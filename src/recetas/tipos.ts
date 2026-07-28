@@ -144,6 +144,32 @@ export const UNIDADES_SUGERIDAS = [
   'hoja',
 ] as const
 
+/**
+ * Quita los datos que pone la base (id, autoría, fechas) y deja lo
+ * editable. Vive aquí y no en el formulario: qué campos son metadatos es
+ * asunto del modelo, no de la pantalla.
+ */
+export function aEditable(receta: Receta): RecetaEditable {
+  // Campo a campo a propósito: si mañana se añade un campo editable, el
+  // compilador avisa aquí en vez de dejarlo caer en silencio.
+  return {
+    titulo: receta.titulo,
+    descripcion: receta.descripcion,
+    procedencia: receta.procedencia,
+    porQueEspecial: receta.porQueEspecial,
+    ocasiones: receta.ocasiones,
+    raciones: receta.raciones,
+    tiempoMinutos: receta.tiempoMinutos,
+    ingredientes: receta.ingredientes,
+    materiales: receta.materiales,
+    pasos: receta.pasos,
+    trucos: receta.trucos,
+    fotoPortadaUrl: receta.fotoPortadaUrl,
+    fotos: receta.fotos,
+    audioUrl: receta.audioUrl,
+  }
+}
+
 /** Receta en blanco para empezar a escribir. */
 export function recetaVacia(): RecetaEditable {
   return {

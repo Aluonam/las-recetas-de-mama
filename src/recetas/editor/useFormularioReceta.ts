@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { actualizarReceta, crearReceta, obtenerReceta } from '../api'
-import { recetaVacia } from '../tipos'
+import { aEditable, recetaVacia } from '../tipos'
 import type { RecetaEditable } from '../tipos'
 
 /**
@@ -23,9 +23,7 @@ export function useFormularioReceta(id?: string) {
 
     setCargando(true)
     obtenerReceta(id)
-      .then(({ id: _id, creadaPor, creadaEn, actualizadaEn, ...editable }) => {
-        setReceta(editable)
-      })
+      .then((receta) => setReceta(aEditable(receta)))
       .catch(setError)
       .finally(() => setCargando(false))
   }, [id])
