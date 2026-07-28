@@ -4,9 +4,12 @@ import { useSesion } from '../nucleo/sesion'
 import { HAY_SUPABASE } from '../nucleo/entorno'
 
 /**
- * Cabecera + contenido + pie. Responsive: en móvil el título ocupa la
- * primera línea y los botones bajan a la segunda; a partir de `sm` va todo
- * en una fila.
+ * Cabecera + contenido + pie.
+ *
+ * El contenido va sobre una «hoja» opaca centrada. El papel pintado del
+ * body solo asoma por los márgenes, así que ningún texto cae encima del
+ * estampado. En móvil no hay márgenes y el estampado sencillamente no se
+ * ve: mejor eso que un fondo con ruido detrás de la letra.
  */
 export function Marco({ children }: { children: ReactNode }) {
   const { correo, salir } = useSesion()
@@ -15,21 +18,26 @@ export function Marco({ children }: { children: ReactNode }) {
     <div className="flex min-h-svh flex-col">
       {!HAY_SUPABASE && <AvisoDemostracion />}
 
-      <header className="azulejo">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+      <header className="bg-aqua">
+        <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
           <Link
             to="/"
-            className="font-titulo text-lg font-bold tracking-wide text-white no-underline sm:text-xl"
+            className="marco-oro inline-block rounded-full bg-superficie px-6 py-2 no-underline sm:px-10"
           >
-            Las Recetas de Mamá
+            <span className="block font-titulo text-lg font-bold text-aqua-texto sm:text-2xl">
+              Las Recetas de Mamá
+            </span>
+            <span className="versalitas mt-0.5 block text-rosa-texto">
+              Recetario de familia
+            </span>
           </Link>
 
-          <nav className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+          <nav className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <NavLink
               to="/nueva"
               className={({ isActive }) =>
                 (isActive ? 'boton-principal' : 'boton-secundario') +
-                ' flex-1 whitespace-nowrap px-3 py-2 text-sm no-underline sm:flex-none sm:px-4 sm:text-base'
+                ' whitespace-nowrap px-4 py-2 text-sm no-underline sm:text-base'
               }
             >
               Escribir una receta
@@ -39,7 +47,7 @@ export function Marco({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={salir}
-                className="boton-secundario px-3 py-2 text-sm sm:px-4 sm:text-base"
+                className="boton-secundario px-4 py-2 text-sm sm:text-base"
                 title={correo ?? undefined}
               >
                 Salir
@@ -49,15 +57,18 @@ export function Marco({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Tira de hule: el remate que separa la cabecera del contenido. */}
-      <div className="vichy" aria-hidden="true" />
+      {/* El suelo de damero de la cocina, como remate de la cabecera. */}
+      <div className="damero" aria-hidden="true" />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-8">
-        {children}
-      </main>
+      <div className="mx-auto w-full max-w-5xl flex-1 border-borde bg-papel sm:border-x">
+        <main className="px-4 py-6 sm:py-8">{children}</main>
+      </div>
 
-      <footer className="border-t border-borde px-4 py-6 text-center text-sm text-tinta-suave">
-        Hecho para que no se pierdan.
+      <footer className="bg-aqua px-4 py-5 text-center">
+        <div className="guirnalda mx-auto max-w-xs" aria-hidden="true" />
+        <p className="versalitas mt-2 text-aqua-texto">
+          Hecho para que no se pierdan
+        </p>
       </footer>
     </div>
   )

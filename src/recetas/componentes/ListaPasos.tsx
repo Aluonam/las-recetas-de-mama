@@ -12,7 +12,7 @@ export function ListaPasos({ pasos }: { pasos: Paso[] }) {
           <li key={paso.id} className="flex gap-3 sm:gap-4">
             <span
               aria-hidden="true"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-superficie-2 text-sm font-bold"
+              className="ficha-azulejo flex size-9 shrink-0 items-center justify-center bg-aqua-medio text-sm font-bold text-white"
             >
               {indice + 1}
             </span>

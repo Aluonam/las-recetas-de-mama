@@ -110,6 +110,8 @@ export function PaginaVerReceta() {
 
       <GaleriaFotos fotos={receta.fotos} />
 
+      <div className="guirnalda mx-auto mt-10 max-w-sm" aria-hidden="true" />
+
       <SeccionVariantes recetaId={receta.id} />
     </article>
   )

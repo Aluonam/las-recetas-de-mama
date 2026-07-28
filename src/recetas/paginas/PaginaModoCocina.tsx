@@ -128,10 +128,8 @@ function PasoCocina({
         <span
           aria-hidden="true"
           className={
-            'flex size-10 shrink-0 items-center justify-center rounded-full border-2 text-base font-bold ' +
-            (hecho
-              ? 'border-exito bg-exito text-papel'
-              : 'border-borde text-tinta-suave')
+            'ficha-azulejo flex size-11 shrink-0 items-center justify-center text-base font-bold ' +
+            (hecho ? 'bg-exito text-papel' : 'bg-superficie-2 text-tinta-suave')
           }
         >
           {hecho ? '✓' : numero}

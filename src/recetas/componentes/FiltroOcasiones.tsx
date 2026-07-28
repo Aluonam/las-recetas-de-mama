@@ -45,9 +45,10 @@ function Chip({
       onClick={onClick}
       aria-pressed={activo}
       className={
-        'rounded-full border px-3 py-1.5 text-sm transition-colors ' +
+        // El rojo se reserva para acciones; los filtros van en turquesa.
+        'rounded-full border-2 px-3 py-1.5 text-sm transition-colors ' +
         (activo
-          ? 'border-acento bg-acento text-acento-tinta'
+          ? 'border-aqua-texto bg-aqua-texto text-white'
           : 'border-borde bg-superficie text-tinta-suave hover:bg-superficie-2')
       }
     >
