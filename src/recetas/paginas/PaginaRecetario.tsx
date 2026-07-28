@@ -5,6 +5,9 @@ import type { RecetaResumen } from '../tipos'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { TarjetaReceta } from '../componentes/TarjetaReceta'
 import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
+import { PanelIndice } from '../indice/PanelIndice'
+import { SelectorVista } from '../indice/SelectorVista'
+import { usePreferenciaVista } from '../indice/usePreferenciaVista'
 
 /** Portada: todas las recetas, con buscador y filtro por ocasión. */
 export function PaginaRecetario() {
@@ -12,6 +15,7 @@ export function PaginaRecetario() {
   const [error, setError] = useState<unknown>(null)
   const [busqueda, setBusqueda] = useState('')
   const [ocasion, setOcasion] = useState<string | null>(null)
+  const { vista, agrupacion, cambiar } = usePreferenciaVista()
 
   useEffect(() => {
     listarRecetas().then(setRecetas).catch(setError)
@@ -64,14 +68,22 @@ export function PaginaRecetario() {
           seleccionada={ocasion}
           alSeleccionar={setOcasion}
         />
+
+        <SelectorVista
+          vista={vista}
+          agrupacion={agrupacion}
+          alCambiar={cambiar}
+        />
       </div>
 
       {visibles.length === 0 ? (
         <p className="py-12 text-center text-tinta-suave">
           Ninguna receta encaja con esa búsqueda.
         </p>
+      ) : vista === 'indice' ? (
+        <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {visibles.map((receta) => (
             <li key={receta.id}>
               <TarjetaReceta receta={receta} />
