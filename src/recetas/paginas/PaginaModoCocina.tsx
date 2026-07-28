@@ -5,6 +5,7 @@ import type { Receta } from '../tipos'
 import { textoCantidad } from '../formato'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { ListaTrucos } from '../componentes/ListaTrucos'
+import { ReproductorAudio } from '../audio/ReproductorAudio'
 import { usePantallaEncendida } from './usePantallaEncendida'
 
 /**
@@ -53,6 +54,13 @@ export function PaginaModoCocina() {
       </header>
 
       <div className="mx-auto max-w-3xl px-4 py-6">
+        {/* Escucharla mientras se cocina es justo el momento en que sirve. */}
+        {receta.audioUrl && (
+          <section className="tarjeta mb-8 p-4 sm:p-5">
+            <ReproductorAudio url={receta.audioUrl} titulo="Escúchala mientras cocinas" />
+          </section>
+        )}
+
         <section className="tarjeta mb-8 p-4 sm:p-5">
           <h2 className="mb-3 text-xl">Lo que necesitas</h2>
 

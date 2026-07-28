@@ -9,6 +9,7 @@ import { EditorIngredientes, UnidadesSugeridas } from './EditorIngredientes'
 import { EditorMateriales } from './EditorMateriales'
 import { EditorPasos } from './EditorPasos'
 import { EditorTrucos } from './EditorTrucos'
+import { EditorAudio } from '../audio/EditorAudio'
 
 /**
  * Escribir o editar una receta. La misma pantalla para las dos cosas: sin
@@ -102,6 +103,22 @@ export function PaginaEditarReceta() {
         procedencia={receta.procedencia}
         alCambiar={(procedencia) => cambiar({ procedencia })}
       />
+
+      <fieldset className="tarjeta m-0 p-4 sm:p-5">
+        <legend className="px-2 font-titulo text-xl font-semibold">
+          Contada con su voz
+        </legend>
+        <p className="mb-3 text-sm text-tinta-suave">
+          Grábala mientras la cuenta, o sube esa nota de voz que ya tienes
+          guardada. Es lo único de una receta que no se puede reconstruir
+          después.
+        </p>
+        <EditorAudio
+          url={receta.audioUrl}
+          alGuardar={(audioUrl) => cambiar({ audioUrl })}
+          alQuitar={() => cambiar({ audioUrl: null })}
+        />
+      </fieldset>
 
       <fieldset className="tarjeta m-0 p-4 sm:p-5">
         <legend className="px-2 font-titulo text-xl font-semibold">
