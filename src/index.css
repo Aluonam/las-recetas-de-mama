@@ -111,19 +111,22 @@
     @apply mb-1 block text-sm font-semibold text-tinta-suave;
   }
 
-  .boton {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
-           font-semibold transition-colors disabled:cursor-not-allowed
-           disabled:opacity-50;
+  /* Base común. Tailwind 4 no deja hacer @apply de otra clase de
+     componente, así que la base se comparte por lista de selectores. */
+  .boton,
+  .boton-principal,
+  .boton-secundario {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2
+           rounded-lg px-4 py-2.5 font-semibold transition-colors
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .boton-principal {
-    @apply boton bg-acento text-acento-tinta hover:opacity-90;
+    @apply bg-acento text-acento-tinta hover:opacity-90;
   }
 
   .boton-secundario {
-    @apply boton border border-borde bg-superficie text-tinta
-           hover:bg-superficie-2;
+    @apply border border-borde bg-superficie text-tinta hover:bg-superficie-2;
   }
 
   .tarjeta {
