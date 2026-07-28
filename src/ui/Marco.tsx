@@ -57,12 +57,15 @@ export function Marco({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* El suelo de damero de la cocina, como remate de la cabecera. */}
-      <div className="damero" aria-hidden="true" />
+      {/* Cenefa de Talavera, como remate de la cabecera. */}
+      <div className="cenefa" aria-hidden="true" />
 
       <div className="mx-auto w-full max-w-5xl flex-1 border-borde bg-papel sm:border-x">
         <main className="px-4 py-6 sm:py-8">{children}</main>
       </div>
+
+      {/* La cenefa cierra abajo igual que abre arriba, como en un zócalo. */}
+      <div className="cenefa" aria-hidden="true" />
 
       <footer className="bg-aqua px-4 py-5 text-center">
         <div className="guirnalda mx-auto max-w-xs" aria-hidden="true" />
