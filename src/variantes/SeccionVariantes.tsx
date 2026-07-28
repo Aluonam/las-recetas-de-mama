@@ -21,7 +21,7 @@ export function SeccionVariantes({ recetaId }: { recetaId: string }) {
 
   return (
     // Sin línea divisoria: la guirnalda de la ficha ya hace de separador.
-    <section className="mt-6">
+    <section className="mt-8">
       <h2 className="mb-1 text-2xl">Cómo la hace cada uno</h2>
       <p className="mb-4 text-tinta-suave">
         La misma receta cambia en cada casa. Aquí se apuntan esos cambios.

@@ -5,14 +5,14 @@ export function ListaPasos({ pasos }: { pasos: Paso[] }) {
 
   return (
     <section>
-      <h2 className="mb-3 text-2xl">Cómo se hace</h2>
+      <h2 className="mb-5 text-2xl">Cómo se hace</h2>
 
-      <ol className="m-0 list-none space-y-4 p-0">
+      <ol className="m-0 list-none space-y-6 p-0">
         {pasos.map((paso, indice) => (
           <li key={paso.id} className="flex gap-3 sm:gap-4">
             <span
               aria-hidden="true"
-              className="ficha-azulejo flex size-9 shrink-0 items-center justify-center bg-aqua-medio text-sm font-bold text-white"
+              className="ficha-azulejo flex size-9 shrink-0 items-center justify-center bg-salvia-medio text-sm font-bold text-white"
             >
               {indice + 1}
             </span>

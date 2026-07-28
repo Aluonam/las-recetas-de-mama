@@ -7,10 +7,10 @@ export function ListaIngredientes({ ingredientes }: { ingredientes: Ingrediente[
 
   return (
     <section>
-      <h2 className="mb-3 text-2xl">Ingredientes</h2>
+      <h2 className="mb-5 text-2xl">Ingredientes</h2>
 
       {agruparIngredientes(ingredientes).map(({ grupo, items }) => (
-        <div key={grupo ?? '_sin_grupo'} className="mb-4">
+        <div key={grupo ?? '_sin_grupo'} className="mb-6">
           {grupo && <h3 className="mb-2 text-base text-tinta-suave">{grupo}</h3>}
 
           <ul className="m-0 list-none space-y-2 p-0">

@@ -19,19 +19,19 @@ export function CabeceraReceta({ receta, puedeBorrar, alBorrar }: Props) {
   const tiempo = textoTiempo(receta.tiempoMinutos)
 
   return (
-    <header className="mb-8 text-center">
+    <header className="mb-12 text-center sm:mb-14">
       {receta.fotoPortadaUrl && (
         <img
           src={receta.fotoPortadaUrl}
           alt=""
-          className="arco marco-oro mx-auto mb-6 aspect-[16/9] w-full object-cover"
+          className="arco marco-doble mx-auto mb-6 aspect-[16/9] w-full object-cover"
         />
       )}
 
       <div className="guirnalda mx-auto max-w-sm" aria-hidden="true" />
 
       {procedencia && (
-        <p className="versalitas mb-1 text-rosa-texto">{procedencia}</p>
+        <p className="versalitas mb-1 text-lavanda-texto">{procedencia}</p>
       )}
 
       <h1 className="mb-2 text-3xl sm:text-4xl">{receta.titulo}</h1>

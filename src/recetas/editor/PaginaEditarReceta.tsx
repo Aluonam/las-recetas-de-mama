@@ -35,7 +35,7 @@ export function PaginaEditarReceta() {
   }
 
   return (
-    <form onSubmit={enviar} className="space-y-6">
+    <form onSubmit={enviar} className="space-y-10">
       <UnidadesSugeridas />
 
       <h1 className="text-3xl sm:text-4xl">

@@ -17,9 +17,9 @@ export function ListaTrucos({
         destacado ? 'bloque-especial p-5' : 'tarjeta p-4 sm:p-5'
       }
     >
-      <h2 className="mb-3 text-2xl">{destacado ? 'No se te olvide' : 'Trucos'}</h2>
+      <h2 className="mb-5 text-2xl">{destacado ? 'No se te olvide' : 'Trucos'}</h2>
 
-      <ul className="m-0 list-disc space-y-3 pl-5">
+      <ul className="m-0 list-disc space-y-4 pl-5">
         {trucos.map((truco) => (
           <li key={truco.id}>
             {truco.texto}

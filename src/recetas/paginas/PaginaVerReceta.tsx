@@ -58,7 +58,7 @@ export function PaginaVerReceta() {
       />
 
       {receta.audioUrl && (
-        <section className="tarjeta mb-8 p-4 sm:p-5">
+        <section className="tarjeta mb-12 p-4 sm:p-5">
           <ReproductorAudio
             url={receta.audioUrl}
             titulo="Contada con su voz"
@@ -72,15 +72,15 @@ export function PaginaVerReceta() {
       )}
 
       {receta.porQueEspecial && (
-        <section className="bloque-especial mb-8 p-5 sm:p-6">
+        <section className="bloque-especial mb-12 p-5 sm:p-7">
           <h2 className="mb-2 text-xl">Por qué esta receta es especial</h2>
           <p className="whitespace-pre-line">{receta.porQueEspecial}</p>
         </section>
       )}
 
       {/* En móvil, una columna. Desde md, ingredientes al lado de los pasos. */}
-      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_1.4fr]">
-        <div className="space-y-8">
+      <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_1.4fr] md:gap-14">
+        <div className="space-y-12">
           <ListaIngredientes ingredientes={receta.ingredientes} />
 
           {receta.materiales.length > 0 && (
@@ -102,7 +102,7 @@ export function PaginaVerReceta() {
           )}
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-12">
           <ListaPasos pasos={receta.pasos} />
           <ListaTrucos trucos={receta.trucos} />
         </div>
@@ -110,7 +110,7 @@ export function PaginaVerReceta() {
 
       <GaleriaFotos fotos={receta.fotos} />
 
-      <div className="guirnalda mx-auto mt-10 max-w-sm" aria-hidden="true" />
+      <div className="guirnalda mx-auto mt-16 max-w-sm" aria-hidden="true" />
 
       <SeccionVariantes recetaId={receta.id} />
     </article>

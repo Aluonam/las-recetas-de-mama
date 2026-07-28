@@ -18,16 +18,16 @@ export function Marco({ children }: { children: ReactNode }) {
     <div className="flex min-h-svh flex-col">
       {!HAY_SUPABASE && <AvisoDemostracion />}
 
-      <header className="bg-aqua">
+      <header className="bg-salvia">
         <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
           <Link
             to="/"
-            className="marco-oro inline-block rounded-full bg-superficie px-6 py-2 no-underline sm:px-10"
+            className="marco-doble inline-block rounded-full bg-superficie px-6 py-2 no-underline sm:px-10"
           >
-            <span className="block font-titulo text-lg font-bold text-aqua-texto sm:text-2xl">
+            <span className="block font-titulo text-lg font-bold text-salvia-texto sm:text-2xl">
               Las Recetas de Mamá
             </span>
-            <span className="versalitas mt-0.5 block text-rosa-texto">
+            <span className="versalitas mt-0.5 block text-lavanda-texto">
               Recetario de familia
             </span>
           </Link>
@@ -67,9 +67,9 @@ export function Marco({ children }: { children: ReactNode }) {
       {/* La cenefa cierra abajo igual que abre arriba, como en un zócalo. */}
       <div className="cenefa" aria-hidden="true" />
 
-      <footer className="bg-aqua px-4 py-5 text-center">
+      <footer className="bg-salvia px-4 py-5 text-center">
         <div className="guirnalda mx-auto max-w-xs" aria-hidden="true" />
-        <p className="versalitas mt-2 text-aqua-texto">
+        <p className="versalitas mt-2 text-salvia-texto">
           Hecho para que no se pierdan
         </p>
       </footer>

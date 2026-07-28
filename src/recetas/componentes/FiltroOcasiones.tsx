@@ -45,10 +45,10 @@ function Chip({
       onClick={onClick}
       aria-pressed={activo}
       className={
-        // El rojo se reserva para acciones; los filtros van en turquesa.
-        'rounded-full border-2 px-3 py-1.5 text-sm transition-colors ' +
+        // La terracota se reserva para acciones; los filtros van en salvia.
+        'rounded-full border px-3 py-1.5 text-sm transition-colors ' +
         (activo
-          ? 'border-aqua-texto bg-aqua-texto text-white'
+          ? 'border-salvia-texto bg-salvia-texto text-white'
           : 'border-borde bg-superficie text-tinta-suave hover:bg-superficie-2')
       }
     >

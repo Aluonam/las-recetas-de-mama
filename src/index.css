@@ -1,102 +1,100 @@
 @import 'tailwindcss';
 
 /* ---------------------------------------------------------------
-   Estilo «Azulejo, conserva y Cartuja».
+   Estilo «Lino y flores secas».
 
-   Tres referencias mezcladas:
-   - La cocina retro de la foto  → turquesa y damero rojo del suelo.
-   - El galletero Mucha          → arco, filete dorado doble, orlas.
-   - La vajilla de La Cartuja    → guirnalda rosa de grabado fino.
+   Sereno, con aire y poco ruido. Lino crudo, verde salvia, lavanda
+   seca y terracota.
 
-   Reparto de papeles, para que la mezcla no sea un revoltijo:
-   - Turquesa manda en la estructura (cabecera, títulos). Es el escenario.
-   - Rosa es lo humano: quién la hacía, las cantidades caseras, el adorno.
-   - Rojo solo para acciones. Es el color más fuerte, va donde se pulsa.
-   - Oro solo para marcos. Nunca para texto.
+   El adorno no desaparece, cambia de tono: la cenefa sigue siendo el
+   azulejo de Talavera, pero repintada en esta paleta, como un azulejo
+   descolorido por el sol. La guirnalda de La Cartuja pasa a lavanda.
 
-   De turquesa y rosa hay DOS versiones cada uno. Las claras son para
-   superficies y adorno; las oscuras son las únicas que valen para texto.
-   El turquesa bonito de la foto da 2,4:1 sobre crema y sería ilegible.
+   Reparto de papeles:
+   - Salvia manda en títulos y estructura.
+   - Lavanda es lo humano: quién la hacía, las cantidades caseras.
+   - Terracota solo para acciones. Va donde hay que pulsar.
+   - Latón solo para marcos. Nunca para texto.
+
+   De salvia y lavanda hay dos versiones: las claras para superficies
+   y adorno, las oscuras las únicas que valen para texto.
    --------------------------------------------------------------- */
 :root {
-  /* La pared, con el papel pintado. Se ve solo en los márgenes. */
-  --fondo: #f1ece1;
+  --fondo: #eee9dd;
   /* La hoja donde va el contenido. Opaca, para que el texto no caiga
      nunca encima del estampado. */
-  --papel: #f9f4ea;
-  --superficie: #ffffff;
-  --superficie-2: #efe9dd;
+  --papel: #f6f2ea;
+  --superficie: #fffdf8;
+  --superficie-2: #ece5d7;
 
-  --tinta: #3d352e;
-  --tinta-suave: #6b6055;
-  --borde: #ded5c5;
+  --tinta: #443f38;
+  --tinta-suave: #6d6559;
+  --borde: #ded5c6;
 
-  --aqua: #7fc4c4;
-  --aqua-medio: #5aa8ab;
-  --aqua-texto: #2f7275;
+  --salvia: #dfe5d4;
+  --salvia-medio: #7d8b6a;
+  --salvia-texto: #56634a;
 
-  --rosa: #e8b4bd;
-  --rosa-medio: #c96b7f;
-  --rosa-texto: #a84a5e;
+  --lavanda: #d9c4cf;
+  --lavanda-texto: #7d5f70;
 
-  --oro: #b08d4f;
+  --laton: #ab9366;
 
-  --acento: #c0392b;
-  --acento-tinta: #ffffff;
-  --acento-suave: #fbeae7;
+  --acento: #8f5a42;
+  --acento-tinta: #fffdf8;
+  --acento-suave: #f3e7df;
 
-  --especial-fondo: #eaf5f4;
-  --especial-borde: #5aa8ab;
+  --especial-fondo: #efebde;
+  --especial-borde: #a88a9a;
 
-  --exito: #2f6b45;
+  --exito: #4f7355;
 
-  /* Papel pintado de los laterales: rosa de La Cartuja, grabado fino.
-     Capullo con espiral, hojas y ramita, en repetición al tresbolillo. */
-  --estampado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg fill='none' stroke='%23b8566c' stroke-width='1.1' stroke-linecap='round' opacity='.42'%3E%3Cg%3E%3Ccircle cx='22' cy='20' r='6.5'/%3E%3Cpath d='M22 13.5c3.6 0 6.5 2.9 6.5 6.5S25.6 26.5 22 26.5 17 24.6 17 21.5s2.2-4.5 4.5-4.5 3 1.6 3 3'/%3E%3Cpath d='M22 27v12'/%3E%3Cpath d='M22 31c-5-1-8-4-9-9 5 0 9 3 9 9z'/%3E%3Cpath d='M22 36c5-1 8-4 9-9-5 0-9 3-9 9z'/%3E%3C/g%3E%3Cg transform='translate(45 45)'%3E%3Ccircle cx='22' cy='20' r='6.5'/%3E%3Cpath d='M22 13.5c3.6 0 6.5 2.9 6.5 6.5S25.6 26.5 22 26.5 17 24.6 17 21.5s2.2-4.5 4.5-4.5 3 1.6 3 3'/%3E%3Cpath d='M22 27v12'/%3E%3Cpath d='M22 31c-5-1-8-4-9-9 5 0 9 3 9 9z'/%3E%3Cpath d='M22 36c5-1 8-4 9-9-5 0-9 3-9 9z'/%3E%3C/g%3E%3Cpath d='M64 14c4 3 6 7 6 12M20 66c4 3 6 7 6 12'/%3E%3C/g%3E%3C/svg%3E");
+  /* El estampado del fondo se apaga en modo oscuro bajando la opacidad. */
+  --toile-opacidad: 1;
 
-  /* Cenefa de azulejo de Talavera: filetes de cobalto arriba y abajo,
-     fondo amarillo y naranja, roleos de acanto en blanco perfilados.
-     El trazo grueso pálido va debajo y el fino cobalto encima: así el
-     roleo sale blanco con el perfil azul, como en el azulejo. */
-  --cenefa: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Crect width='120' height='40' fill='%23efc11e'/%3E%3Cpath d='M0 22c14 8 26-6 40 0s26 8 40 0 26-8 40 0v-9c-14-8-26 6-40 0s-26-8-40 0-26 8-40 0z' fill='%23e28c22'/%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23edeade' stroke-width='6.5'%3E%3Cpath d='M4 30C4 18 14 12 22 16c7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M22 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3Cpath d='M64 30c0-12 10-18 18-14 7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M82 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3C/g%3E%3Cg stroke='%231d3557' stroke-width='1.3'%3E%3Cpath d='M4 30C4 18 14 12 22 16c7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M22 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3Cpath d='M64 30c0-12 10-18 18-14 7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M82 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3Cpath d='M34 14l3 4M40 13l3 4M46 14l3 4M94 14l3 4M100 13l3 4M106 14l3 4'/%3E%3C/g%3E%3C/g%3E%3Crect width='120' height='5.5' fill='%231d3557'/%3E%3Crect y='34.5' width='120' height='5.5' fill='%231d3557'/%3E%3C/svg%3E");
+  /* Guirnalda de grabado fino de La Cartuja, en lavanda. */
+  --guirnalda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24' viewBox='0 0 120 24'%3E%3Cg fill='none' stroke='%237d5f70' stroke-width='1'%3E%3Cpath d='M0 12c10-8 20 8 30 0s20-8 30 0 20 8 30 0 20-8 30 0'/%3E%3Ccircle cx='15' cy='7' r='3'/%3E%3Ccircle cx='15' cy='7' r='1.4'/%3E%3Ccircle cx='45' cy='17' r='3'/%3E%3Ccircle cx='45' cy='17' r='1.4'/%3E%3Ccircle cx='75' cy='7' r='3'/%3E%3Ccircle cx='75' cy='7' r='1.4'/%3E%3Ccircle cx='105' cy='17' r='3'/%3E%3Ccircle cx='105' cy='17' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
 
-  --guirnalda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24' viewBox='0 0 120 24'%3E%3Cg fill='none' stroke='%23c96b7f' stroke-width='1'%3E%3Cpath d='M0 12c10-8 20 8 30 0s20-8 30 0 20 8 30 0 20-8 30 0'/%3E%3Ccircle cx='15' cy='7' r='3'/%3E%3Ccircle cx='15' cy='7' r='1.4'/%3E%3Ccircle cx='45' cy='17' r='3'/%3E%3Ccircle cx='45' cy='17' r='1.4'/%3E%3Ccircle cx='75' cy='7' r='3'/%3E%3Ccircle cx='75' cy='7' r='1.4'/%3E%3Ccircle cx='105' cy='17' r='3'/%3E%3Ccircle cx='105' cy='17' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+  /* Cenefa de Talavera, mismo dibujo que el azulejo antiguo pero en la
+     paleta de lino: filetes de salvia, fondo ocre apagado, onda
+     terracota y roleos de acanto en lino perfilados en salvia. */
+  --cenefa: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Crect width='120' height='40' fill='%23e2d5b4'/%3E%3Cpath d='M0 22c14 8 26-6 40 0s26 8 40 0 26-8 40 0v-9c-14-8-26 6-40 0s-26-8-40 0-26 8-40 0z' fill='%23cba98a'/%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23f6f2ea' stroke-width='6.5'%3E%3Cpath d='M4 30C4 18 14 12 22 16c7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M22 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3Cpath d='M64 30c0-12 10-18 18-14 7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M82 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3C/g%3E%3Cg stroke='%2356634a' stroke-width='1.3'%3E%3Cpath d='M4 30C4 18 14 12 22 16c7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M22 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3Cpath d='M64 30c0-12 10-18 18-14 7 4 5 14-2 14-6 0-8-8-2-10'/%3E%3Cpath d='M82 16c8-8 22-6 28 4 4 7 12 8 16 2'/%3E%3Cpath d='M34 14l3 4M40 13l3 4M46 14l3 4M94 14l3 4M100 13l3 4M106 14l3 4'/%3E%3C/g%3E%3C/g%3E%3Crect width='120' height='5' fill='%2356634a'/%3E%3Crect y='35' width='120' height='5' fill='%2356634a'/%3E%3C/svg%3E");
 
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fondo: #14181a;
-    --papel: #1b2124;
-    --superficie: #232b2f;
-    --superficie-2: #2e383d;
+    --fondo: #1a1d16;
+    --papel: #1d201a;
+    --superficie: #24281f;
+    --superficie-2: #30352a;
 
-    --tinta: #ece4d8;
-    --tinta-suave: #a99e8f;
-    --borde: #354145;
+    --tinta: #ece7dc;
+    --tinta-suave: #a8a294;
+    --borde: #3a4033;
 
-    --aqua: #7fc4c4;
-    --aqua-medio: #4d9295;
-    --aqua-texto: #7fc4c4;
+    --salvia: #39412f;
+    --salvia-medio: #7d8b6a;
+    --salvia-texto: #a9bb90;
 
-    --rosa: #e8a3b0;
-    --rosa-medio: #c96b7f;
-    --rosa-texto: #e8a3b0;
+    --lavanda: #4a3a43;
+    --lavanda-texto: #d3aec1;
 
-    --oro: #d0aa66;
+    --laton: #c9ae7d;
 
-    --acento: #f0776a;
-    --acento-tinta: #2a0d0a;
-    --acento-suave: #3a201c;
+    --acento: #e0977a;
+    --acento-tinta: #2a140c;
+    --acento-suave: #3a2419;
 
-    --especial-fondo: #1c2c2c;
-    --especial-borde: #4d9295;
+    --especial-fondo: #262a20;
+    --especial-borde: #7d5f70;
 
-    --exito: #7dc79b;
+    --exito: #8fc09a;
 
-    /* Mismo dibujo, en rosa claro y más apagado sobre fondo oscuro. */
-    --estampado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg fill='none' stroke='%23e8a3b0' stroke-width='1.1' stroke-linecap='round' opacity='.22'%3E%3Cg%3E%3Ccircle cx='22' cy='20' r='6.5'/%3E%3Cpath d='M22 13.5c3.6 0 6.5 2.9 6.5 6.5S25.6 26.5 22 26.5 17 24.6 17 21.5s2.2-4.5 4.5-4.5 3 1.6 3 3'/%3E%3Cpath d='M22 27v12'/%3E%3Cpath d='M22 31c-5-1-8-4-9-9 5 0 9 3 9 9z'/%3E%3Cpath d='M22 36c5-1 8-4 9-9-5 0-9 3-9 9z'/%3E%3C/g%3E%3Cg transform='translate(45 45)'%3E%3Ccircle cx='22' cy='20' r='6.5'/%3E%3Cpath d='M22 13.5c3.6 0 6.5 2.9 6.5 6.5S25.6 26.5 22 26.5 17 24.6 17 21.5s2.2-4.5 4.5-4.5 3 1.6 3 3'/%3E%3Cpath d='M22 27v12'/%3E%3Cpath d='M22 31c-5-1-8-4-9-9 5 0 9 3 9 9z'/%3E%3Cpath d='M22 36c5-1 8-4 9-9-5 0-9 3-9 9z'/%3E%3C/g%3E%3Cpath d='M64 14c4 3 6 7 6 12M20 66c4 3 6 7 6 12'/%3E%3C/g%3E%3C/svg%3E");
+    /* El toile es de tono claro: a plena opacidad sería un foco en una
+       pantalla a oscuras. Se queda como una textura tenue. */
+    --toile-opacidad: 0.12;
   }
 }
 
@@ -108,19 +106,19 @@
   --color-tinta: var(--tinta);
   --color-tinta-suave: var(--tinta-suave);
   --color-borde: var(--borde);
-  --color-aqua: var(--aqua);
-  --color-aqua-medio: var(--aqua-medio);
-  --color-aqua-texto: var(--aqua-texto);
-  --color-rosa: var(--rosa);
-  --color-rosa-texto: var(--rosa-texto);
-  --color-oro: var(--oro);
+  --color-salvia: var(--salvia);
+  --color-salvia-medio: var(--salvia-medio);
+  --color-salvia-texto: var(--salvia-texto);
+  --color-lavanda: var(--lavanda);
+  --color-lavanda-texto: var(--lavanda-texto);
+  --color-laton: var(--laton);
   --color-acento: var(--acento);
   --color-acento-tinta: var(--acento-tinta);
   --color-acento-suave: var(--acento-suave);
   --color-exito: var(--exito);
 
-  /* Serif con cuerpo, de rótulo de lata de conserva. */
-  --font-titulo: Rockwell, 'Bookman Old Style', Georgia, 'Times New Roman', serif;
+  /* Serif de alta calidad, con aire. Nada de rótulo. */
+  --font-titulo: 'Palatino Linotype', Palatino, 'Iowan Old Style', Georgia, serif;
   --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -128,6 +126,7 @@
   html {
     /* 18px de base: la app la usan abuelas, no diseñadores. */
     font-size: 18px;
+    background-color: var(--fondo);
   }
 
   @media (max-width: 640px) {
@@ -138,24 +137,38 @@
 
   body {
     margin: 0;
-    /* El papel pintado vive aquí, en la pared. El contenido va sobre una
-       hoja opaca, así que el estampado solo asoma por los márgenes. */
-    background-color: var(--fondo);
-    background-image: var(--estampado);
+    background: transparent;
     color: var(--color-tinta);
     font-family: var(--font-sans);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
 
+  /**
+   * El toile de Jouy, en una capa fija detrás de todo.
+   *
+   * Con pseudoelemento y no con `background-attachment: fixed`, que en
+   * móvil da tirones y en iOS directamente falla. Así también basta con
+   * bajar la opacidad para apagarlo de noche.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: url('/fondo-toile.jpg') center / cover no-repeat;
+    opacity: var(--toile-opacidad);
+    pointer-events: none;
+  }
+
   h1,
   h2,
   h3 {
     font-family: var(--font-titulo);
-    font-weight: 700;
-    line-height: 1.2;
+    font-weight: 600;
+    line-height: 1.25;
     text-wrap: balance;
-    color: var(--color-aqua-texto);
+    color: var(--color-salvia-texto);
   }
 
   /* Foco siempre visible: se navega con teclado más de lo que parece. */
@@ -194,7 +207,7 @@
   .boton-principal,
   .boton-secundario {
     @apply inline-flex cursor-pointer items-center justify-center gap-2
-           rounded-lg px-4 py-2.5 font-semibold transition-colors
+           rounded-lg px-5 py-2.5 font-semibold transition-colors
            disabled:cursor-not-allowed disabled:opacity-50;
   }
 
@@ -203,7 +216,7 @@
   }
 
   .boton-secundario {
-    @apply border-2 border-aqua-texto bg-superficie text-aqua-texto
+    @apply border border-salvia-texto bg-superficie text-salvia-texto
            hover:bg-superficie-2;
   }
 
@@ -212,33 +225,27 @@
   }
 
   /* --------------------------------------------------------------
-     Vocabulario de formas. Es lo que hace que el estilo sea de época
-     y no solo un cambio de colores.
+     Vocabulario de formas.
      -------------------------------------------------------------- */
 
-  /* Arco del galletero. */
+  /* Arco de la etiqueta de conserva. Más suave que en la versión
+     anterior: este estilo pide serenidad, no rótulo. */
   .arco {
-    border-radius: 140px 140px 12px 12px / 88px 88px 12px 12px;
-  }
-
-  /* Sombra dura, sin desenfoque. Lo de época no tiene blur. */
-  .dura {
-    box-shadow: 4px 5px 0 color-mix(in srgb, var(--tinta) 16%, transparent);
+    border-radius: 120px 120px 14px 14px / 62px 62px 14px 14px;
   }
 
   /**
-   * Filete dorado doble: línea gruesa, hueco, línea fina.
+   * Filete doble: línea fina, hueco, línea finísima. En latón apagado.
    * Con box-shadow y no con outline, para no pisar el anillo de foco.
    */
-  .marco-oro {
-    border: 2px solid var(--oro);
+  .marco-doble {
+    border: 1px solid var(--laton);
     box-shadow:
       0 0 0 4px var(--superficie),
-      0 0 0 5px var(--oro),
-      5px 6px 0 color-mix(in srgb, var(--tinta) 16%, transparent);
+      0 0 0 5px color-mix(in srgb, var(--laton) 55%, transparent);
   }
 
-  /* Guirnalda de grabado fino, de La Cartuja. Separador con adorno. */
+  /* Guirnalda de grabado fino. Separador con adorno. */
   .guirnalda {
     height: 24px;
     background-image: var(--guirnalda);
@@ -246,12 +253,9 @@
     background-position: center;
   }
 
-  /**
-   * Cenefa de azulejo de Talavera. Es cerámica: conserva sus propios
-   * colores en claro y en oscuro, solo se apaga un poco de noche.
-   */
+  /* Cenefa de azulejo de Talavera, repintada en la paleta de lino. */
   .cenefa {
-    height: 28px;
+    height: 26px;
     background-image: var(--cenefa);
     background-repeat: repeat-x;
     background-size: auto 100%;
@@ -259,7 +263,7 @@
 
   @media (prefers-color-scheme: dark) {
     .cenefa {
-      filter: brightness(0.78) saturate(0.9);
+      filter: brightness(0.62) saturate(0.85);
     }
   }
 
@@ -286,7 +290,8 @@
   /* «Por qué es especial» y los trucos del modo cocina. */
   .bloque-especial {
     background: var(--especial-fondo);
-    border: 2px dashed var(--especial-borde);
+    border: 1px solid var(--especial-borde);
+    border-left-width: 4px;
     @apply rounded-xl;
   }
 }
