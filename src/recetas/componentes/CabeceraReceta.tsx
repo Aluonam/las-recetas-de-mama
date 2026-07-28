@@ -31,7 +31,7 @@ export function CabeceraReceta({ receta, puedeBorrar, alBorrar }: Props) {
       <div className="guirnalda mx-auto max-w-sm" aria-hidden="true" />
 
       {procedencia && (
-        <p className="versalitas mb-1 text-lavanda-texto">{procedencia}</p>
+        <p className="versalitas mb-1 text-rosa-texto">{procedencia}</p>
       )}
 
       <h1 className="mb-2 text-3xl sm:text-4xl">{receta.titulo}</h1>

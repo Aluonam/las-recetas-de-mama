@@ -45,10 +45,9 @@ function Chip({
       onClick={onClick}
       aria-pressed={activo}
       className={
-        // La terracota se reserva para acciones; los filtros van en salvia.
         'rounded-full border px-3 py-1.5 text-sm transition-colors ' +
         (activo
-          ? 'border-salvia-texto bg-salvia-texto text-white'
+          ? 'border-verde-texto bg-verde-texto text-papel'
           : 'border-borde bg-superficie text-tinta-suave hover:bg-superficie-2')
       }
     >

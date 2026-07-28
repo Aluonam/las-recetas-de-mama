@@ -67,7 +67,7 @@ export function PaginaModoCocina() {
           <ul className="m-0 list-none space-y-2 p-0">
             {receta.ingredientes.map((ingrediente) => (
               <li key={ingrediente.id} className="flex flex-wrap gap-x-3">
-                <span className="font-semibold text-lavanda-texto sm:min-w-36">
+                <span className="font-semibold text-rosa-texto sm:min-w-36">
                   {textoCantidad(ingrediente) || '—'}
                 </span>
                 <span>{ingrediente.nombre}</span>

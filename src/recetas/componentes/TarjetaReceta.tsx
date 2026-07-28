@@ -24,7 +24,7 @@ export function TarjetaReceta({ receta }: { receta: RecetaResumen }) {
       )}
 
       {receta.autorNombre && (
-        <p className="versalitas mb-1 text-lavanda-texto">De {receta.autorNombre}</p>
+        <p className="versalitas mb-1 text-rosa-texto">De {receta.autorNombre}</p>
       )}
 
       <h2 className="mb-1 text-xl">{receta.titulo}</h2>
