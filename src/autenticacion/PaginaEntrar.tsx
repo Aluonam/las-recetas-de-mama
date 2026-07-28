@@ -10,14 +10,14 @@ import { CampoTexto } from '../ui/Campo'
  * Con usuarias de 80 años, cada contraseña es una puerta cerrada.
  */
 export function PaginaEntrar() {
-  const { sesion, cargando } = useSesion()
+  const { usuarioId, cargando } = useSesion()
   const [correo, setCorreo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
   if (cargando) return <Cargando que="Abriendo el recetario" />
-  if (sesion) return <Navigate to="/" replace />
+  if (usuarioId) return <Navigate to="/" replace />
 
   const enviar = async (evento: React.FormEvent) => {
     evento.preventDefault()

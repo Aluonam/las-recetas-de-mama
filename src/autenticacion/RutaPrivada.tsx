@@ -3,11 +3,16 @@ import { Navigate } from 'react-router-dom'
 import { useSesion } from '../nucleo/sesion'
 import { Cargando } from '../ui/Estado'
 
-/** Manda a /entrar a quien no tenga sesión. */
+/**
+ * Manda a /entrar a quien no tenga sesión.
+ *
+ * En modo demostración siempre hay una sesión ficticia, así que esto no
+ * estorba al probar la app.
+ */
 export function RutaPrivada({ children }: { children: ReactNode }) {
-  const { sesion, cargando } = useSesion()
+  const { usuarioId, cargando } = useSesion()
 
   if (cargando) return <Cargando que="Abriendo el recetario" />
-  if (!sesion) return <Navigate to="/entrar" replace />
+  if (!usuarioId) return <Navigate to="/entrar" replace />
   return <>{children}</>
 }

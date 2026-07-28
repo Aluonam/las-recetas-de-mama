@@ -10,6 +10,7 @@ import { ListaPasos } from '../componentes/ListaPasos'
 import { ListaTrucos } from '../componentes/ListaTrucos'
 import { GaleriaFotos } from '../componentes/GaleriaFotos'
 import { SeccionVariantes } from '../../variantes/SeccionVariantes'
+import { ReproductorAudio } from '../audio/ReproductorAudio'
 
 /**
  * Ficha completa de una receta. Esta página solo carga datos y coloca
@@ -18,7 +19,7 @@ import { SeccionVariantes } from '../../variantes/SeccionVariantes'
 export function PaginaVerReceta() {
   const { id } = useParams<{ id: string }>()
   const navegar = useNavigate()
-  const { sesion } = useSesion()
+  const { usuarioId } = useSesion()
 
   const [receta, setReceta] = useState<Receta | null>(null)
   const [error, setError] = useState<unknown>(null)
@@ -52,9 +53,23 @@ export function PaginaVerReceta() {
     <article>
       <CabeceraReceta
         receta={receta}
-        puedeBorrar={sesion?.user.id === receta.creadaPor}
+        puedeBorrar={usuarioId === receta.creadaPor}
         alBorrar={eliminar}
       />
+
+      {receta.audioUrl && (
+        <section className="tarjeta mb-8 p-4 sm:p-5">
+          <ReproductorAudio
+            url={receta.audioUrl}
+            titulo="Contada con su voz"
+            descripcion={
+              receta.procedencia.autorNombre
+                ? `${receta.procedencia.autorNombre} explicando la receta.`
+                : undefined
+            }
+          />
+        </section>
+      )}
 
       {receta.porQueEspecial && (
         <section className="mb-8 rounded-xl border border-acento bg-acento-suave p-5 sm:p-6">

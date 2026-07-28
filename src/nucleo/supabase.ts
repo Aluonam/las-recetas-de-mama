@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { CONFIG_SUPABASE } from './entorno'
 
 /**
  * Único punto donde la app conoce a Supabase.
@@ -7,18 +8,7 @@ import { createClient } from '@supabase/supabase-js'
  * con este cliente directamente. Así, cambiar de proveedor de datos toca un
  * archivo por funcionalidad y ninguna pantalla.
  */
-
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!url || !anonKey) {
-  throw new Error(
-    'Faltan VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY. ' +
-      'Copia .env.example a .env.local y rellena tus claves de Supabase.',
-  )
-}
-
-export const supabase = createClient(url, anonKey)
+export const supabase = createClient(CONFIG_SUPABASE.url, CONFIG_SUPABASE.clave)
 
 /** Id de la persona con sesión abierta, o error si no la hay. */
 export async function usuarioActual(): Promise<string> {

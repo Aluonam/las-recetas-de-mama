@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useSesion } from '../nucleo/sesion'
+import { HAY_SUPABASE } from '../nucleo/entorno'
 
 /**
  * Cabecera + contenido + pie. Responsive: en móvil el título ocupa la
@@ -8,10 +9,12 @@ import { useSesion } from '../nucleo/sesion'
  * en una fila.
  */
 export function Marco({ children }: { children: ReactNode }) {
-  const { sesion, salir } = useSesion()
+  const { correo, salir } = useSesion()
 
   return (
     <div className="flex min-h-svh flex-col">
+      {!HAY_SUPABASE && <AvisoDemostracion />}
+
       <header className="border-b border-borde bg-superficie">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <Link
@@ -32,12 +35,12 @@ export function Marco({ children }: { children: ReactNode }) {
               Escribir una receta
             </NavLink>
 
-            {sesion && (
+            {HAY_SUPABASE && (
               <button
                 type="button"
                 onClick={salir}
                 className="boton-secundario px-3 py-2 text-sm sm:px-4 sm:text-base"
-                title={sesion.user.email ?? undefined}
+                title={correo ?? undefined}
               >
                 Salir
               </button>
@@ -54,5 +57,14 @@ export function Marco({ children }: { children: ReactNode }) {
         Hecho para que no se pierdan.
       </footer>
     </div>
+  )
+}
+
+function AvisoDemostracion() {
+  return (
+    <p className="bg-acento px-4 py-2 text-center text-sm text-acento-tinta">
+      <strong>Modo demostración.</strong> Las recetas se guardan solo en este
+      navegador. Configura Supabase para compartirlas con la familia.
+    </p>
   )
 }
