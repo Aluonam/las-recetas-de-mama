@@ -15,11 +15,11 @@ export function Marco({ children }: { children: ReactNode }) {
     <div className="flex min-h-svh flex-col">
       {!HAY_SUPABASE && <AvisoDemostracion />}
 
-      <header className="border-b border-borde bg-superficie">
+      <header className="azulejo">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <Link
             to="/"
-            className="font-titulo text-lg font-semibold no-underline sm:text-xl"
+            className="font-titulo text-lg font-bold tracking-wide text-white no-underline sm:text-xl"
           >
             Las Recetas de Mamá
           </Link>
@@ -48,6 +48,9 @@ export function Marco({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
+
+      {/* Tira de hule: el remate que separa la cabecera del contenido. */}
+      <div className="vichy" aria-hidden="true" />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-8">
         {children}

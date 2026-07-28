@@ -72,7 +72,7 @@ export function PaginaVerReceta() {
       )}
 
       {receta.porQueEspecial && (
-        <section className="mb-8 rounded-xl border border-acento bg-acento-suave p-5 sm:p-6">
+        <section className="bloque-especial mb-8 p-5 sm:p-6">
           <h2 className="mb-2 text-xl">Por qué esta receta es especial</h2>
           <p className="whitespace-pre-line">{receta.porQueEspecial}</p>
         </section>

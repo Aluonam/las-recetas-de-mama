@@ -14,9 +14,7 @@ export function ListaTrucos({
   return (
     <section
       className={
-        destacado
-          ? 'rounded-xl border border-acento bg-acento-suave p-5'
-          : 'tarjeta p-4 sm:p-5'
+        destacado ? 'bloque-especial p-5' : 'tarjeta p-4 sm:p-5'
       }
     >
       <h2 className="mb-3 text-2xl">{destacado ? 'No se te olvide' : 'Trucos'}</h2>
