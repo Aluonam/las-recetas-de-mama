@@ -32,26 +32,28 @@ export function PanelLibro({ recetas }: { recetas: RecetaResumen[] }) {
 
   return (
     <div className="pasando" {...gestos}>
-      <div className="libro p-2 sm:p-3">
-        <div
-          // Cambiar la key reinicia la animación: cada hoja entra girada
-          // sobre el lomo y cae hasta quedar plana.
-          key={resumen.id}
-          className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
-        >
-          <div className="relative grid md:grid-cols-2">
-            <HojaIzquierda resumen={resumen} numero={indice * 2 + 1} />
-            <HojaDerecha
-              receta={receta}
-              resumen={resumen}
-              numero={indice * 2 + 2}
-            />
+      <div className="libro">
+        <div className="paginas overflow-hidden">
+          <div
+            // Cambiar la key reinicia la animación: cada hoja entra girada
+            // sobre el lomo y cae hasta quedar plana.
+            key={resumen.id}
+            className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
+          >
+            <div className="relative grid md:grid-cols-2">
+              <HojaIzquierda resumen={resumen} numero={indice * 2 + 1} />
+              <HojaDerecha
+                receta={receta}
+                resumen={resumen}
+                numero={indice * 2 + 2}
+              />
 
-            {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
-            <div
-              aria-hidden="true"
-              className="lomo pointer-events-none absolute inset-y-0 left-1/2 hidden w-8 -translate-x-1/2 md:block"
-            />
+              {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
+              <div
+                aria-hidden="true"
+                className="lomo pointer-events-none absolute inset-y-0 left-1/2 hidden w-10 -translate-x-1/2 md:block"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -76,7 +78,7 @@ function HojaIzquierda({
   const tiempo = textoTiempo(resumen.tiempoMinutos)
 
   return (
-    <article className="hoja flex flex-col p-6 text-center sm:p-8">
+    <article className="hoja hoja-izq flex flex-col p-6 text-center sm:p-8">
       {resumen.fotoPortadaUrl ? (
         <img
           src={resumen.fotoPortadaUrl}
@@ -129,7 +131,7 @@ function HojaDerecha({
   numero: number
 }) {
   return (
-    <article className="hoja flex flex-col border-t border-borde p-6 sm:p-8 md:border-l md:border-t-0">
+    <article className="hoja hoja-der flex flex-col p-6 sm:p-8">
       {receta ? (
         <>
           {receta.porQueEspecial && (

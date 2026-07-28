@@ -51,6 +51,15 @@
 
   --exito: #2f4a35;
 
+  /* El libro: tapa de tela, oro grabado, papel envejecido y el canto
+     de las hojas apiladas. */
+  --tapa: #26402c;
+  --tapa-alta: #3a5a40;
+  --oro-tapa: #c2a86a;
+  --hoja-papel: #f8f2e4;
+  --canto-1: #ebe1cb;
+  --canto-2: #ddd2b8;
+
   /* El estampado del fondo se apaga en modo oscuro bajando la opacidad. */
   --toile-opacidad: 1;
 
@@ -100,6 +109,14 @@
     --especial-borde: #b8566c;
 
     --exito: #8fbb87;
+
+    /* De noche el papel no puede ser crema: sería un foco. */
+    --tapa: #16241a;
+    --tapa-alta: #243a28;
+    --oro-tapa: #9c8850;
+    --hoja-papel: #262b23;
+    --canto-1: #333a2e;
+    --canto-2: #2b3127;
 
     /* El toile es de tono claro: a plena opacidad sería un foco en una
        pantalla a oscuras. Se queda como una textura tenue. */
@@ -302,35 +319,91 @@
      El libro: tapas, hojas y lomo.
      -------------------------------------------------------------- */
 
-  /* Las tapas. El canto simulado a la derecha da el grosor del tomo. */
+  /**
+   * La tapa: tela verde con el grano cruzado de la encuadernación.
+   * Tiene que verse tapa, no un borde: por eso el relleno es grande.
+   */
   .libro {
-    background: var(--verde-claro);
-    border: 1px solid var(--filete);
-    border-radius: 6px 14px 14px 6px;
+    position: relative;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.035) 0 2px,
+        transparent 2px 4px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(0, 0, 0, 0.05) 0 2px,
+        transparent 2px 4px
+      ),
+      linear-gradient(135deg, var(--tapa-alta), var(--tapa));
+    border-radius: 5px 18px 18px 5px;
+    padding: 16px 22px 22px 16px;
     box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--filete) 40%, transparent),
-      4px 4px 0 -1px var(--superficie),
-      5px 5px 0 0 color-mix(in srgb, var(--filete) 45%, transparent),
-      9px 9px 0 -1px var(--superficie),
-      10px 10px 0 0 color-mix(in srgb, var(--filete) 30%, transparent),
-      14px 16px 26px -10px rgba(0, 0, 0, 0.35);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+      0 20px 34px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  /* El filete dorado grabado en la tapa, por dentro del canto. */
+  .libro::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: 1px solid var(--oro-tapa);
+    border-radius: 3px 13px 13px 3px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /**
+   * El bloque de papel. Las hojas apiladas asoman por el canto derecho
+   * y por abajo, que es lo que da el grosor del tomo.
+   */
+  .paginas {
+    position: relative;
+    background: var(--hoja-papel);
+    border-radius: 2px 9px 9px 2px;
+    box-shadow:
+      2px 1px 0 var(--canto-1),
+      4px 2px 0 var(--canto-2),
+      6px 3px 0 var(--canto-1),
+      8px 4px 0 var(--canto-2),
+      10px 5px 0 var(--canto-1);
   }
 
   .hoja {
-    background: var(--superficie);
     /* Que la hoja corta siga pareciendo una hoja, sin obligar a las
        largas a esconder contenido tras un scroll interno. */
-    min-height: 22rem;
+    min-height: 24rem;
   }
 
-  /* El lomo: la sombra del pliegue entre las dos páginas abiertas. */
+  /* El papel se curva hacia el pliegue: se oscurece al acercarse. */
+  .hoja-izq {
+    background: linear-gradient(
+      to right,
+      transparent 78%,
+      color-mix(in srgb, var(--tinta) 13%, transparent)
+    );
+    border-radius: 2px 0 0 2px;
+  }
+
+  .hoja-der {
+    background: linear-gradient(
+      to left,
+      transparent 78%,
+      color-mix(in srgb, var(--tinta) 13%, transparent)
+    );
+    border-radius: 0 8px 8px 0;
+  }
+
+  /* El pliegue del centro, donde se cosen las hojas. */
   .lomo {
     background: linear-gradient(
       to right,
       transparent,
-      color-mix(in srgb, var(--tinta) 22%, transparent) 42%,
-      color-mix(in srgb, var(--tinta) 30%, transparent) 50%,
-      color-mix(in srgb, var(--tinta) 22%, transparent) 58%,
+      color-mix(in srgb, var(--tinta) 26%, transparent) 44%,
+      color-mix(in srgb, var(--tinta) 42%, transparent) 50%,
+      color-mix(in srgb, var(--tinta) 26%, transparent) 56%,
       transparent
     );
   }
