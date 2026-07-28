@@ -6,6 +6,7 @@ import { Aviso, Cargando } from '../../ui/Estado'
 import { TarjetaReceta } from '../componentes/TarjetaReceta'
 import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
 import { PanelIndice } from '../indice/PanelIndice'
+import { PanelLibro } from '../libro/PanelLibro'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
 
@@ -80,6 +81,8 @@ export function PaginaRecetario() {
         <p className="py-12 text-center text-tinta-suave">
           Ninguna receta encaja con esa búsqueda.
         </p>
+      ) : vista === 'libro' ? (
+        <PanelLibro recetas={visibles} />
       ) : vista === 'indice' ? (
         <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (

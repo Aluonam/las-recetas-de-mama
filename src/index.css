@@ -298,6 +298,43 @@
     letter-spacing: 0.2em;
   }
 
+  /* --------------------------------------------------------------
+     El libro: tapas, hojas y lomo.
+     -------------------------------------------------------------- */
+
+  /* Las tapas. El canto simulado a la derecha da el grosor del tomo. */
+  .libro {
+    background: var(--verde-claro);
+    border: 1px solid var(--filete);
+    border-radius: 6px 14px 14px 6px;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--filete) 40%, transparent),
+      4px 4px 0 -1px var(--superficie),
+      5px 5px 0 0 color-mix(in srgb, var(--filete) 45%, transparent),
+      9px 9px 0 -1px var(--superficie),
+      10px 10px 0 0 color-mix(in srgb, var(--filete) 30%, transparent),
+      14px 16px 26px -10px rgba(0, 0, 0, 0.35);
+  }
+
+  .hoja {
+    background: var(--superficie);
+    /* Que la hoja corta siga pareciendo una hoja, sin obligar a las
+       largas a esconder contenido tras un scroll interno. */
+    min-height: 22rem;
+  }
+
+  /* El lomo: la sombra del pliegue entre las dos páginas abiertas. */
+  .lomo {
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--tinta) 22%, transparent) 42%,
+      color-mix(in srgb, var(--tinta) 30%, transparent) 50%,
+      color-mix(in srgb, var(--tinta) 22%, transparent) 58%,
+      transparent
+    );
+  }
+
   /* «Por qué es especial» y los trucos del modo cocina. */
   .bloque-especial {
     background: var(--especial-fondo);
@@ -310,4 +347,58 @@
 /* El modo cocina se lee de pie, a un metro y con las manos pringadas. */
 .modo-cocina {
   font-size: 1.35rem;
+}
+
+/* ---------------------------------------------------------------
+   Pasar la hoja.
+
+   La hoja entra girada sobre el lomo y cae hasta quedar plana. Se
+   dispara cambiando la `key` en React, así que no hace falta ni
+   máquina de estados ni temporizadores: cada receta reinicia su
+   propia animación.
+   --------------------------------------------------------------- */
+.pasando {
+  perspective: 1800px;
+}
+
+@keyframes hoja-adelante {
+  from {
+    transform: rotateY(72deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes hoja-atras {
+  from {
+    transform: rotateY(-72deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+.pasa-adelante {
+  transform-origin: left center;
+  animation: hoja-adelante 0.42s ease-out;
+  backface-visibility: hidden;
+}
+
+.pasa-atras {
+  transform-origin: right center;
+  animation: hoja-atras 0.42s ease-out;
+  backface-visibility: hidden;
+}
+
+/* Quien pide menos movimiento no debería marearse pasando páginas. */
+@media (prefers-reduced-motion: reduce) {
+  .pasa-adelante,
+  .pasa-atras {
+    animation: none;
+  }
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Agrupacion } from './agrupar'
 
-export type Vista = 'fichas' | 'indice'
+export type Vista = 'fichas' | 'indice' | 'libro'
 
 const CLAVE = 'vista-recetario'
 

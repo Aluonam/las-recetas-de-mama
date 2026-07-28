@@ -30,6 +30,12 @@ export function SelectorVista({ vista, agrupacion, alCambiar }: Props) {
           Fichas
         </Opcion>
         <Opcion
+          activa={vista === 'libro'}
+          onClick={() => alCambiar({ vista: 'libro' })}
+        >
+          Libro
+        </Opcion>
+        <Opcion
           activa={vista === 'indice'}
           onClick={() => alCambiar({ vista: 'indice' })}
         >
