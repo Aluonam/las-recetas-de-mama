@@ -68,6 +68,16 @@ Los pasos 2 y 3 no son opcionales:
   no hay direcciones fijas; cada archivo se pide con la sesión abierta y el
   enlace caduca en una hora.
 
+**El orden importa.** El 002 reescribe políticas que crea el 001, y el 003
+depende de la función que crea el 002. Pasarlos salteados deja la base a
+medias sin dar ningún error.
+
+### Comprobar que quedó bien
+
+Pega [`supabase/comprobar.sql`](../supabase/comprobar.sql) y pulsa **Run**.
+No cambia nada: mira y da un parte de quince líneas. **Todas deben decir
+`OK`**; las que no, traen al lado qué falta por pasar.
+
 ---
 
 ## 3. Copiar las claves
