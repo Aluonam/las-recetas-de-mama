@@ -45,10 +45,17 @@ En el panel, **SQL Editor** → **New query**:
 2. Repite con
    [`supabase/migraciones/002-lista-de-invitados.sql`](../supabase/migraciones/002-lista-de-invitados.sql),
    **cambiando antes los correos del final por los de verdad**.
+3. Y con
+   [`supabase/migraciones/003-fotos-y-audios-privados.sql`](../supabase/migraciones/003-fotos-y-audios-privados.sql).
 
-El paso 2 no es opcional. Sin él, cualquiera que se registre en tu web
-entra al recetario de tu familia. Con él, además de tener sesión hay que
-estar en la lista.
+Los pasos 2 y 3 no son opcionales:
+
+- **Sin el 2**, cualquiera que se registre en tu web entra al recetario de
+  tu familia. Con él, además de tener sesión hay que estar en la lista.
+- **Sin el 3**, las fotos y los audios tienen direcciones permanentes: quien
+  conozca una la ve sin cuenta, y esa dirección se puede reenviar. Con él
+  no hay direcciones fijas; cada archivo se pide con la sesión abierta y el
+  enlace caduca en una hora.
 
 ---
 
@@ -171,8 +178,28 @@ vistas funcionan sin conexión.
 
 ## Copias de seguridad
 
-Son recetas de familia: si se pierden, no se recuperan.
+Son recetas de familia: si se pierden, no se recuperan. Y el plan gratuito
+de Supabase **no hace copias**.
 
-Supabase hace copias automáticas en el plan de pago, **no en el gratuito**.
-Vale la pena descargar un volcado de vez en cuando desde
-*Database → Backups*, o con `pg_dump` usando la contraseña del paso 1.
+**Desde la propia app** hay un botón al final de la portada: *Descargar
+copia de seguridad*. Genera un ZIP con todo dentro:
+
+```
+recetas-de-mama-2026-07-29.zip
+├── recetas.json          Todas las recetas y variantes, en texto legible
+├── LEEME.txt
+├── croquetas-de-la-abuela-carmen/
+│   ├── 8f3a....jpg       Las fotos
+│   └── b21c....webm      El audio
+└── arroz-con-leche/
+```
+
+Se abre con cualquier cosa y **no necesita esta aplicación para
+entenderse**. Es también la garantía de que nunca te quedas atrapada: los
+datos son tuyos y salen en un formato que se lee dentro de veinte años.
+
+Hazlo de vez en cuando y guárdalo en más de un sitio. Un disco que se
+estropea y una cuenta que se cierra pasan más de lo que parece.
+
+Si además quieres la copia de la base entera, está en *Database → Backups*
+o con `pg_dump` usando la contraseña del paso 1.

@@ -1,4 +1,5 @@
 import type { Paso } from '../tipos'
+import { Imagen } from '../archivos/Imagen'
 
 export function ListaPasos({ pasos }: { pasos: Paso[] }) {
   if (pasos.length === 0) return null
@@ -19,14 +20,10 @@ export function ListaPasos({ pasos }: { pasos: Paso[] }) {
 
             <div className="min-w-0">
               <p className="whitespace-pre-line">{paso.texto}</p>
-              {paso.fotoUrl && (
-                <img
-                  src={paso.fotoUrl}
-                  alt=""
-                  loading="lazy"
-                  className="mt-2 w-full max-w-sm rounded-lg"
-                />
-              )}
+              <Imagen
+                archivo={paso.fotoUrl}
+                className="mt-2 w-full max-w-sm rounded-lg"
+              />
             </div>
           </li>
         ))}

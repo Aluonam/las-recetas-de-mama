@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Receta } from '../tipos'
 import { textoProcedencia, textoTiempo } from '../formato'
+import { Imagen } from '../archivos/Imagen'
 
 interface Props {
   receta: Receta
@@ -20,13 +21,11 @@ export function CabeceraReceta({ receta, puedeBorrar, alBorrar }: Props) {
 
   return (
     <header className="mb-12 text-center sm:mb-14">
-      {receta.fotoPortadaUrl && (
-        <img
-          src={receta.fotoPortadaUrl}
-          alt=""
-          className="arco marco-doble mx-auto mb-6 aspect-[16/9] w-full object-cover"
-        />
-      )}
+      <Imagen
+        archivo={receta.fotoPortadaUrl}
+        loading="eager"
+        className="arco marco-doble mx-auto mb-6 aspect-[16/9] w-full object-cover"
+      />
 
       <div className="guirnalda mx-auto max-w-sm" aria-hidden="true" />
 

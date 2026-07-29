@@ -5,6 +5,7 @@ import { textoCantidad, textoTiempo } from '../formato'
 import { tituloParaOrdenar } from '../indice/agrupar'
 import { useNavegacionLibro, type Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
+import { Imagen } from '../archivos/Imagen'
 
 /** Un libro va en orden, ignorando el artículo del título. */
 function ordenarComoLibro(recetas: RecetaResumen[]) {
@@ -130,15 +131,11 @@ function HojaIzquierda({
         activa,
       )}
     >
-      {resumen.fotoPortadaUrl ? (
-        <img
-          src={resumen.fotoPortadaUrl}
-          alt=""
-          className="arco marco-doble mx-auto mb-6 aspect-[4/3] w-full max-w-xs object-cover"
-        />
-      ) : (
-        <div className="guirnalda mb-4" aria-hidden="true" />
-      )}
+      <Imagen
+        archivo={resumen.fotoPortadaUrl}
+        className="arco marco-doble mx-auto mb-6 aspect-[4/3] w-full max-w-xs object-cover"
+        hueco={<div className="guirnalda mb-4" aria-hidden="true" />}
+      />
 
       {resumen.autorNombre && (
         <p className="versalitas mb-2 text-rosa-texto">De {resumen.autorNombre}</p>

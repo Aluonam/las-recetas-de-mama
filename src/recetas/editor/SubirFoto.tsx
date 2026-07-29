@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { subirFoto } from '../almacenamiento'
 import { Aviso } from '../../ui/Estado'
+import { Imagen } from '../archivos/Imagen'
 
 interface Props {
   etiqueta: string
@@ -42,13 +43,10 @@ export function SubirFoto({ etiqueta, url, alSubir, alQuitar }: Props) {
     <div>
       <span className="etiqueta">{etiqueta}</span>
 
-      {url && (
-        <img
-          src={url}
-          alt=""
-          className="mb-2 max-h-48 w-full rounded-lg object-cover"
-        />
-      )}
+      <Imagen
+        archivo={url}
+        className="mb-2 max-h-48 w-full rounded-lg object-cover"
+      />
 
       <div className="flex flex-wrap gap-2">
         <label className="boton-secundario cursor-pointer">

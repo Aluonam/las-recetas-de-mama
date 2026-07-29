@@ -8,6 +8,7 @@ import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
 import { PanelIndice } from '../indice/PanelIndice'
 import { PanelLibro } from '../libro/PanelLibro'
 import { AvisoInstalar } from '../../pwa/AvisoInstalar'
+import { BotonCopia } from '../../copias/BotonCopia'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
 
@@ -113,6 +114,8 @@ export function PaginaRecetario() {
           ))}
         </ul>
       )}
+
+      <BotonCopia />
     </div>
   )
 }

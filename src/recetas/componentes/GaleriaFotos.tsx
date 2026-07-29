@@ -1,4 +1,5 @@
 import type { Foto } from '../tipos'
+import { Imagen } from '../archivos/Imagen'
 
 export function GaleriaFotos({ fotos }: { fotos: Foto[] }) {
   if (fotos.length === 0) return null
@@ -10,10 +11,9 @@ export function GaleriaFotos({ fotos }: { fotos: Foto[] }) {
       <ul className="grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3">
         {fotos.map((foto) => (
           <li key={foto.id}>
-            <img
-              src={foto.url}
+            <Imagen
+              archivo={foto.url}
               alt={foto.pie ?? ''}
-              loading="lazy"
               className="aspect-square w-full rounded-lg object-cover"
             />
             {foto.pie && (

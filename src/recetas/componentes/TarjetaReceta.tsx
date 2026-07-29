@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { RecetaResumen } from '../tipos'
+import { Imagen } from '../archivos/Imagen'
 
 /**
  * Una receta en la portada, como etiqueta de tarro de conserva: filete
@@ -12,16 +13,11 @@ export function TarjetaReceta({ receta }: { receta: RecetaResumen }) {
       to={`/receta/${receta.id}`}
       className="marco-doble arco flex h-full flex-col bg-superficie p-4 text-center no-underline transition-transform hover:-translate-y-0.5"
     >
-      {receta.fotoPortadaUrl ? (
-        <img
-          src={receta.fotoPortadaUrl}
-          alt=""
-          loading="lazy"
-          className="arco mb-3 aspect-[4/3] w-full object-cover"
-        />
-      ) : (
-        <div className="guirnalda mb-1 mt-2" aria-hidden="true" />
-      )}
+      <Imagen
+        archivo={receta.fotoPortadaUrl}
+        className="arco mb-3 aspect-[4/3] w-full object-cover"
+        hueco={<div className="guirnalda mb-1 mt-2" aria-hidden="true" />}
+      />
 
       {receta.autorNombre && (
         <p className="versalitas mb-1 text-rosa-texto">De {receta.autorNombre}</p>

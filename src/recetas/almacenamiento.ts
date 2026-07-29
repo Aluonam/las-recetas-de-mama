@@ -58,9 +58,52 @@ async function subir(archivo: Blob, clase: Clase, nombre?: string): Promise<stri
 
   if (error) throw error
 
-  const { data } = supabase.storage.from('recetas').getPublicUrl(ruta)
-  return data.publicUrl
+  // Se guarda la ruta, no una dirección.
+  //
+  // El bucket es privado: no existe una URL permanente que valga para
+  // siempre. Cada vez que hay que enseñar la foto se pide un enlace
+  // firmado que caduca. Guardar direcciones aquí sería guardar enlaces
+  // muertos.
+  return ruta
 }
+
+/**
+ * Convierte lo guardado en una receta en algo que un `src` pueda usar.
+ *
+ * Convive con tres formatos, y los tres tienen que seguir funcionando:
+ * - Rutas del bucket privado, que es lo que se guarda ahora.
+ * - Data URLs del modo demostración.
+ * - Direcciones completas de cuando el bucket era público.
+ */
+export async function urlDeArchivo(guardado: string): Promise<string> {
+  if (esDirecta(guardado)) return guardado
+
+  const enCache = firmadas.get(guardado)
+  if (enCache && enCache.caduca > Date.now()) return enCache.url
+
+  const { data, error } = await supabase.storage
+    .from('recetas')
+    .createSignedUrl(guardado, DURACION_FIRMA)
+
+  if (error) throw error
+
+  firmadas.set(guardado, {
+    url: data.signedUrl,
+    // Se renueva antes de tiempo: un enlace que caduca a mitad de un
+    // audio deja a la abuela cortada a media frase.
+    caduca: Date.now() + (DURACION_FIRMA - 300) * 1000,
+  })
+
+  return data.signedUrl
+}
+
+/** Ya es utilizable tal cual: no hay nada que firmar. */
+export const esDirecta = (guardado: string) =>
+  guardado.startsWith('http') || guardado.startsWith('data:') ||
+  guardado.startsWith('blob:')
+
+const DURACION_FIRMA = 3600
+const firmadas = new Map<string, { url: string; caduca: number }>()
 
 function validar(archivo: Blob, clase: Clase): void {
   // Se compara solo la familia ("image", "audio"): los subtipos y codecs

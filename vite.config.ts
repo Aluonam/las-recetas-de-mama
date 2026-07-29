@@ -82,6 +82,16 @@ export default defineConfig({
               cacheName: 'fotos-y-audios',
               expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
+              /**
+               * Sin esto no habría fotos sin conexión.
+               *
+               * El bucket es privado y cada enlace lleva una firma que
+               * caduca a la hora. Como la firma va en la consulta, la
+               * misma foto tendría una dirección distinta cada vez y la
+               * caché no la reconocería nunca. Ignorando la consulta, la
+               * foto guardada sirve aunque la firma haya cambiado.
+               */
+              matchOptions: { ignoreSearch: true },
             },
           },
         ],
