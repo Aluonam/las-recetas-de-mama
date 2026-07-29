@@ -23,11 +23,22 @@ quien escriba.
 ## 1. Crear el proyecto en Supabase
 
 1. Entra en [supabase.com](https://supabase.com) y crea una cuenta.
-2. **New project**. Ponle el nombre que quieras.
-3. **Región: Frankfurt (eu-central-1)** si estás en España. Es la más
-   cercana y se nota al cargar las fotos.
-4. Guarda la contraseña de la base de datos que te genere. No la usa la
-   app, pero la necesitarás si algún día haces copias de seguridad.
+2. **New project**, y rellena así:
+
+| Campo | Qué poner |
+| ----- | --------- |
+| **Project name** | `las-recetas-de-mama`. El nombre por defecto es «Tu nombre's Project» y dentro de un año no te dirá nada. |
+| **Database password** | Genérala con *Generate a password* y **guárdala en tu gestor de contraseñas**. La app no la usa, pero es la única forma de sacar un volcado completo de la base, y no se puede recuperar. |
+| **Region** | Despliega y elige una concreta de Europa: **Paris** o **Frankfurt** son las más cercanas a España. Dejarlo en el grupo «Europe» sin concretar no vale. |
+| **GitHub** | Déjalo sin conectar. Sirve para que Supabase aplique cambios de esquema desde el repositorio; aquí el esquema se pega a mano y son cuatro archivos. |
+
+3. En **Security**, tres casillas:
+
+| Casilla | Cómo dejarla | Por qué |
+| ------- | ------------ | ------- |
+| **Enable Data API** | ✅ **Marcada** | Es por donde habla la app. Sin esto no funciona nada. |
+| **Automatically expose new tables** | ⬜ **Desmarcada** | Lo recomienda el propio Supabase. El esquema concede los permisos tabla por tabla, así que no hace falta, y así una tabla que crees más adelante no queda expuesta por descuido. |
+| **Enable automatic RLS** | ✅ **Márcala** | Red de seguridad: cualquier tabla nueva nace protegida. El esquema ya activa la protección en las suyas, así que esto solo cubre despistes futuros. |
 
 > **Aviso del plan gratuito:** Supabase pausa los proyectos que pasan
 > varios días sin actividad. Un recetario familiar se usa a temporadas, así

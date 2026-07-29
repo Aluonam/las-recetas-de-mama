@@ -82,6 +82,27 @@ create trigger receta_actualizada_en
   for each row execute function public.tocar_actualizada_en();
 
 -- ------------------------------------------------------------
+--  Permisos del API
+--
+--  Supabase puede dar estos permisos solo a cada tabla nueva
+--  («Automatically expose new tables»), pero su propia recomendación
+--  es desactivarlo y concederlos a mano. Concediéndolos aquí, esa
+--  opción puede quedar apagada: una tabla que se cree más adelante no
+--  quedará expuesta por descuido.
+--
+--  Esto es solo el permiso de asomarse. Lo que decide qué filas se
+--  ven son las políticas de más abajo.
+-- ------------------------------------------------------------
+grant usage on schema public to anon, authenticated;
+
+grant select, insert, update, delete on public.receta   to authenticated;
+grant select, insert, delete         on public.variante to authenticated;
+
+-- Sin sesión no se toca nada. El recetario no es público.
+revoke all on public.receta   from anon;
+revoke all on public.variante from anon;
+
+-- ------------------------------------------------------------
 --  Seguridad (RLS)
 --
 --  Alcance actual: UNA familia. Cualquier persona con cuenta ve y

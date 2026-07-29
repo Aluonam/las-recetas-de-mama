@@ -29,6 +29,10 @@ create table if not exists public.invitado (
 -- consulta la función de abajo, que corre con permisos propios.
 alter table public.invitado enable row level security;
 
+-- Y sin permiso siquiera de asomarse, por si algún día se activara
+-- «Automatically expose new tables» en el panel. Dos cerraduras.
+revoke all on public.invitado from anon, authenticated;
+
 comment on table public.invitado is
   'Correos que pueden entrar al recetario. Sin política de acceso a propósito.';
 
@@ -49,6 +53,11 @@ as $$
     where lower(correo) = lower(coalesce(auth.jwt() ->> 'email', ''))
   );
 $$;
+
+-- La función corre con permisos propios (security definer), así que puede
+-- leer la tabla cerrada. Quien la llama solo obtiene un sí o un no: nunca
+-- llega a ver la lista de correos.
+grant execute on function public.es_de_la_familia() to authenticated;
 
 -- ------------------------------------------------------------
 --  Las políticas pasan a exigir estar invitado
