@@ -82,7 +82,7 @@ export function PaginaRecetario() {
           Ninguna receta encaja con esa búsqueda.
         </p>
       ) : vista === 'libro' ? (
-        <PanelLibro recetas={visibles} />
+        <PanelLibro recetas={visibles} todas={recetas} />
       ) : vista === 'indice' ? (
         <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (

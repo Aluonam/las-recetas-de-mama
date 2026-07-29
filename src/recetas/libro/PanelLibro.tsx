@@ -3,32 +3,66 @@ import { Link } from 'react-router-dom'
 import type { Receta, RecetaResumen } from '../tipos'
 import { textoCantidad, textoTiempo } from '../formato'
 import { tituloParaOrdenar } from '../indice/agrupar'
-import { useNavegacionLibro } from './useNavegacionLibro'
+import { useNavegacionLibro, type Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
+
+/** Un libro va en orden, ignorando el artículo del título. */
+function ordenarComoLibro(recetas: RecetaResumen[]) {
+  return [...recetas].sort((a, b) =>
+    tituloParaOrdenar(a.titulo).localeCompare(tituloParaOrdenar(b.titulo), 'es'),
+  )
+}
 
 /**
  * El recetario como libro: cada receta ocupa una hoja, y las hojas se
- * pasan.
+ * pasan pulsando sobre ellas.
  *
  * La hoja izquierda se pinta con lo que ya tenemos del listado, así que
  * nunca parpadea al pasar. La derecha necesita la receta entera y aparece
  * en cuanto llega; en la práctica es instantáneo salvo la primera vez.
  */
-export function PanelLibro({ recetas }: { recetas: RecetaResumen[] }) {
-  // Un libro va en orden, ignorando el artículo del título.
-  const enOrden = useMemo(
-    () =>
-      [...recetas].sort((a, b) =>
-        tituloParaOrdenar(a.titulo).localeCompare(tituloParaOrdenar(b.titulo), 'es'),
-      ),
-    [recetas],
-  )
+export function PanelLibro({
+  recetas,
+  todas,
+}: {
+  recetas: RecetaResumen[]
+  /** El recetario entero, para numerar las páginas. */
+  todas: RecetaResumen[]
+}) {
+  const enOrden = useMemo(() => ordenarComoLibro(recetas), [recetas])
+
+  /**
+   * La página es la del tomo, no la del montón que tengas delante: buscar
+   * o filtrar enseña unas hojas y esconde otras, pero a nadie se le
+   * renumeran las páginas de un libro por leerlo salteado.
+   */
+  const paginaDe = useMemo(() => {
+    const tomo = ordenarComoLibro(todas)
+    return new Map(tomo.map((receta, posicion) => [receta.id, posicion * 2 + 1]))
+  }, [todas])
 
   const { indice, sentido, pasar, gestos } = useNavegacionLibro(enOrden.length)
   const resumen = enOrden[indice]
   const { receta } = useRecetaCompleta(resumen?.id)
 
+  /**
+   * Pulsar en una hoja la pasa: la de la izquierda va hacia atrás y la de
+   * la derecha hacia delante. Se aparta cuando lo pulsado es un enlace o
+   * cuando hay texto seleccionado, para no pasar hoja a quien solo estaba
+   * copiando un ingrediente.
+   */
+  const alPulsarHoja =
+    (haciaDonde: Sentido) => (evento: React.MouseEvent<HTMLElement>) => {
+      if ((evento.target as HTMLElement).closest('a, button')) return
+      if (window.getSelection()?.toString()) return
+      pasar(haciaDonde)
+    }
+
   if (!resumen) return null
+
+  const primeraPagina = paginaDe.get(resumen.id) ?? indice * 2 + 1
+  const quedaAtras = indice > 0
+  const quedaAdelante = indice < enOrden.length - 1
 
   return (
     <div className="pasando" {...gestos}>
@@ -41,11 +75,18 @@ export function PanelLibro({ recetas }: { recetas: RecetaResumen[] }) {
             className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
           >
             <div className="relative grid md:grid-cols-2">
-              <HojaIzquierda resumen={resumen} numero={indice * 2 + 1} />
+              <HojaIzquierda
+                resumen={resumen}
+                numero={primeraPagina}
+                alPulsar={alPulsarHoja('atras')}
+                activa={quedaAtras}
+              />
               <HojaDerecha
                 receta={receta}
                 resumen={resumen}
-                numero={indice * 2 + 2}
+                numero={primeraPagina + 1}
+                alPulsar={alPulsarHoja('adelante')}
+                activa={quedaAdelante}
               />
 
               {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
@@ -58,27 +99,37 @@ export function PanelLibro({ recetas }: { recetas: RecetaResumen[] }) {
         </div>
       </div>
 
-      <Controles
-        indice={indice}
-        total={enOrden.length}
-        alPasar={pasar}
-        receta={resumen}
-      />
+      <Contador indice={indice} total={enOrden.length} receta={resumen} />
     </div>
   )
+}
+
+/** El cursor solo promete pasar hoja si de verdad queda hoja que pasar. */
+function claseHoja(base: string, activa: boolean) {
+  return `${base} ${activa ? 'cursor-pointer' : 'cursor-default'}`
 }
 
 function HojaIzquierda({
   resumen,
   numero,
+  alPulsar,
+  activa,
 }: {
   resumen: RecetaResumen
   numero: number
+  alPulsar: (evento: React.MouseEvent<HTMLElement>) => void
+  activa: boolean
 }) {
   const tiempo = textoTiempo(resumen.tiempoMinutos)
 
   return (
-    <article className="hoja hoja-izq flex flex-col p-6 text-center sm:p-8">
+    <article
+      onClick={alPulsar}
+      className={claseHoja(
+        'hoja hoja-izq relative flex flex-col p-6 pb-14 text-center sm:p-8 sm:pb-16',
+        activa,
+      )}
+    >
       {resumen.fotoPortadaUrl ? (
         <img
           src={resumen.fotoPortadaUrl}
@@ -125,13 +176,23 @@ function HojaDerecha({
   receta,
   resumen,
   numero,
+  alPulsar,
+  activa,
 }: {
   receta: Receta | null
   resumen: RecetaResumen
   numero: number
+  alPulsar: (evento: React.MouseEvent<HTMLElement>) => void
+  activa: boolean
 }) {
   return (
-    <article className="hoja hoja-der flex flex-col p-6 sm:p-8">
+    <article
+      onClick={alPulsar}
+      className={claseHoja(
+        'hoja hoja-der relative flex flex-col p-6 pb-14 sm:p-8 sm:pb-16',
+        activa,
+      )}
+    >
       {receta ? (
         <>
           {receta.porQueEspecial && (
@@ -189,12 +250,14 @@ function PieDePagina({
   numero: number
   alineado: 'izquierda' | 'derecha'
 }) {
+  // Clavado al pie de la hoja, como en un libro: si va en el flujo, se
+  // queda colgando justo debajo del texto y sube o baja con cada receta.
   return (
     <p
       aria-hidden="true"
       className={
-        'mt-6 font-titulo text-sm text-tinta-suave ' +
-        (alineado === 'izquierda' ? 'text-left' : 'text-right')
+        'absolute bottom-6 font-titulo text-sm text-tinta-suave sm:bottom-8 ' +
+        (alineado === 'izquierda' ? 'left-6 sm:left-8' : 'right-6 sm:right-8')
       }
     >
       {numero}
@@ -202,41 +265,30 @@ function PieDePagina({
   )
 }
 
-function Controles({
+/**
+ * Sin botones, nada delata que las hojas se pasan solas al pulsarlas: el
+ * pie hace de instrucción además de contar por dónde vas.
+ */
+function Contador({
   indice,
   total,
-  alPasar,
   receta,
 }: {
   indice: number
   total: number
-  alPasar: (sentido: 'adelante' | 'atras') => void
   receta: RecetaResumen
 }) {
   return (
-    <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-      <button
-        type="button"
-        className="boton-secundario"
-        onClick={() => alPasar('atras')}
-        disabled={indice === 0}
-      >
-        ← Anterior
-      </button>
-
-      <p role="status" className="text-center text-sm text-tinta-suave">
-        <span className="sr-only">Hoja abierta: {receta.titulo}. </span>
-        {indice + 1} de {total}
-      </p>
-
-      <button
-        type="button"
-        className="boton-secundario"
-        onClick={() => alPasar('adelante')}
-        disabled={indice === total - 1}
-      >
-        Siguiente →
-      </button>
-    </div>
+    <p role="status" className="mt-6 text-center text-sm text-tinta-suave">
+      <span className="sr-only">Hoja abierta: {receta.titulo}. </span>
+      {indice + 1} de {total}
+      <span aria-hidden="true" className="mx-2">
+        ·
+      </span>
+      <span aria-hidden="true">Pulsa en la hoja para pasarla</span>
+      <span className="sr-only">
+        Usa las flechas izquierda y derecha para pasar de hoja.
+      </span>
+    </p>
   )
 }
