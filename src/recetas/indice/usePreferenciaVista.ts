@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Agrupacion } from './agrupar'
 
-export type Vista = 'fichas' | 'indice' | 'libro'
+export type Vista = 'todos' | 'fichas' | 'indice' | 'libro'
 
 const CLAVE = 'vista-recetario'
 
@@ -10,7 +10,7 @@ interface Preferencia {
   agrupacion: Agrupacion
 }
 
-const POR_DEFECTO: Preferencia = { vista: 'fichas', agrupacion: 'plato' }
+const POR_DEFECTO: Preferencia = { vista: 'todos', agrupacion: 'plato' }
 
 /**
  * Recuerda cómo prefieres ver el recetario.

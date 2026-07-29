@@ -9,6 +9,7 @@ interface Props {
 }
 
 const VISTAS: Array<{ valor: Vista; texto: string }> = [
+  { valor: 'todos', texto: 'Todas' },
   { valor: 'fichas', texto: 'Fichas' },
   { valor: 'libro', texto: 'Libro' },
   { valor: 'indice', texto: 'Índice' },

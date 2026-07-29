@@ -23,6 +23,18 @@ export function PaginaRecetario() {
     listarRecetas().then(setRecetas).catch(setError)
   }, [])
 
+  /**
+   * Al salir de Fichas se limpia el filtro de celebración.
+   *
+   * Los filtros solo se ven ahí, así que dejarlos puestos escondería
+   * recetas en el libro o en el índice sin nada en pantalla que explicara
+   * por qué faltan.
+   */
+  const cambiarVista = (parche: Parameters<typeof cambiar>[0]) => {
+    if (parche.vista && parche.vista !== 'fichas') setOcasion(null)
+    cambiar(parche)
+  }
+
   /** Solo las ocasiones que alguien ha usado de verdad. */
   const ocasiones = useMemo(() => {
     const todas = (recetas ?? []).flatMap((receta) => receta.ocasiones)
@@ -67,17 +79,21 @@ export function PaginaRecetario() {
           onChange={(evento) => setBusqueda(evento.target.value)}
         />
 
-        <FiltroOcasiones
-          ocasiones={ocasiones}
-          seleccionada={ocasion}
-          alSeleccionar={setOcasion}
-        />
-
         <SelectorVista
           vista={vista}
           agrupacion={agrupacion}
-          alCambiar={cambiar}
+          alCambiar={cambiarVista}
         />
+
+        {/* Los filtros de celebración viven dentro de Fichas: es la vista
+            para rebuscar. «Todas» enseña el recetario entero sin recortes. */}
+        {vista === 'fichas' && (
+          <FiltroOcasiones
+            ocasiones={ocasiones}
+            seleccionada={ocasion}
+            alSeleccionar={setOcasion}
+          />
+        )}
       </div>
 
       {visibles.length === 0 ? (
