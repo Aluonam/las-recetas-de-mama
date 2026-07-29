@@ -30,8 +30,8 @@ quien escriba.
    app, pero la necesitarás si algún día haces copias de seguridad.
 
 > **Aviso del plan gratuito:** Supabase pausa los proyectos que pasan
-> varios días sin actividad. Se reactivan desde el panel en un par de
-> minutos, pero si el recetario se usa a temporadas, cuenta con ello.
+> varios días sin actividad. Un recetario familiar se usa a temporadas, así
+> que esto importa. Ver [Que no se duerma](#que-no-se-duerma).
 
 ---
 
@@ -173,6 +173,40 @@ vistas funcionan sin conexión.
 | Entra pero el recetario sale vacío | Su correo no está en la lista de invitados |
 | No aparece la opción de instalar | No estás en HTTPS, o ya está instalada |
 | «Failed to fetch» | Proyecto pausado por inactividad: reactívalo en el panel |
+
+---
+
+## Que no se duerma
+
+El plan gratuito pausa los proyectos que pasan unos días sin recibir
+ninguna petición. Se pausa por **inactividad**, no por poco uso: basta con
+que algo consulte la base de vez en cuando.
+
+En el repositorio hay una tarea que lo hace sola, dos veces por semana:
+[`.github/workflows/mantener-despierto.yml`](../.github/workflows/mantener-despierto.yml).
+
+Para activarla, crea dos secretos en GitHub —*Settings → Secrets and
+variables → Actions*—, con los mismos valores del paso 3:
+
+| Secreto | Valor |
+| ------- | ----- |
+| `SUPABASE_URL` | *Project URL* |
+| `SUPABASE_ANON_KEY` | *anon · public* |
+
+Luego, en la pestaña **Actions**, lánzala una vez a mano (*Run workflow*)
+para comprobar que responde `200`. Si falla, GitHub te avisa por correo.
+
+> **Ojo con una trampa de GitHub:** desactiva las tareas programadas en los
+> repositorios que pasan **60 días sin ningún commit**. Avisa por correo
+> antes de hacerlo. Si vas a tener el proyecto parado mucho tiempo, o
+> prefieres no depender de esto, puedes hacer lo mismo gratis desde
+> [cron-job.org](https://cron-job.org): una petición a
+> `TU-URL/rest/v1/receta?select=id&limit=1` con la cabecera
+> `apikey: TU-CLAVE-ANON`.
+
+Si algún día se duerme igualmente, la app lo dice con palabras claras en
+vez de con un error técnico, y se reactiva desde el panel de Supabase en
+un par de minutos.
 
 ---
 

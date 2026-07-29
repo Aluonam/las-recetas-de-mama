@@ -1,0 +1,65 @@
+# Mantener despierto el proyecto de Supabase
+#
+# El plan gratuito pausa los proyectos que pasan unos días sin recibir
+# ninguna petición. Un recetario familiar se usa a temporadas —en Navidad,
+# en un cumpleaños—, así que sin esto lo normal sería encontrárselo
+# dormido justo el día que hace falta.
+#
+# Esto hace una consulta mínima dos veces por semana. No busca engañar a
+# nadie: es tráfico real y ridículo, y evita que la familia se encuentre
+# la puerta cerrada.
+#
+# ANTES DE QUE FUNCIONE hay que crear dos secretos en GitHub:
+#   Settings → Secrets and variables → Actions → New repository secret
+#     SUPABASE_URL       la Project URL
+#     SUPABASE_ANON_KEY  la clave anon public
+#
+# La clave anon es pública por diseño, pero va como secreto igualmente
+# para no tenerla escrita en el repositorio.
+
+name: Mantener despierto
+
+on:
+  schedule:
+    # Lunes y jueves a las 6:15 UTC. Dos veces por semana sobra para un
+    # contador de varios días, y deja margen si GitHub retrasa alguna.
+    - cron: '15 6 * * 1,4'
+  # Para poder lanzarlo a mano desde la pestaña Actions.
+  workflow_dispatch:
+
+jobs:
+  despertar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la base
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          CLAVE: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${URL:-}" ] || [ -z "${CLAVE:-}" ]; then
+            echo "Faltan los secretos SUPABASE_URL o SUPABASE_ANON_KEY."
+            echo "Se crean en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          # Se pide una sola fila. Las políticas de seguridad devolverán
+          # una lista vacía porque esta petición no lleva sesión, y da
+          # igual: lo que cuenta como actividad es que la consulta llegue.
+          codigo=$(curl -sS -o /tmp/respuesta -w '%{http_code}' \
+            "${URL}/rest/v1/receta?select=id&limit=1" \
+            -H "apikey: ${CLAVE}" \
+            -H "Authorization: Bearer ${CLAVE}")
+
+          echo "Respuesta HTTP: ${codigo}"
+
+          if [ "${codigo}" != "200" ]; then
+            echo "El proyecto no responde como debería."
+            echo "Si es un 5xx puede estar pausado: entra al panel de"
+            echo "Supabase y reactívalo a mano esta vez."
+            cat /tmp/respuesta
+            exit 1
+          fi
+
+          echo "Proyecto despierto."
