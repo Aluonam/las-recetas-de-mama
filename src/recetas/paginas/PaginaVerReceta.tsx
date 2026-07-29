@@ -110,7 +110,9 @@ export function PaginaVerReceta() {
 
       <GaleriaFotos fotos={receta.fotos} />
 
-      <div className="guirnalda mx-auto mt-16 max-w-sm" aria-hidden="true" />
+      {/* A todo el ancho: aquí separa dos secciones, y una greca corta y
+          centrada parecía un adorno suelto en vez de una línea divisoria. */}
+      <div className="guirnalda mt-16 w-full" aria-hidden="true" />
 
       <SeccionVariantes recetaId={receta.id} />
     </article>

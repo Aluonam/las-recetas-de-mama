@@ -67,12 +67,12 @@ export function Marco({ children }: { children: ReactNode }) {
       {/* La cenefa cierra abajo igual que abre arriba, como en un zócalo. */}
       <div className="cenefa" aria-hidden="true" />
 
+      {/* Sin greca en el pie: la cenefa de arriba ya cierra el contenido y
+          dos adornos seguidos se estorbaban. */}
       <footer className="bg-verde-claro px-4 py-6 text-center">
-        <div className="guirnalda mx-auto max-w-xs" aria-hidden="true" />
-
         {/* Una cita larga no cabe en versalitas: va en cursiva, como se
             citaría en un libro, y la firma debajo. */}
-        <blockquote className="mx-auto mt-3 max-w-md">
+        <blockquote className="mx-auto max-w-md">
           <p className="font-titulo text-lg italic leading-snug text-verde-texto">
             «Uno no puede pensar bien, amar bien, dormir bien, si no ha comido
             bien.»
