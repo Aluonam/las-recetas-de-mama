@@ -19,8 +19,14 @@ Cada receta guarda:
 
 ## Puesta en marcha
 
-Necesitas Node 20 o superior y una cuenta gratuita en
-[Supabase](https://supabase.com).
+> Para compartir el recetario con la familia de verdad —cada uno desde su
+> móvil o su tablet— sigue la guía completa:
+> **[docs/puesta-en-marcha.md](docs/puesta-en-marcha.md)**. Incluye cerrar
+> el acceso a quien no esté invitado, que sin eso cualquiera que se
+> registre entraría a tus recetas.
+
+Lo que sigue es solo para levantarlo en tu ordenador. Necesitas Node 20 o
+superior y una cuenta gratuita en [Supabase](https://supabase.com).
 
 ### 1. Instalar
 
