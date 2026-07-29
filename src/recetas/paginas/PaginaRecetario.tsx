@@ -7,6 +7,7 @@ import { TarjetaReceta } from '../componentes/TarjetaReceta'
 import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
 import { PanelIndice } from '../indice/PanelIndice'
 import { PanelLibro } from '../libro/PanelLibro'
+import { AvisoInstalar } from '../../pwa/AvisoInstalar'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
 
@@ -50,6 +51,8 @@ export function PaginaRecetario() {
   return (
     <div>
       <h1 className="mb-6 text-3xl sm:text-4xl">El recetario</h1>
+
+      <AvisoInstalar />
 
       <div className="mb-6 flex flex-col gap-3">
         <label htmlFor="buscar" className="sr-only">

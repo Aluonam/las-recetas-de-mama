@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Service worker de desarrollo, generado por vite-plugin-pwa
+dev-dist
+
 # Claves de Supabase: nunca al repositorio (usa .env.example como plantilla)
 .env
 .env.local
