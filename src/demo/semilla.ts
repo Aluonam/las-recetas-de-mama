@@ -32,7 +32,7 @@ export const RECETAS_DE_EJEMPLO: Receta[] = [
       'La abuela empezaba el día antes y no dejaba entrar a nadie en la ' +
       'cocina hasta que la masa estaba fría. Decía que las prisas se notan ' +
       'en la croqueta.',
-    ocasiones: ['Nochebuena', 'Navidad', 'Domingos'],
+    ocasiones: ['Nochebuena', 'Domingos'],
     raciones: 'Salen unas 40, o 30 si está el tío',
     tiempoMinutos: 90,
     ingredientes: [
@@ -224,7 +224,7 @@ export const RECETAS_DE_EJEMPLO: Receta[] = [
     porQueEspecial:
       'No tienen nada de especial y por eso están aquí: son el sabor de ' +
       'volver a casa un martes cualquiera.',
-    ocasiones: ['Del diario', 'Cuando alguien está malo'],
+    ocasiones: ['De diario', 'Enfermitos'],
     raciones: 'Para 4, y sobra para el día siguiente',
     tiempoMinutos: 45,
     ingredientes: [

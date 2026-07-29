@@ -309,6 +309,48 @@
     );
   }
 
+  /**
+   * Solapas: elegir cómo se mira el recetario.
+   *
+   * Con forma de pestaña de libro y no de píldora redonda, porque no son
+   * lo mismo que los filtros: los filtros quitan y ponen recetas, las
+   * solapas cambian la manera de mirar las mismas.
+   */
+  .solapas {
+    display: inline-flex;
+    gap: 3px;
+    padding: 0 3px;
+    border-bottom: 2px solid var(--verde-texto);
+  }
+
+  .solapa {
+    position: relative;
+    top: 3px;
+    border: 1px solid var(--borde);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    background: var(--superficie);
+    color: var(--tinta-suave);
+    @apply cursor-pointer px-4 py-2 text-sm font-semibold transition-colors;
+  }
+
+  .solapa:hover {
+    background: var(--superficie-2);
+  }
+
+  .solapa-activa {
+    /* La solapa abierta sube hasta el filo y se pinta llena: es la hoja
+       por la que está abierto el libro. */
+    top: 0;
+    background: var(--verde-texto);
+    border-color: var(--verde-texto);
+    color: var(--papel);
+  }
+
+  .solapa-activa:hover {
+    background: var(--verde-texto);
+  }
+
   /* Versalitas espaciadas: las etiquetas de tarro de conserva. */
   .versalitas {
     @apply text-xs font-bold uppercase;

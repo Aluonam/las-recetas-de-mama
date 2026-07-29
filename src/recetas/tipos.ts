@@ -78,7 +78,7 @@ export interface Receta {
   /** Qué hace esta receta tan especial. */
   porQueEspecial?: string | null
 
-  /** "Nochebuena", "cumpleaños", "cuando alguien está malo". */
+  /** "Nochebuena", "Cumpleaños", "Enfermitos". */
   ocasiones: string[]
 
   /** Texto libre: "para 6, o para 4 si viene el tío". */
@@ -118,15 +118,39 @@ export type RecetaResumen = Pick<
 
 export const OCASIONES_SUGERIDAS = [
   'Nochebuena',
-  'Navidad',
   'Semana Santa',
   'Cumpleaños',
   'Domingos',
   'Verano',
-  'Cuando alguien está malo',
+  'Enfermitos',
   'Días de fiesta',
-  'Del diario',
+  'De diario',
 ] as const
+
+/**
+ * Ocasiones que cambiaron de nombre o se retiraron.
+ *
+ * Los filtros salen de las ocasiones que tienen las recetas guardadas, no
+ * de una lista fija, así que cambiar las sugerencias no basta: hay que
+ * arreglar lo ya escrito. `null` significa que la ocasión desaparece.
+ */
+export const OCASIONES_RENOMBRADAS: Record<string, string | null> = {
+  // Nochebuena ya cubre estas fechas y tenerlas las dos duplicaba el filtro.
+  Navidad: null,
+  'Del diario': 'De diario',
+  'Cuando alguien está malo': 'Enfermitos',
+}
+
+/** Aplica los renombrados y quita las retiradas, sin repetir ninguna. */
+export function normalizarOcasiones(ocasiones: string[]): string[] {
+  const arregladas = ocasiones
+    .map((ocasion) =>
+      ocasion in OCASIONES_RENOMBRADAS ? OCASIONES_RENOMBRADAS[ocasion] : ocasion,
+    )
+    .filter((ocasion): ocasion is string => Boolean(ocasion))
+
+  return [...new Set(arregladas)]
+}
 
 export const UNIDADES_SUGERIDAS = [
   'g',

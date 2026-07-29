@@ -1,5 +1,6 @@
 import { escribir, leer } from '../nucleo/almacenLocal'
 import { RECETAS_DE_EJEMPLO } from '../demo/semilla'
+import { normalizarOcasiones } from './tipos'
 import type { Receta, RecetaEditable, RecetaResumen } from './tipos'
 
 /**
@@ -16,10 +17,44 @@ function todas(): Receta[] {
   // La primera vez se siembra con ejemplos: un recetario vacío no enseña
   // nada de lo que hace especial a este proyecto.
   const guardadas = leer<Receta[] | null>(CLAVE, null)
-  if (guardadas) return guardadas
+  if (!guardadas) {
+    escribir(CLAVE, RECETAS_DE_EJEMPLO)
+    return RECETAS_DE_EJEMPLO
+  }
 
-  escribir(CLAVE, RECETAS_DE_EJEMPLO)
-  return RECETAS_DE_EJEMPLO
+  return migrarOcasiones(guardadas)
+}
+
+/**
+ * Arregla las ocasiones renombradas o retiradas en lo ya guardado.
+ *
+ * Los filtros se construyen con las ocasiones que llevan las recetas, así
+ * que sin esto un cambio de nombre no se notaría hasta volver a escribir
+ * cada receta a mano. Se ejecuta al leer y solo reescribe si algo cambió.
+ */
+function migrarOcasiones(recetas: Receta[]): Receta[] {
+  let huboCambios = false
+
+  const migradas = recetas.map((receta) => {
+    const ocasiones = normalizarOcasiones(receta.ocasiones)
+    if (ocasiones.length === receta.ocasiones.length &&
+        ocasiones.every((o, i) => o === receta.ocasiones[i])) {
+      return receta
+    }
+    huboCambios = true
+    return { ...receta, ocasiones }
+  })
+
+  if (huboCambios) {
+    try {
+      escribir(CLAVE, migradas)
+    } catch {
+      // Que no se pueda guardar la migración no debe impedir leer las
+      // recetas: se verán bien igual y se reintentará en la próxima carga.
+    }
+  }
+
+  return migradas
 }
 
 /** Marca de tiempo en ISO, como la que devolvería PostgreSQL. */
