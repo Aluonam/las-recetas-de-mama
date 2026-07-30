@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { borrarReceta, obtenerReceta } from '../api'
 import type { Receta } from '../tipos'
-import { useSesion } from '../../nucleo/sesion'
+import { useFamilia } from '../../familias/contexto'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { CabeceraReceta } from '../componentes/CabeceraReceta'
 import { ListaIngredientes } from '../componentes/ListaIngredientes'
@@ -19,7 +19,7 @@ import { ReproductorAudio } from '../audio/ReproductorAudio'
 export function PaginaVerReceta() {
   const { id } = useParams<{ id: string }>()
   const navegar = useNavigate()
-  const { usuarioId } = useSesion()
+  const { soyDuena } = useFamilia()
 
   const [receta, setReceta] = useState<Receta | null>(null)
   const [error, setError] = useState<unknown>(null)
@@ -53,7 +53,9 @@ export function PaginaVerReceta() {
     <article>
       <CabeceraReceta
         receta={receta}
-        puedeBorrar={usuarioId === receta.creadaPor}
+        // Borrar es de quien creó el recetario, no de quien escribió la
+        // receta: una receta borrada por error no vuelve.
+        puedeBorrar={soyDuena}
         alBorrar={eliminar}
       />
 

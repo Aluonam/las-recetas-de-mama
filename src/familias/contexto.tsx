@@ -23,6 +23,11 @@ import { useSesion } from '../nucleo/sesion'
 interface ContextoFamilia {
   /** El recetario abierto, o null si aún no pertenece a ninguno. */
   familia: Familia | null
+  /**
+   * Si quien mira es quien creó el recetario. Solo esa persona puede
+   * borrar recetas; el resto ve y edita.
+   */
+  soyDuena: boolean
   /** Todos los suyos, por si algún día pertenece a más de uno. */
   todas: Familia[]
   cargando: boolean
@@ -77,8 +82,20 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
   }, [])
 
   const valor = useMemo<ContextoFamilia>(
-    () => ({ familia, todas, cargando, error, entrar, recargar }),
-    [familia, todas, cargando, error, entrar, recargar],
+    () => ({
+      familia,
+      // Si no se sabe quién lo creó, se asume que no. Más vale esconder
+      // un botón de más que enseñar uno que va a fallar.
+      soyDuena: Boolean(
+        familia?.creadaPor && usuarioId && familia.creadaPor === usuarioId,
+      ),
+      todas,
+      cargando,
+      error,
+      entrar,
+      recargar,
+    }),
+    [familia, usuarioId, todas, cargando, error, entrar, recargar],
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

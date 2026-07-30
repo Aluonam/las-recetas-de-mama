@@ -9,4 +9,13 @@ export interface Familia {
   id: string
   nombre: string
   codigo: string
+  /**
+   * Quién lo creó. Es quien puede borrar recetas: el resto de la familia
+   * ve y edita, pero no hace desaparecer nada.
+   *
+   * Puede venir vacío al crear el recetario o al entrar con un código,
+   * porque la base solo devuelve ahí lo imprescindible. Se rellena en la
+   * siguiente carga.
+   */
+  creadaPor?: string | null
 }

@@ -15,6 +15,9 @@ const DEMOSTRACION: Familia = {
   id: 'f0000000-0000-4000-8000-000000000001',
   nombre: 'Las recetas de casa',
   codigo: 'MEMBRILLO-1958',
+  // En demostración quien mira es siempre quien lo creó, así se puede
+  // probar también el borrado.
+  creadaPor: '00000000-0000-4000-8000-000000000001',
 }
 
 function guardada(): Familia {

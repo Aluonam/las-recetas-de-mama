@@ -16,17 +16,24 @@ interface FilaFamilia {
   id: string
   nombre: string
   codigo: string
+  creada_por: string
 }
 
 /** Los recetarios a los que pertenece quien tiene la sesión abierta. */
 export async function misRecetarios(): Promise<Familia[]> {
   const { data, error } = await supabase
     .from('familia')
-    .select('id, nombre, codigo')
+    .select('id, nombre, codigo, creada_por')
     .order('creada_en', { ascending: true })
 
   if (error) throw error
-  return (data ?? []) as FilaFamilia[]
+
+  return ((data ?? []) as FilaFamilia[]).map((fila) => ({
+    id: fila.id,
+    nombre: fila.nombre,
+    codigo: fila.codigo,
+    creadaPor: fila.creada_por,
+  }))
 }
 
 export async function crearRecetario(
