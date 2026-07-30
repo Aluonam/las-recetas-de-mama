@@ -44,21 +44,25 @@ jobs:
             exit 1
           fi
 
-          # Se pide una sola fila. Las políticas de seguridad devolverán
-          # una lista vacía porque esta petición no lleva sesión, y da
-          # igual: lo que cuenta como actividad es que la consulta llegue.
+          # Se pregunta al servicio de autenticación y no a las tablas.
+          #
+          # Una consulta a las recetas sin sesión devuelve 401 —«no tienes
+          # permiso»—, que es justo lo que queremos que pase, pero obligaría
+          # a tratar un error como éxito. Este endpoint responde 200 sin
+          # depender de ningún permiso y vale igual como actividad.
           codigo=$(curl -sS -o /tmp/respuesta -w '%{http_code}' \
-            "${URL}/rest/v1/receta?select=id&limit=1" \
-            -H "apikey: ${CLAVE}" \
-            -H "Authorization: Bearer ${CLAVE}")
+            "${URL}/auth/v1/health" \
+            -H "apikey: ${CLAVE}")
 
           echo "Respuesta HTTP: ${codigo}"
+          cat /tmp/respuesta
+          echo
 
-          if [ "${codigo}" != "200" ]; then
-            echo "El proyecto no responde como debería."
-            echo "Si es un 5xx puede estar pausado: entra al panel de"
-            echo "Supabase y reactívalo a mano esta vez."
-            cat /tmp/respuesta
+          # Lo que importa es que conteste alguien. Un 5xx o un 000 —sin
+          # respuesta— son los dos casos en los que hay que preocuparse.
+          if [ "${codigo}" = "000" ] || [ "${codigo}" -ge 500 ]; then
+            echo "El proyecto no responde. Puede estar pausado: entra al"
+            echo "panel de Supabase y reactivalo a mano esta vez."
             exit 1
           fi
 
