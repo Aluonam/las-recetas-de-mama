@@ -81,6 +81,23 @@ export async function cambiarCodigo(familiaId: string): Promise<string> {
   return data as string
 }
 
+/**
+ * El correo de quien administra el recetario, para poder escribirle.
+ *
+ * Puede venir vacío: quien lo creó no está obligado a haber dejado un
+ * correo, y en ese caso no hay nadie a quien escribir.
+ */
+export async function correoDelAdministrador(
+  familiaId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc('administrador_del_recetario', {
+    p_familia_id: familiaId,
+  })
+
+  if (error) throw error
+  return (data as string | null) || null
+}
+
 /** Pone el que se le diga. La base valida y lo guarda en mayúsculas. */
 export async function establecerCodigo(
   familiaId: string,

@@ -31,7 +31,7 @@ export function BotonCopia() {
     : 0
 
   return (
-    <section className="tarjeta mt-16 p-4 sm:p-5">
+    <section className="tarjeta p-4 sm:p-5">
       <h2 className="mb-1 text-xl">Guarda una copia</h2>
       <p className="mb-4 text-tinta-suave">
         Descarga el recetario entero —recetas, fotos y audios— en un solo

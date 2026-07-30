@@ -7,6 +7,7 @@ import { PaginaRecetario } from './recetas/paginas/PaginaRecetario'
 import { PaginaVerReceta } from './recetas/paginas/PaginaVerReceta'
 import { PaginaModoCocina } from './recetas/paginas/PaginaModoCocina'
 import { PaginaEditarReceta } from './recetas/editor/PaginaEditarReceta'
+import { PaginaAjustes } from './ajustes/PaginaAjustes'
 
 /** Mapa de rutas. Un solo sitio donde mirar para saber qué pantallas hay. */
 
@@ -46,6 +47,14 @@ export function Rutas() {
         element={
           <Pantalla>
             <PaginaRecetario />
+          </Pantalla>
+        }
+      />
+      <Route
+        path="/ajustes"
+        element={
+          <Pantalla>
+            <PaginaAjustes />
           </Pantalla>
         }
       />

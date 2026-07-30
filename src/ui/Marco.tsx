@@ -58,6 +58,16 @@ export function Marco({ children, navegacion = true }: Props) {
               Escribir una receta
             </NavLink>
 
+            <NavLink
+              to="/ajustes"
+              className={({ isActive }) =>
+                (isActive ? 'boton-principal' : 'boton-secundario') +
+                ' whitespace-nowrap px-4 py-2 text-sm no-underline sm:text-base'
+              }
+            >
+              Ajustes
+            </NavLink>
+
             {HAY_SUPABASE && (
               <button
                 type="button"

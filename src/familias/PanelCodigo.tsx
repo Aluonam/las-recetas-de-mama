@@ -59,7 +59,7 @@ export function PanelCodigo() {
   }
 
   return (
-    <section className="tarjeta mt-16 p-4 sm:p-5">
+    <section className="tarjeta p-4 sm:p-5">
       <h2 className="mb-1 text-xl">Invitar a la familia</h2>
       <p className="mb-4 text-tinta-suave">
         Quien tenga este código entra en <strong>{familia.nombre}</strong>.

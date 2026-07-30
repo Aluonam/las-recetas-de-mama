@@ -59,6 +59,11 @@ export async function cambiarCodigo(): Promise<string> {
   return nuevo
 }
 
+export async function correoDelAdministrador(): Promise<string | null> {
+  // En demostración no hay nadie más al otro lado.
+  return null
+}
+
 export async function establecerCodigo(
   _familiaId: string,
   codigo: string,
