@@ -29,8 +29,16 @@ export async function misRecetarios(): Promise<Familia[]> {
   return [guardada()]
 }
 
-export async function crearRecetario(nombre: string): Promise<Familia> {
-  const nueva = { ...guardada(), nombre: nombre.trim() }
+export async function crearRecetario(
+  nombre: string,
+  codigo?: string,
+): Promise<Familia> {
+  const actual = guardada()
+  const nueva = {
+    ...actual,
+    nombre: nombre.trim(),
+    codigo: codigo?.trim().toUpperCase() || actual.codigo,
+  }
   escribir(CLAVE, nueva)
   return nueva
 }
@@ -45,4 +53,18 @@ export async function cambiarCodigo(): Promise<string> {
   const nuevo = `MEMBRILLO-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`
   escribir(CLAVE, { ...actual, codigo: nuevo })
   return nuevo
+}
+
+export async function establecerCodigo(
+  _familiaId: string,
+  codigo: string,
+): Promise<string> {
+  const limpio = codigo.trim().toUpperCase()
+  if (limpio.length < 5) throw new Error('El código necesita al menos 5 caracteres.')
+  if (!/^[A-Z0-9-]+$/.test(limpio)) {
+    throw new Error('El código solo admite letras sin tilde, números y guiones.')
+  }
+
+  escribir(CLAVE, { ...guardada(), codigo: limpio })
+  return limpio
 }

@@ -105,6 +105,7 @@ function FormularioCrear({
   alEntrar: (familia: import('./tipos').Familia) => void
 }) {
   const [nombre, setNombre] = useState('')
+  const [codigo, setCodigo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
@@ -113,7 +114,7 @@ function FormularioCrear({
     setEnviando(true)
     setError(null)
     try {
-      alEntrar(await crearRecetario(nombre))
+      alEntrar(await crearRecetario(nombre, codigo))
     } catch (e) {
       setError(e)
     } finally {
@@ -132,9 +133,19 @@ function FormularioCrear({
         onChange={(e) => setNombre(e.target.value)}
       />
 
+      <CampoTexto
+        etiqueta="El código para entrar (opcional)"
+        ayuda="Déjalo vacío y se genera uno. Entre 5 y 32 caracteres: letras sin tilde, números y guiones."
+        autoCapitalize="characters"
+        autoComplete="off"
+        placeholder="ROGELIO24"
+        value={codigo}
+        onChange={(e) => setCodigo(e.target.value)}
+      />
+
       <p className="text-sm text-tinta-suave">
-        Al crearlo se genera un código. Ese código es la llave: pásalo a tu
-        familia y entrarán aquí mismo.
+        Ese código es la llave: pásalo a tu familia por WhatsApp y entrarán
+        aquí mismo. Se puede cambiar cuando quieras.
       </p>
 
       {error != null && <Aviso error={error} />}

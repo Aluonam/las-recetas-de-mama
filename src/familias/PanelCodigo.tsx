@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { cambiarCodigo } from './api'
+import { cambiarCodigo, establecerCodigo } from './api'
 import { useFamilia } from './contexto'
 import { Aviso } from '../ui/Estado'
+import { CampoTexto } from '../ui/Campo'
 
 /**
  * El código del recetario, para compartirlo y para cambiarlo.
@@ -14,6 +15,7 @@ export function PanelCodigo() {
   const { familia, entrar } = useFamilia()
   const [copiado, setCopiado] = useState(false)
   const [cambiando, setCambiando] = useState(false)
+  const [editando, setEditando] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
   if (!familia) return null
@@ -75,12 +77,29 @@ export function PanelCodigo() {
         <button
           type="button"
           className="boton-secundario"
+          onClick={() => setEditando((antes) => !antes)}
+        >
+          Elegir otro código
+        </button>
+        <button
+          type="button"
+          className="boton-secundario"
           onClick={regenerar}
           disabled={cambiando}
         >
-          {cambiando ? 'Cambiando…' : 'Cambiar el código'}
+          {cambiando ? 'Generando…' : 'Generar uno al azar'}
         </button>
       </div>
+
+      {editando && (
+        <FormularioCodigo
+          familiaId={familia.id}
+          alCambiar={(nuevo) => {
+            entrar({ ...familia, codigo: nuevo })
+            setEditando(false)
+          }}
+        />
+      )}
 
       {error != null && (
         <div className="mt-3">
@@ -88,5 +107,63 @@ export function PanelCodigo() {
         </div>
       )}
     </section>
+  )
+}
+
+function FormularioCodigo({
+  familiaId,
+  alCambiar,
+}: {
+  familiaId: string
+  alCambiar: (codigo: string) => void
+}) {
+  const [codigo, setCodigo] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState<unknown>(null)
+
+  // Un código corto y sin números se adivina. Se avisa, no se prohíbe:
+  // la decisión es de quien lo va a repartir.
+  const flojo = codigo.trim().length >= 5 && !/\d/.test(codigo)
+
+  const enviar = async (evento: React.FormEvent) => {
+    evento.preventDefault()
+    setGuardando(true)
+    setError(null)
+    try {
+      alCambiar(await establecerCodigo(familiaId, codigo))
+    } catch (e) {
+      setError(e)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <form onSubmit={enviar} className="mt-4 space-y-3 border-t border-borde pt-4">
+      <CampoTexto
+        etiqueta="El código que quieras"
+        ayuda="Entre 5 y 32 caracteres. Letras sin tilde, números y guiones."
+        required
+        autoCapitalize="characters"
+        autoComplete="off"
+        placeholder="ROGELIO24"
+        value={codigo}
+        onChange={(e) => setCodigo(e.target.value)}
+      />
+
+      {flojo && (
+        <p className="text-sm text-tinta-suave">
+          Este código es una palabra sola. Es lo único que separa vuestras
+          recetas del resto de internet, así que añadirle un número lo hace
+          mucho más difícil de adivinar.
+        </p>
+      )}
+
+      {error != null && <Aviso error={error} />}
+
+      <button type="submit" className="boton-principal" disabled={guardando}>
+        {guardando ? 'Guardando…' : 'Poner este código'}
+      </button>
+    </form>
   )
 }

@@ -9,3 +9,4 @@ export const misRecetarios = impl.misRecetarios
 export const crearRecetario = impl.crearRecetario
 export const unirseConCodigo = impl.unirseConCodigo
 export const cambiarCodigo = impl.cambiarCodigo
+export const establecerCodigo = impl.establecerCodigo
