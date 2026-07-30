@@ -26,6 +26,36 @@ interface ContextoSesion {
 
 const Contexto = createContext<ContextoSesion | undefined>(undefined)
 
+/**
+ * Una sesión anónima a la vez, aunque pregunten dos.
+ *
+ * En desarrollo React ejecuta los efectos por duplicado a propósito, para
+ * destapar justo este tipo de fallos. Sin esta guarda se creaban dos
+ * cuentas anónimas en cada carga —milisegundos aparte— y la base se
+ * llenaba de identidades huérfanas.
+ *
+ * Fuera de React porque el guardián tiene que sobrevivir a que el
+ * componente se monte, se desmonte y se vuelva a montar.
+ */
+let abriendoSesion: Promise<string | null> | null = null
+
+async function asegurarSesion(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  if (data.session) return data.session.user.id
+
+  abriendoSesion ??= supabase.auth
+    .signInAnonymously()
+    .then(({ data: nueva, error }) => {
+      if (error) throw error
+      return nueva.session?.user.id ?? null
+    })
+    .finally(() => {
+      abriendoSesion = null
+    })
+
+  return abriendoSesion
+}
+
 /** Identidad ficticia del modo demostración. */
 const USUARIO_DEMO = '00000000-0000-4000-8000-000000000001'
 
@@ -48,20 +78,10 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       }
 
       try {
-        const { data } = await supabase.auth.getSession()
-
         // Supabase guarda la sesión en el navegador, así que en las
-        // visitas siguientes ya hay una y no se crea otra.
-        if (data.session) {
-          if (vigente) setUsuarioId(data.session.user.id)
-          return
-        }
-
-        const { data: nueva, error: fallo } =
-          await supabase.auth.signInAnonymously()
-
-        if (fallo) throw fallo
-        if (vigente) setUsuarioId(nueva.session?.user.id ?? null)
+        // visitas siguientes se reaprovecha y no se crea otra.
+        const id = await asegurarSesion()
+        if (vigente) setUsuarioId(id)
       } catch (e) {
         if (vigente) setError(e)
       } finally {
