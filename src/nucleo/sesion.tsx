@@ -19,6 +19,17 @@ import { HAY_SUPABASE } from './entorno'
  */
 interface ContextoSesion {
   usuarioId: string | null
+  /** El correo con el que está verificada la cuenta, si lo está. */
+  correo: string | null
+  /**
+   * Si la cuenta es de las desechables.
+   *
+   * Una cuenta anónima vive en este navegador y se pierde al salir o al
+   * cambiar de dispositivo. Para quien solo consulta recetas da igual;
+   * para quien manda en el recetario, no: perdería el mando sin hacer
+   * nada raro.
+   */
+  esAnonima: boolean
   cargando: boolean
   error: unknown
   salir: () => Promise<void>
@@ -63,6 +74,8 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [usuarioId, setUsuarioId] = useState<string | null>(
     HAY_SUPABASE ? null : USUARIO_DEMO,
   )
+  const [correo, setCorreo] = useState<string | null>(null)
+  const [esAnonima, setEsAnonima] = useState(true)
   const [cargando, setCargando] = useState(HAY_SUPABASE)
   const [error, setError] = useState<unknown>(null)
 
@@ -70,6 +83,14 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     if (!HAY_SUPABASE) return
 
     let vigente = true
+
+    /** Vuelca en el estado lo que dice la sesión. */
+    const anotar = (sesion: import('@supabase/supabase-js').Session | null) => {
+      setUsuarioId(sesion?.user.id ?? null)
+      setCorreo(sesion?.user.email ?? null)
+      // Sin correo no hay forma de demostrar quién eres desde otro sitio.
+      setEsAnonima(!sesion?.user.email)
+    }
 
     const abrir = async () => {
       if (vigente) {
@@ -80,8 +101,9 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       try {
         // Supabase guarda la sesión en el navegador, así que en las
         // visitas siguientes se reaprovecha y no se crea otra.
-        const id = await asegurarSesion()
-        if (vigente) setUsuarioId(id)
+        await asegurarSesion()
+        const { data } = await supabase.auth.getSession()
+        if (vigente) anotar(data.session)
       } catch (e) {
         if (vigente) setError(e)
       } finally {
@@ -93,11 +115,11 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
 
     const { data } = supabase.auth.onAuthStateChange((evento, sesion) => {
       if (sesion) {
-        setUsuarioId(sesion.user.id)
+        anotar(sesion)
         return
       }
 
-      setUsuarioId(null)
+      anotar(null)
 
       /**
        * Al salir hay que abrir otra sesión anónima enseguida.
@@ -121,13 +143,15 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   const valor = useMemo<ContextoSesion>(
     () => ({
       usuarioId,
+      correo,
+      esAnonima,
       cargando,
       error,
       salir: async () => {
         if (HAY_SUPABASE) await supabase.auth.signOut()
       },
     }),
-    [usuarioId, cargando, error],
+    [usuarioId, correo, esAnonima, cargando, error],
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
