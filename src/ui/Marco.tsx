@@ -30,7 +30,43 @@ export function Marco({ children, navegacion = true }: Props) {
     <div className="flex min-h-svh flex-col">
       {!HAY_SUPABASE && <AvisoDemostracion />}
 
-      <header className="bg-verde-claro">
+      <header className="relative bg-verde-claro">
+        {navegacion && (
+          <div className="absolute right-3 top-3 flex flex-col items-end gap-2 sm:right-4 sm:top-4">
+            <NavLink
+              to="/ajustes"
+              aria-label="Ajustes"
+              title="Ajustes"
+              className={({ isActive }) =>
+                // 44px de lado: el mínimo para acertar con el dedo.
+                'flex size-11 items-center justify-center rounded-full border transition-colors ' +
+                (isActive
+                  ? 'border-verde-texto bg-verde-texto text-papel'
+                  : 'border-verde-texto bg-superficie text-verde-texto hover:bg-superficie-2')
+              }
+            >
+              <Engranaje />
+            </NavLink>
+
+            {HAY_SUPABASE && (
+              <button
+                type="button"
+                onClick={() => {
+                  const seguro = window.confirm(
+                    '¿Estás seguro de que deseas salir?\n\n' +
+                      'Para volver a entrar tendrás que escribir de nuevo el ' +
+                      'código de tu familia.',
+                  )
+                  if (seguro) salir()
+                }}
+                className="rounded-full border border-borde bg-superficie px-3 py-1 text-xs font-semibold text-tinta-suave transition-colors hover:bg-superficie-2"
+              >
+                Salir
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
           <Link
             to="/"
@@ -58,33 +94,6 @@ export function Marco({ children, navegacion = true }: Props) {
               Escribir una receta
             </NavLink>
 
-            <NavLink
-              to="/ajustes"
-              className={({ isActive }) =>
-                (isActive ? 'boton-principal' : 'boton-secundario') +
-                ' whitespace-nowrap px-4 py-2 text-sm no-underline sm:text-base'
-              }
-            >
-              Ajustes
-            </NavLink>
-
-            {HAY_SUPABASE && (
-              <button
-                type="button"
-                onClick={() => {
-                  // Sin correo con el que volver a identificarse, salir
-                  // significa tener que escribir el código otra vez.
-                  const seguro = window.confirm(
-                    'Para volver a entrar tendrás que escribir de nuevo el ' +
-                      'código de tu familia. ¿Sales?',
-                  )
-                  if (seguro) salir()
-                }}
-                className="boton-secundario px-4 py-2 text-sm sm:text-base"
-              >
-                Salir
-              </button>
-            )}
           </nav>
         </div>
       </header>
@@ -115,6 +124,25 @@ export function Marco({ children, navegacion = true }: Props) {
         </blockquote>
       </footer>
     </div>
+  )
+}
+
+/** Engranaje de trazo grueso, para que no desentone con el resto. */
+function Engranaje() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="size-5"
+    >
+      <circle cx="12" cy="12" r="3.4" />
+      <path d="M12 2.2v2.6M12 19.2v2.6M4.1 4.1l1.9 1.9M18 18l1.9 1.9M2.2 12h2.6M19.2 12h2.6M4.1 19.9 6 18M18 6l1.9-1.9" />
+    </svg>
   )
 }
 

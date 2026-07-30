@@ -42,6 +42,11 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     let vigente = true
 
     const abrir = async () => {
+      if (vigente) {
+        setCargando(true)
+        setError(null)
+      }
+
       try {
         const { data } = await supabase.auth.getSession()
 
@@ -66,8 +71,25 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
 
     abrir()
 
-    const { data } = supabase.auth.onAuthStateChange((_evento, sesion) => {
-      setUsuarioId(sesion?.user.id ?? null)
+    const { data } = supabase.auth.onAuthStateChange((evento, sesion) => {
+      if (sesion) {
+        setUsuarioId(sesion.user.id)
+        return
+      }
+
+      setUsuarioId(null)
+
+      /**
+       * Al salir hay que abrir otra sesión anónima enseguida.
+       *
+       * Sin esto, «Salir» dejaba la app sin sesión y sin forma de
+       * conseguir otra: la primera se creaba solo al cargar la página, así
+       * que quedaba una pantalla de error de la que no se salía.
+       *
+       * Lo que se busca al salir es volver a la pantalla del código, y
+       * para llegar ahí hace falta una sesión nueva, no ninguna.
+       */
+      if (evento === 'SIGNED_OUT') abrir()
     })
 
     return () => {
