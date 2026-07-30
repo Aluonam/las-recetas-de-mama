@@ -33,14 +33,14 @@ export function Marco({ children, navegacion = true }: Props) {
 
       <header className="relative bg-verde-claro">
         {navegacion && (
-          <div className="absolute right-3 top-3 flex flex-col items-end gap-2 sm:right-4 sm:top-4">
+          <>
             <NavLink
               to="/ajustes"
               aria-label="Ajustes"
               title="Ajustes"
               className={({ isActive }) =>
                 // 44px de lado: el mínimo para acertar con el dedo.
-                'flex size-11 items-center justify-center rounded-full border transition-colors ' +
+                'absolute right-3 top-3 flex size-11 items-center justify-center rounded-full border transition-colors sm:right-4 sm:top-4 ' +
                 (isActive
                   ? 'border-verde-texto bg-verde-texto text-papel'
                   : 'border-verde-texto bg-superficie text-verde-texto hover:bg-superficie-2')
@@ -49,6 +49,8 @@ export function Marco({ children, navegacion = true }: Props) {
               <Engranaje />
             </NavLink>
 
+            {/* Salir va abajo del todo y apartado del engranaje: se usa
+                poco y no conviene tenerlo pegado a lo que sí se toca. */}
             {HAY_SUPABASE && (
               <button
                 type="button"
@@ -60,12 +62,12 @@ export function Marco({ children, navegacion = true }: Props) {
                   )
                   if (seguro) salir()
                 }}
-                className="rounded-full border border-borde bg-superficie px-3 py-1 text-xs font-semibold text-tinta-suave transition-colors hover:bg-superficie-2"
+                className="absolute bottom-3 right-3 rounded-md border border-borde bg-superficie px-3 py-1.5 text-xs font-semibold text-tinta-suave transition-colors hover:bg-superficie-2 sm:right-4"
               >
                 Salir
               </button>
             )}
-          </div>
+          </>
         )}
 
         <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
