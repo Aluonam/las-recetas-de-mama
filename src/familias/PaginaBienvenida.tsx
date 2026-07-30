@@ -1,22 +1,27 @@
 import { useState } from 'react'
 import { crearRecetario, unirseConCodigo } from './api'
 import { useFamilia } from './contexto'
+import type { Familia } from './tipos'
 import { Aviso } from '../ui/Estado'
 import { CampoTexto } from '../ui/Campo'
 
 /**
- * Primera pantalla de quien todavía no pertenece a ningún recetario.
+ * La primera y única pantalla antes de entrar.
  *
- * Dos caminos y nada más: crear el de tu casa, o entrar en uno con el
- * código que te han pasado. Quien llega aquí suele venir de un WhatsApp
- * con un código dentro, así que esa opción va primero.
+ * Sin enlaces al correo ni esperas: se escribe el correo, el código
+ * familiar, y se entra. El correo queda anotado para saber quién metió
+ * cada receta; la llave es el código.
+ *
+ * «Ya tengo código» va primero porque casi todo el mundo llega aquí
+ * desde un WhatsApp con un código dentro. Crear recetario lo hace una
+ * persona por familia, una sola vez.
  */
 export function PaginaBienvenida() {
   const { entrar } = useFamilia()
   const [modo, setModo] = useState<'entrar' | 'crear'>('entrar')
 
   return (
-    <div className="mx-auto max-w-lg py-8">
+    <div className="mx-auto max-w-lg py-6">
       <div className="guirnalda mb-4" aria-hidden="true" />
 
       <h1 className="mb-3 text-center text-3xl sm:text-4xl">
@@ -34,7 +39,7 @@ export function PaginaBienvenida() {
           aria-pressed={modo === 'entrar'}
           className={'solapa' + (modo === 'entrar' ? ' solapa-activa' : '')}
         >
-          Tengo un código
+          Ya tengo código
         </button>
         <button
           type="button"
@@ -47,7 +52,7 @@ export function PaginaBienvenida() {
       </div>
 
       {modo === 'entrar' ? (
-        <FormularioCodigo alEntrar={entrar} />
+        <FormularioEntrar alEntrar={entrar} />
       ) : (
         <FormularioCrear alEntrar={entrar} />
       )}
@@ -55,11 +60,34 @@ export function PaginaBienvenida() {
   )
 }
 
-function FormularioCodigo({
+/** Campo de correo, igual en los dos formularios. */
+function CampoCorreo({
+  valor,
+  alCambiar,
+}: {
+  valor: string
+  alCambiar: (correo: string) => void
+}) {
+  return (
+    <CampoTexto
+      etiqueta="Tu correo"
+      ayuda="Solo para saber quién ha escrito cada receta. No te vamos a mandar nada."
+      type="email"
+      required
+      autoComplete="email"
+      placeholder="nombre@correo.com"
+      value={valor}
+      onChange={(e) => alCambiar(e.target.value)}
+    />
+  )
+}
+
+function FormularioEntrar({
   alEntrar,
 }: {
-  alEntrar: (familia: import('./tipos').Familia) => void
+  alEntrar: (familia: Familia) => void
 }) {
+  const [correo, setCorreo] = useState('')
   const [codigo, setCodigo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -69,7 +97,7 @@ function FormularioCodigo({
     setEnviando(true)
     setError(null)
     try {
-      alEntrar(await unirseConCodigo(codigo))
+      alEntrar(await unirseConCodigo(codigo, correo))
     } catch (e) {
       setError(e)
     } finally {
@@ -79,6 +107,8 @@ function FormularioCodigo({
 
   return (
     <form onSubmit={enviar} className="tarjeta space-y-4 p-5">
+      <CampoCorreo valor={correo} alCambiar={setCorreo} />
+
       <CampoTexto
         etiqueta="El código de tu familia"
         ayuda="Te lo habrán pasado por WhatsApp. Da igual mayúsculas o minúsculas."
@@ -102,19 +132,23 @@ function FormularioCodigo({
 function FormularioCrear({
   alEntrar,
 }: {
-  alEntrar: (familia: import('./tipos').Familia) => void
+  alEntrar: (familia: Familia) => void
 }) {
+  const [correo, setCorreo] = useState('')
   const [nombre, setNombre] = useState('')
   const [codigo, setCodigo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<unknown>(null)
+
+  // Una palabra suelta se adivina. Se avisa, no se prohíbe.
+  const flojo = codigo.trim().length >= 5 && !/\d/.test(codigo)
 
   const enviar = async (evento: React.FormEvent) => {
     evento.preventDefault()
     setEnviando(true)
     setError(null)
     try {
-      alEntrar(await crearRecetario(nombre, codigo))
+      alEntrar(await crearRecetario(nombre, codigo, correo))
     } catch (e) {
       setError(e)
     } finally {
@@ -124,9 +158,11 @@ function FormularioCrear({
 
   return (
     <form onSubmit={enviar} className="tarjeta space-y-4 p-5">
+      <CampoCorreo valor={correo} alCambiar={setCorreo} />
+
       <CampoTexto
         etiqueta="¿Cómo se llama vuestro recetario?"
-        ayuda="El nombre que le pondríais en casa. Se puede cambiar luego."
+        ayuda="El nombre que le pondríais en casa."
         required
         placeholder="Las recetas de los Cano"
         value={nombre}
@@ -134,18 +170,25 @@ function FormularioCrear({
       />
 
       <CampoTexto
-        etiqueta="El código para entrar (opcional)"
-        ayuda="Déjalo vacío y se genera uno. Entre 5 y 32 caracteres: letras sin tilde, números y guiones."
+        etiqueta="La contraseña familiar"
+        ayuda="Entre 5 y 32 caracteres: letras sin tilde, números y guiones. Déjala vacía y se genera una."
         autoCapitalize="characters"
         autoComplete="off"
-        placeholder="ROGELIO24"
+        placeholder="ROGELIO162"
         value={codigo}
         onChange={(e) => setCodigo(e.target.value)}
       />
 
+      {flojo && (
+        <p className="text-sm text-tinta-suave">
+          Es una palabra sola. Añadirle un número la hace mucho más difícil
+          de adivinar, y sigue siendo igual de fácil de dictar.
+        </p>
+      )}
+
       <p className="text-sm text-tinta-suave">
-        Ese código es la llave: pásalo a tu familia por WhatsApp y entrarán
-        aquí mismo. Se puede cambiar cuando quieras.
+        Esa contraseña es la llave: pásala a tu familia por WhatsApp y
+        entrarán aquí mismo. Se puede cambiar cuando quieras.
       </p>
 
       {error != null && <Aviso error={error} />}

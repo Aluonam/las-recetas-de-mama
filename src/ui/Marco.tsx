@@ -12,7 +12,7 @@ import { HAY_SUPABASE } from '../nucleo/entorno'
  * ve: mejor eso que un fondo con ruido detrás de la letra.
  */
 export function Marco({ children }: { children: ReactNode }) {
-  const { correo, salir } = useSesion()
+  const { salir } = useSesion()
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -46,9 +46,16 @@ export function Marco({ children }: { children: ReactNode }) {
             {HAY_SUPABASE && (
               <button
                 type="button"
-                onClick={salir}
+                onClick={() => {
+                  // Sin correo con el que volver a identificarse, salir
+                  // significa tener que escribir el código otra vez.
+                  const seguro = window.confirm(
+                    'Para volver a entrar tendrás que escribir de nuevo el ' +
+                      'código de tu familia. ¿Sales?',
+                  )
+                  if (seguro) salir()
+                }}
                 className="boton-secundario px-4 py-2 text-sm sm:text-base"
-                title={correo ?? undefined}
               >
                 Salir
               </button>

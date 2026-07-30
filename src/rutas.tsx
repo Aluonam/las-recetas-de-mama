@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RutaPrivada } from './autenticacion/RutaPrivada'
 import { RutaConRecetario } from './familias/RutaConRecetario'
-import { PaginaEntrar } from './autenticacion/PaginaEntrar'
 import { Marco } from './ui/Marco'
 import { PaginaRecetario } from './recetas/paginas/PaginaRecetario'
 import { PaginaVerReceta } from './recetas/paginas/PaginaVerReceta'
@@ -25,7 +24,10 @@ function Pantalla({ children }: { children: ReactNode }) {
 export function Rutas() {
   return (
     <Routes>
-      <Route path="/entrar" element={<PaginaEntrar />} />
+      {/* Ya no hay pantalla de acceso: la sesión se abre sola y la
+          bienvenida pide el código. /entrar se deja redirigiendo por si
+          alguien tiene el enlace viejo guardado. */}
+      <Route path="/entrar" element={<Navigate to="/" replace />} />
 
       {/* El modo cocina va a pantalla completa: sin cabecera ni pie. */}
       <Route

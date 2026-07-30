@@ -32,12 +32,16 @@ export async function misRecetarios(): Promise<Familia[]> {
 export async function crearRecetario(
   nombre: string,
   codigo?: string,
+  correo?: string,
 ): Promise<Familia> {
   const { data, error } = await supabase
     .rpc('crear_recetario', {
       p_nombre: nombre.trim(),
       // Sin código propio, la base genera uno.
       p_codigo: codigo?.trim() || null,
+      // El correo va como argumento y no se saca de la sesión: la
+      // sesión es anónima y no lleva ninguno.
+      p_correo: correo?.trim() || null,
     })
     .single()
 
@@ -45,9 +49,15 @@ export async function crearRecetario(
   return data as Familia
 }
 
-export async function unirseConCodigo(codigo: string): Promise<Familia> {
+export async function unirseConCodigo(
+  codigo: string,
+  correo?: string,
+): Promise<Familia> {
   const { data, error } = await supabase
-    .rpc('unirse_con_codigo', { p_codigo: codigo.trim() })
+    .rpc('unirse_con_codigo', {
+      p_codigo: codigo.trim(),
+      p_correo: correo?.trim() || null,
+    })
     .single()
 
   if (error) throw error

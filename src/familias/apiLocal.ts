@@ -32,6 +32,7 @@ export async function misRecetarios(): Promise<Familia[]> {
 export async function crearRecetario(
   nombre: string,
   codigo?: string,
+  _correo?: string,
 ): Promise<Familia> {
   const actual = guardada()
   const nueva = {
