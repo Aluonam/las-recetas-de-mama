@@ -106,12 +106,28 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
     if (familia) recordar(familia.id)
   }, [familia])
 
-  const entrar = useCallback((nueva: Familia) => {
-    setTodas((previas) =>
-      previas.some((f) => f.id === nueva.id) ? previas : [...previas, nueva],
-    )
-    setFamilia(nueva)
-  }, [])
+  const entrar = useCallback(
+    (nueva: Familia) => {
+      // Se anota antes de recargar, para que la recarga vuelva a este y
+      // no al primero de la lista.
+      recordar(nueva.id)
+      setTodas((previas) =>
+        previas.some((f) => f.id === nueva.id) ? previas : [...previas, nueva],
+      )
+      setFamilia(nueva)
+
+      /**
+       * Y se recarga.
+       *
+       * Las funciones de la base devuelven solo nombre y código al crear
+       * o al entrar, no quién lo creó. Y eso es justo lo que decide si
+       * sale el botón de borrar: sin recargar, quien acababa de crear un
+       * recetario no podía borrar en él hasta refrescar la página.
+       */
+      recargar()
+    },
+    [recargar],
+  )
 
   const elegir = useCallback(
     (familiaId: string) => {

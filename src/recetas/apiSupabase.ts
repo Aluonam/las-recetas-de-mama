@@ -98,9 +98,20 @@ const COLUMNAS_RESUMEN =
   'id, titulo, descripcion, ocasiones, foto_portada_url, tiempo_minutos, autor_nombre'
 
 export async function listarRecetas(): Promise<RecetaResumen[]> {
+  /**
+   * El filtro por recetario es imprescindible aquí.
+   *
+   * Las reglas de la base dejan ver las recetas de TODOS los recetarios a
+   * los que perteneces, que es lo correcto: son tuyas. Pero quien está
+   * mirando el de la yaya no quiere ver mezcladas las de su madre.
+   *
+   * Sin esto, el selector de arriba cambiaba el nombre y no filtraba
+   * nada.
+   */
   const { data, error } = await supabase
     .from('receta')
     .select(COLUMNAS_RESUMEN)
+    .eq('familia_id', exigirFamilia())
     .order('titulo', { ascending: true })
 
   if (error) throw error

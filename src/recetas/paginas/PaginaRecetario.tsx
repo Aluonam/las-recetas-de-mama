@@ -7,6 +7,7 @@ import { TarjetaReceta } from '../componentes/TarjetaReceta'
 import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
 import { PanelIndice } from '../indice/PanelIndice'
 import { PanelLibro } from '../libro/PanelLibro'
+import { useFamilia } from '../../familias/contexto'
 import { AvisoInstalar } from '../../pwa/AvisoInstalar'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
@@ -18,10 +19,22 @@ export function PaginaRecetario() {
   const [busqueda, setBusqueda] = useState('')
   const [ocasion, setOcasion] = useState<string | null>(null)
   const { vista, agrupacion, cambiar } = usePreferenciaVista()
+  const { familia } = useFamilia()
 
+  /**
+   * Se vuelven a pedir al cambiar de recetario.
+   *
+   * Antes se pedían una sola vez al entrar, así que cambiar de recetario
+   * en el selector cambiaba el nombre de arriba y dejaba las recetas del
+   * anterior en pantalla.
+   */
   useEffect(() => {
+    if (!familia) return
+    setRecetas(null)
+    setError(null)
+    setOcasion(null)
     listarRecetas().then(setRecetas).catch(setError)
-  }, [])
+  }, [familia])
 
   /**
    * Al salir de Fichas se limpia el filtro de celebración.

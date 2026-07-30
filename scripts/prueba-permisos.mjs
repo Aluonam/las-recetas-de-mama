@@ -224,6 +224,51 @@ async function principal() {
     falloCambioPropio?.message,
   )
 
+  // ---------- Dos recetarios de la misma persona ----------
+  // La creadora crea un segundo. Las recetas de uno no deben aparecer
+  // mezcladas con las del otro: es lo que fallaba en la app, que leía
+  // sin filtrar por recetario.
+  const { data: segundo } = await creadora
+    .rpc('crear_recetario', {
+      p_nombre: 'Las recetas de la yaya (prueba)',
+      p_codigo: `YAYA-${SUFIJO}`,
+      p_correo: 'creadora@ejemplo.com',
+    })
+    .single()
+
+  await creadora.from('receta').insert({
+    titulo: 'Sopa de la yaya',
+    familia_id: segundo.id,
+    creada_por: (await creadora.auth.getUser()).data.user.id,
+    ocasiones: [],
+    ingredientes: [],
+    materiales: [],
+    pasos: [],
+    trucos: [],
+    fotos: [],
+  })
+
+  const { data: soloDelSegundo } = await creadora
+    .from('receta')
+    .select('titulo')
+    .eq('familia_id', segundo.id)
+
+  comprobar(
+    'Filtrando por recetario solo salen las suyas',
+    soloDelSegundo?.length === 1 && soloDelSegundo[0].titulo === 'Sopa de la yaya',
+    `salieron ${soloDelSegundo?.length ?? '?'}`,
+  )
+
+  const { data: sinFiltrar } = await creadora.from('receta').select('titulo')
+
+  comprobar(
+    'Sin filtrar salen las de los DOS (por eso hay que filtrar)',
+    (sinFiltrar?.length ?? 0) > 1,
+    `salieron ${sinFiltrar?.length ?? '?'}`,
+  )
+
+  await creadora.from('receta').delete().eq('familia_id', segundo.id)
+
   // ---------- Aislamiento entre familias ----------
   const { data: loQueVeElDesconocido } = await desconocido
     .from('receta')
