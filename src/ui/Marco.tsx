@@ -119,9 +119,12 @@ export function Marco({ children, navegacion = true }: Props) {
         {/* Una cita larga no cabe en versalitas: va en cursiva, como se
             citaría en un libro, y la firma debajo. */}
         <blockquote className="mx-auto max-w-md">
+          {/* El corte va en la última coma: la enumeración entera arriba y
+              la conclusión debajo, que es como se lee la frase. */}
           <p className="font-titulo text-lg italic leading-snug text-verde-texto">
-            «Uno no puede pensar bien, amar bien, dormir bien, si no ha comido
-            bien.»
+            «Uno no puede pensar bien, amar bien, dormir bien,
+            <br />
+            si no ha comido bien.»
           </p>
           <cite className="versalitas mt-2 block not-italic text-rosa-texto">
             Virginia Woolf
