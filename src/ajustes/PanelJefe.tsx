@@ -7,19 +7,21 @@ import { Aviso } from '../ui/Estado'
 import { CampoTexto } from '../ui/Campo'
 
 /**
- * Verificar la cuenta de quien manda en el recetario.
+ * Identificarse como quien administra el recetario.
  *
- * Quien crea un recetario es el único que puede borrar recetas. Hasta
- * ahora esa identidad era una sesión anónima que vivía en un navegador:
- * al salir, al borrar el historial o al abrir la app en la tablet, la
- * base ya no te reconocía y perdías el mando de tu propio recetario.
+ * Todo el mundo entra igual: con el código y sin correos. Quien
+ * administra se identifica después, aquí, y solo si le hace falta.
  *
- * Con un correo verificado la identidad deja de depender del navegador.
- * Y es la misma cuenta, no una nueva: el recetario sigue siendo tuyo sin
- * tener que traspasar nada.
+ * Por debajo son dos situaciones distintas, pero desde fuera es un solo
+ * botón:
  *
- * Solo se le pide a quien manda. Al resto de la familia no se le vuelve a
- * pedir un correo en la vida: entran con el código y ya está.
+ * - En el navegador donde se creó el recetario, la cuenta es anónima y
+ *   ya manda. El correo la ancla, sin cambiar de identidad, para que
+ *   deje de depender de este navegador.
+ * - En cualquier otro sitio, el correo devuelve a esa cuenta anclada.
+ *
+ * En los dos casos el resultado es el mismo: pinchas el enlace y
+ * apareces como administradora, con los botones de borrar.
  */
 export function PanelJefe() {
   const { correo, esAnonima } = useSesion()
@@ -27,54 +29,66 @@ export function PanelJefe() {
 
   if (!familia || !HAY_SUPABASE) return null
 
-  if (!soyDuena) {
+  if (!esAnonima) {
     return (
       <section className="tarjeta p-4 sm:p-5">
-        <h2 className="mb-1 text-xl">Tu acceso</h2>
+        <h2 className="mb-1 text-xl">
+          {soyDuena ? 'Mandas en este recetario' : 'Tu cuenta está verificada'}
+        </h2>
         <p className="text-tinta-suave">
-          Puedes ver y escribir todas las recetas de{' '}
-          <strong>{familia.nombre}</strong>. Borrarlas solo puede quien creó
-          el recetario.
+          Verificada como <strong>{correo}</strong>.{' '}
+          {soyDuena
+            ? 'Entres desde donde entres, seguirás siendo quien administra.'
+            : `Puedes ver y escribir en ${familia.nombre}, pero borrar recetas solo puede quien lo creó.`}
         </p>
       </section>
     )
   }
 
-  return (
-    <section className="tarjeta p-4 sm:p-5">
-      <h2 className="mb-1 text-xl">Mandas en este recetario</h2>
-
-      {esAnonima ? (
-        <SinVerificar />
-      ) : (
-        <p className="text-tinta-suave">
-          Tu cuenta está verificada como <strong>{correo}</strong>. Puedes
-          entrar desde el móvil, la tablet o donde quieras y seguirás siendo
-          quien manda aquí.
-        </p>
-      )}
-    </section>
-  )
+  return <Identificarse soyDuena={soyDuena} />
 }
 
-function SinVerificar() {
+function Identificarse({ soyDuena }: { soyDuena: boolean }) {
   const [correo, setCorreo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
-  const verificar = async (evento: React.FormEvent) => {
+  const enviar = async (evento: React.FormEvent) => {
     evento.preventDefault()
     setEnviando(true)
     setError(null)
+
     try {
-      // updateUser sobre una sesión anónima le pone correo SIN cambiar de
-      // identidad. Por eso el recetario sigue siendo tuyo: eres la misma
-      // cuenta de siempre, ahora con una forma de demostrarlo.
-      const { error: fallo } = await supabase.auth.updateUser({
-        email: correo.trim(),
-      })
-      if (fallo) throw fallo
+      if (soyDuena) {
+        /**
+         * Esta cuenta ya manda, pero es anónima y vive en este navegador.
+         * updateUser le pone correo SIN cambiar de identidad: sigue siendo
+         * la misma cuenta, así que el recetario no se traspasa a nadie.
+         */
+        const { error: fallo } = await supabase.auth.updateUser({
+          email: correo.trim(),
+        })
+        if (fallo) throw fallo
+      } else {
+        /**
+         * Aquí manda otra cuenta, así que hay que volver a la de siempre.
+         *
+         * shouldCreateUser en false a propósito: sin eso, escribir un
+         * correo nunca usado crearía una cuenta nueva, que tampoco
+         * administraría nada, y el mensaje de «ya estás dentro» sería
+         * mentira.
+         */
+        const { error: fallo } = await supabase.auth.signInWithOtp({
+          email: correo.trim(),
+          options: {
+            shouldCreateUser: false,
+            emailRedirectTo: window.location.origin + '/ajustes',
+          },
+        })
+        if (fallo) throw fallo
+      }
+
       setEnviado(true)
     } catch (e) {
       setError(e)
@@ -85,30 +99,39 @@ function SinVerificar() {
 
   if (enviado) {
     return (
-      <div className="rounded-lg border border-verde-texto bg-acento-suave p-4">
-        <p className="mb-1 font-semibold">Mira tu correo.</p>
+      <section className="tarjeta p-4 sm:p-5">
+        <h2 className="mb-1 text-xl">Mira tu correo</h2>
         <p className="text-tinta-suave">
           Te hemos mandado un enlace a <strong>{correo}</strong>. Pincha en él
-          y tu cuenta quedará verificada. Hasta entonces sigues mandando aquí
-          igual, pero solo desde este navegador.
+          y volverás aquí como administradora, con los botones para borrar
+          recetas.
         </p>
-      </div>
+      </section>
     )
   }
 
   return (
-    <>
+    <section className="tarjeta p-4 sm:p-5">
+      <h2 className="mb-1 text-xl">¿Administras este recetario?</h2>
       <p className="mb-4 text-tinta-suave">
-        Pero tu cuenta <strong>no está verificada</strong>, y eso es
-        arriesgado: vive solo en este navegador. Si sales, borras el historial
-        o abres el recetario en otro dispositivo, dejarás de ser quien manda y
-        no podrás borrar recetas.
+        {soyDuena
+          ? 'Lo administras desde este navegador, pero tu cuenta no está ' +
+            'verificada: si sales, borras el historial o abres el recetario ' +
+            'en la tablet, dejarás de mandar. Verifícala con tu correo y eso ' +
+            'deja de pasar.'
+          : 'Si eres quien lo creó, identifícate con tu correo y recuperarás ' +
+            'los botones para borrar recetas. Si no, no necesitas hacer nada: ' +
+            'ya puedes ver y escribir todo.'}
       </p>
 
-      <form onSubmit={verificar} className="space-y-3">
+      <form onSubmit={enviar} className="space-y-3">
         <CampoTexto
-          etiqueta="Verifica tu cuenta con un correo"
-          ayuda="Te llegará un enlace. Es la misma cuenta, no una nueva: el recetario sigue siendo tuyo."
+          etiqueta="Tu correo"
+          ayuda={
+            soyDuena
+              ? 'Es la misma cuenta, no una nueva: el recetario sigue siendo tuyo.'
+              : 'El mismo con el que verificaste tu cuenta en su día.'
+          }
           type="email"
           required
           autoComplete="email"
@@ -120,9 +143,9 @@ function SinVerificar() {
         {error != null && <Aviso error={error} />}
 
         <button type="submit" className="boton-principal" disabled={enviando}>
-          {enviando ? 'Enviando…' : 'Enviarme el enlace de verificación'}
+          {enviando ? 'Enviando…' : 'Enviarme el enlace'}
         </button>
       </form>
-    </>
+    </section>
   )
 }

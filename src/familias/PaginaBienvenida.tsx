@@ -4,8 +4,6 @@ import { useFamilia } from './contexto'
 import type { Familia } from './tipos'
 import { Aviso } from '../ui/Estado'
 import { CampoTexto } from '../ui/Campo'
-import { supabase } from '../nucleo/supabase'
-import { HAY_SUPABASE } from '../nucleo/entorno'
 
 /**
  * La primera y única pantalla antes de entrar.
@@ -59,95 +57,10 @@ export function PaginaBienvenida() {
         <FormularioCrear alEntrar={entrar} />
       )}
 
-      <VolverComoJefa />
+      {/* Aquí no hay nada de administradoras a propósito: todo el mundo
+          entra igual, con el código. Quien administra se identifica
+          después, desde Ajustes, y solo si le hace falta. */}
     </div>
-  )
-}
-
-/**
- * Volver a mandar en un recetario desde otro dispositivo.
- *
- * Va escondido detrás de un enlace y no como una tercera pestaña: lo usa
- * una persona por familia y una vez cada mucho. Ponerlo al mismo nivel
- * que las otras dos opciones haría dudar a quien solo quiere entrar.
- */
-function VolverComoJefa() {
-  const [abierto, setAbierto] = useState(false)
-  const [correo, setCorreo] = useState('')
-  const [enviando, setEnviando] = useState(false)
-  const [enviado, setEnviado] = useState(false)
-  const [error, setError] = useState<unknown>(null)
-
-  const enviar = async (evento: React.FormEvent) => {
-    evento.preventDefault()
-    setEnviando(true)
-    setError(null)
-    try {
-      const { error: fallo } = await supabase.auth.signInWithOtp({
-        email: correo.trim(),
-        options: { emailRedirectTo: window.location.origin },
-      })
-      if (fallo) throw fallo
-      setEnviado(true)
-    } catch (e) {
-      setError(e)
-    } finally {
-      setEnviando(false)
-    }
-  }
-
-  if (!HAY_SUPABASE) return null
-
-  if (enviado) {
-    return (
-      <p className="mt-8 text-center text-sm text-tinta-suave">
-        Te hemos mandado un enlace a <strong>{correo}</strong>. Pincha en él
-        y entrarás con tu cuenta de siempre.
-      </p>
-    )
-  }
-
-  if (!abierto) {
-    return (
-      <p className="mt-8 text-center text-sm">
-        <button
-          type="button"
-          onClick={() => setAbierto(true)}
-          className="text-tinta-suave underline hover:text-verde-texto"
-        >
-          Ya administraba un recetario y he cambiado de dispositivo
-        </button>
-      </p>
-    )
-  }
-
-  return (
-    <form onSubmit={enviar} className="tarjeta mt-8 space-y-3 p-5">
-      <CampoTexto
-        etiqueta="El correo con el que verificaste tu cuenta"
-        ayuda="Te llegará un enlace para entrar. Solo sirve si en su día verificaste la cuenta desde Ajustes."
-        type="email"
-        required
-        autoComplete="email"
-        value={correo}
-        onChange={(e) => setCorreo(e.target.value)}
-      />
-
-      {error != null && <Aviso error={error} />}
-
-      <div className="flex flex-wrap gap-2">
-        <button type="submit" className="boton-principal" disabled={enviando}>
-          {enviando ? 'Enviando…' : 'Enviarme el enlace'}
-        </button>
-        <button
-          type="button"
-          className="boton-secundario"
-          onClick={() => setAbierto(false)}
-        >
-          Cancelar
-        </button>
-      </div>
-    </form>
   )
 }
 
