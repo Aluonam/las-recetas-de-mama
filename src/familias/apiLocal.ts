@@ -59,8 +59,15 @@ export async function establecerCodigo(
   _familiaId: string,
   codigo: string,
 ): Promise<string> {
+  // Los mismos textos que en la base, para que no haya dos versiones del
+  // mismo mensaje según en qué modo se esté.
   const limpio = codigo.trim().toUpperCase()
-  if (limpio.length < 5) throw new Error('El código necesita al menos 5 caracteres.')
+  if (limpio.length < 5) {
+    throw new Error('El código necesita al menos 5 caracteres.')
+  }
+  if (limpio.length > 32) {
+    throw new Error('El código no puede pasar de 32 caracteres.')
+  }
   if (!/^[A-Z0-9-]+$/.test(limpio)) {
     throw new Error('El código solo admite letras sin tilde, números y guiones.')
   }

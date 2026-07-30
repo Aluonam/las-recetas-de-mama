@@ -22,7 +22,7 @@ export const recordarFamilia = (id: string | null) => {
 export function exigirFamilia(): string {
   if (!abierto) {
     throw new Error(
-      'No hay ningún recetario abierto. Crea uno o entra con un código.',
+      'No hay ningún recetario abierto. Crea uno, o entra con tu código familiar.',
     )
   }
   return abierto
