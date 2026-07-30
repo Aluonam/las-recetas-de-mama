@@ -1,4 +1,5 @@
 import { supabase, usuarioActual } from '../nucleo/supabase'
+import { exigirFamilia } from '../familias/actual'
 import type {
   Foto,
   Ingrediente,
@@ -131,7 +132,13 @@ export async function crearReceta(receta: RecetaEditable): Promise<Receta> {
 
   const { data, error } = await supabase
     .from('receta')
-    .insert({ ...aFila(receta), creada_por: creadaPor })
+    // La familia va explícita: las reglas de la base rechazan una receta
+    // que no pertenezca a un recetario del que seas miembro.
+    .insert({
+      ...aFila(receta),
+      creada_por: creadaPor,
+      familia_id: exigirFamilia(),
+    })
     .select('*')
     .single()
 

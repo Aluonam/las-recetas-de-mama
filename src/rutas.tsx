@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RutaPrivada } from './autenticacion/RutaPrivada'
+import { RutaConRecetario } from './familias/RutaConRecetario'
 import { PaginaEntrar } from './autenticacion/PaginaEntrar'
 import { Marco } from './ui/Marco'
 import { PaginaRecetario } from './recetas/paginas/PaginaRecetario'
@@ -10,11 +11,13 @@ import { PaginaEditarReceta } from './recetas/editor/PaginaEditarReceta'
 
 /** Mapa de rutas. Un solo sitio donde mirar para saber qué pantallas hay. */
 
-/** Privada y dentro del marco: el caso normal. */
+/** Privada, con recetario y dentro del marco: el caso normal. */
 function Pantalla({ children }: { children: ReactNode }) {
   return (
     <RutaPrivada>
-      <Marco>{children}</Marco>
+      <RutaConRecetario>
+        <Marco>{children}</Marco>
+      </RutaConRecetario>
     </RutaPrivada>
   )
 }
@@ -29,7 +32,9 @@ export function Rutas() {
         path="/receta/:id/cocinar"
         element={
           <RutaPrivada>
-            <PaginaModoCocina />
+            <RutaConRecetario>
+              <PaginaModoCocina />
+            </RutaConRecetario>
           </RutaPrivada>
         }
       />

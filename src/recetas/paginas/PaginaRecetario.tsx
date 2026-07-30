@@ -9,6 +9,7 @@ import { PanelIndice } from '../indice/PanelIndice'
 import { PanelLibro } from '../libro/PanelLibro'
 import { AvisoInstalar } from '../../pwa/AvisoInstalar'
 import { BotonCopia } from '../../copias/BotonCopia'
+import { PanelCodigo } from '../../familias/PanelCodigo'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
 
@@ -115,6 +116,7 @@ export function PaginaRecetario() {
         </ul>
       )}
 
+      <PanelCodigo />
       <BotonCopia />
     </div>
   )

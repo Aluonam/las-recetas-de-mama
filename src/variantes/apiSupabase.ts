@@ -1,4 +1,5 @@
 import { supabase, usuarioActual } from '../nucleo/supabase'
+import { exigirFamilia } from '../familias/actual'
 import type { Variante, VarianteNueva } from './tipos'
 
 /**
@@ -45,6 +46,7 @@ export async function crearVariante(
 
   const { error } = await supabase.from('variante').insert({
     receta_id: recetaId,
+    familia_id: exigirFamilia(),
     autor_nombre: variante.autorNombre.trim(),
     titulo: variante.titulo.trim(),
     texto: variante.texto.trim(),

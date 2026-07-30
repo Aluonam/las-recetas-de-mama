@@ -1,5 +1,6 @@
 import { supabase } from '../nucleo/supabase'
 import { HAY_SUPABASE } from '../nucleo/entorno'
+import { exigirFamilia } from '../familias/actual'
 
 /**
  * Subida de fotos y audios al bucket `recetas`.
@@ -46,7 +47,12 @@ async function subir(archivo: Blob, clase: Clase, nombre?: string): Promise<stri
 
   if (!HAY_SUPABASE) return aDataUrl(archivo, clase)
 
-  const ruta = `${clase.carpeta}/${crypto.randomUUID()}.${extensionDe(archivo, nombre)}`
+  // La carpeta de primer nivel es el recetario. Las reglas de la base la
+  // miran para decidir si puedes ver o subir un archivo: sin ella, adivinar
+  // una ruta bastaría para colarse en el álbum de otra casa.
+  const ruta =
+    `${exigirFamilia()}/${clase.carpeta}/` +
+    `${crypto.randomUUID()}.${extensionDe(archivo, nombre)}`
 
   const { error } = await supabase.storage
     .from('recetas')
