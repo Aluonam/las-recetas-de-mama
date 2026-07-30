@@ -154,12 +154,65 @@ Detalles que parecen menores y no lo son:
   miran. Sin eso, adivinar una ruta bastaría para colarse en el álbum de
   otra casa.
 
-### Lo que esto NO protege
+---
 
-El código es lo único que separa un recetario del resto de internet, y no
-hay límite de intentos. Un código corto y adivinable —una palabra suelta,
-un nombre— se puede encontrar probando. Por eso la app avisa cuando el
-elegido no lleva ningún número.
+## SEGURIDAD
 
-Si algún día esto creciera, lo siguiente sería limitar los intentos por
-usuario y hora.
+Conviene decir con claridad **hasta dónde llega y hasta dónde no**, porque
+un proyecto que promete más de lo que da es peor que uno modesto y
+honesto.
+
+### Qué se protege, y cómo
+
+| Capa | Qué impide |
+| ---- | ---------- |
+| Sesión por enlace al correo | Que entre alguien sin acceso a ese buzón |
+| `mis_recetarios()` en las políticas | Que veas un recetario que no es tuyo. Ni su nombre. |
+| Permisos por rol | Que `anon` —sin sesión— se asome a ninguna tabla |
+| Carpeta por recetario en el almacén | Que adivinar una ruta te meta en el álbum de otra casa |
+| Almacén privado con enlaces firmados | Que una dirección de foto reenviada siga sirviendo. Caducan en una hora. |
+
+Y una decisión de fondo: **todo esto vive dentro de PostgreSQL**, no en el
+navegador. Da igual que la clave `anon` sea pública; aunque alguien la
+copie y escriba su propio programa, la base le devuelve vacío.
+
+### Qué NO se protege, a propósito
+
+**No hay límite de intentos al probar códigos.** Alguien puede escribir un
+programa que vaya probando hasta acertar uno. Un código corto o adivinable
+—una palabra suelta, un nombre— caería. Por eso la app avisa cuando el
+elegido no lleva ningún número, pero no lo impide.
+
+**Las fotos y los audios se sirven con enlaces temporales, no cifrados.**
+Quien tenga uno válido puede verlo durante esa hora.
+
+**No hay registro de quién ha visto qué**, ni avisos de accesos raros, ni
+verificación en dos pasos.
+
+### Por qué está bien así
+
+Esto es **el recetario de una familia**. Lo que hay dentro son croquetas,
+fotos de una comida y la voz de una abuela contando cómo se hacía el
+arroz. No hay dinero, ni datos de salud, ni documentos de identidad, ni
+nada que sirva para suplantar a nadie.
+
+El peor caso realista de un fallo aquí es que un desconocido lea recetas
+de croquetas. Eso no justifica límites de intentos, auditorías de acceso ni
+doble factor: cada una de esas capas se paga en complicación, y la
+complicación se paga en que **la abuela no sepa entrar**.
+
+La seguridad se ha puesto donde de verdad importa —que un recetario no se
+mezcle con otro y que las fotos no queden colgadas en direcciones
+permanentes— y se ha parado ahí a conciencia.
+
+### Cuándo habría que subir el listón
+
+Si esto dejara de ser una app familiar y pasara a ser un producto con
+gente desconocida dentro, lo primero sería:
+
+1. **Limitar los intentos** de `unirse_con_codigo` por usuario y hora.
+2. **Caducidad o un solo uso** en los códigos de invitación.
+3. **Registro de accesos**, para poder mirar atrás cuando algo raro pase.
+4. **Copias automáticas**, que hoy dependen de que alguien pulse el botón.
+
+Ninguna hace falta hoy. Todas harían falta ese día.
