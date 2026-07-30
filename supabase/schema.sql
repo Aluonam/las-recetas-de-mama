@@ -1,6 +1,30 @@
 -- ============================================================
 --  Las Recetas de Mamá — esquema de base de datos
---  Pegar en Supabase → SQL Editor → Run
+--
+--  Pegar en Supabase → SQL Editor → Run.
+--
+--  QUÉ HACE, POR ORDEN
+--    1. Las tablas: receta y variante.
+--    2. Los índices: buscar por ocasión, y por título o autor.
+--    3. Un disparador que pone al día la fecha de modificación.
+--    4. Los permisos: quién puede asomarse a cada tabla.
+--    5. La protección por filas: qué filas ve quien se asoma.
+--    6. El almacén de fotos y audios.
+--
+--  SOBRE EL AVISO DE «OPERACIONES DESTRUCTIVAS»
+--
+--  Supabase lo saca al ver la palabra `drop`. Aquí solo hay
+--  `drop policy if exists` y `drop trigger if exists`: reglas de
+--  seguridad, no datos. No hay ningún drop table, truncate ni
+--  delete from. En un proyecto nuevo no borran nada, porque esas
+--  reglas todavía no existen.
+--
+--  Están para que este archivo se pueda volver a ejecutar. Si hay
+--  que retocar una regla, se cambia y se pasa entero: quita la
+--  vieja y pone la nueva. Sin esas líneas, la segunda ejecución se
+--  pararía con «esa regla ya existe».
+--
+--  Explicación completa en docs/base-de-datos.md.
 -- ============================================================
 
 -- ------------------------------------------------------------
