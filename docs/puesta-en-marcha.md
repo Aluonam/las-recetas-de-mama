@@ -53,30 +53,29 @@ En el panel, **SQL Editor** → **New query**:
 1. Pega el contenido de [`supabase/schema.sql`](../supabase/schema.sql) y
    pulsa **Run**. Crea las tablas, la seguridad por filas y el almacén de
    fotos.
-2. Repite con
-   [`supabase/migraciones/002-lista-de-invitados.sql`](../supabase/migraciones/002-lista-de-invitados.sql),
-   **cambiando antes los correos del final por los de verdad**.
-3. Y con
-   [`supabase/migraciones/003-fotos-y-audios-privados.sql`](../supabase/migraciones/003-fotos-y-audios-privados.sql).
+2. Repite con estos tres, **en este orden**:
 
-Los pasos 2 y 3 no son opcionales:
+| Archivo | Qué deja hecho |
+| ------- | -------------- |
+| [`004-varios-recetarios.sql`](../supabase/migraciones/004-varios-recetarios.sql) | Cada familia tiene su recetario y su código. Solo ves el tuyo. |
+| [`005-codigo-a-medida.sql`](../supabase/migraciones/005-codigo-a-medida.sql) | El código se puede elegir en vez de generarlo |
+| [`006-almacen-privado.sql`](../supabase/migraciones/006-almacen-privado.sql) | Las fotos dejan de tener direcciones permanentes |
 
-- **Sin el 2**, cualquiera que se registre en tu web entra al recetario de
-  tu familia. Con él, además de tener sesión hay que estar en la lista.
-- **Sin el 3**, las fotos y los audios tienen direcciones permanentes: quien
-  conozca una la ve sin cuenta, y esa dirección se puede reenviar. Con él
-  no hay direcciones fijas; cada archivo se pide con la sesión abierta y el
-  enlace caduca en una hora.
+**El orden importa.** El 005 sustituye una función que crea el 004.
+Pasarlos salteados deja la base a medias **sin dar ningún error**, que es
+la peor forma de fallar. Por eso existe el comprobador.
 
-**El orden importa.** El 002 reescribe políticas que crea el 001, y el 003
-depende de la función que crea el 002. Pasarlos salteados deja la base a
-medias sin dar ningún error.
+> **Los archivos 002 y 003 ya no se usan.** Eran el modelo anterior, de un
+> solo recetario con una lista de correos editada a mano. Se quedan en el
+> repositorio por si hay que consultar de dónde viene algo, pero **no los
+> ejecutes**: el 003, pasado después del 004, desharía la separación entre
+> familias.
 
 ### Comprobar que quedó bien
 
 Pega [`supabase/comprobar.sql`](../supabase/comprobar.sql) y pulsa **Run**.
-No cambia nada: mira y da un parte de quince líneas. **Todas deben decir
-`OK`**; las que no, traen al lado qué falta por pasar.
+No cambia nada: mira y da un parte. Además de las comprobaciones una por
+una, resume en una línea hasta dónde llegas y si las fotos están privadas.
 
 ---
 
@@ -138,35 +137,49 @@ En **Authentication → URL Configuration**:
 
 ---
 
-## 6. Cerrar el registro
+## 6. El registro tiene que quedar ABIERTO
 
-En **Authentication**, en la configuración de acceso por correo, **desactiva
-que cualquiera pueda registrarse** (la opción suele llamarse *Allow new
+En **Authentication**, deja que cualquiera pueda registrarse (*Allow new
 users to sign up*).
 
-Es la segunda cerradura. La lista de invitados del paso 2 ya impide ver
-las recetas a un desconocido; esto impide además que se cree la cuenta.
+Puede sonar mal, pero es lo correcto con este modelo: **si cualquier
+familia puede crear su recetario, cualquiera tiene que poder crear su
+cuenta**. Tener cuenta no da acceso a nada.
+
+La cerradura no está en la puerta de entrada, está en el código: sin él no
+ves ningún recetario, ni siquiera su nombre.
 
 ---
 
-## 7. Invitar a la familia
+## 7. Crear tu recetario e invitar a la familia
 
-Dos partes, y las dos hacen falta:
+Esto ya **no se hace con SQL**. Se hace desde la app:
 
-1. **En la base**: añade su correo a la lista de invitados.
+1. Entra con tu correo y pincha el enlace que te llega.
+2. Como todavía no perteneces a ningún recetario, verás dos opciones.
+   Elige **Crear uno nuevo**.
+3. Ponle nombre y **elige el código**. Si lo dejas vacío, se genera uno.
+4. Ya dentro, al final de la portada tienes el código en grande y un botón
+   **Copiar invitación**, que deja preparado el enlace y el código para
+   pegar en WhatsApp.
 
-   ```sql
-   insert into public.invitado (correo, nombre)
-   values ('correo-de-la-suegra@ejemplo.com', 'La suegra');
-   ```
+Tu suegra recibe ese mensaje, entra con **su** correo y escribe el código.
+A partir de ahí **veis exactamente lo mismo**, y lo que escriba una lo ve
+la otra.
 
-2. **En Supabase**: *Authentication → Users → Invite user*, con ese mismo
-   correo.
+Cada familia que llegue a la web hace lo mismo con el suyo. Los recetarios
+son independientes: un código no sirve para entrar en otro.
 
-Ella recibirá un correo, pinchará el enlace y entrará. Sin contraseñas.
+### Sobre el código
 
-A partir de ahí, **tú desde casa y ella desde su tablet veis exactamente
-lo mismo**, y lo que escriba una lo ve la otra.
+Es lo único que separa vuestras recetas del resto de internet:
+
+- **Métele un número.** Una palabra suelta se adivina; `ROGELIO162` no.
+- **Se puede cambiar** desde la portada. Si se difunde de más, pones otro y
+  el viejo deja de servir. **Quien ya entró sigue dentro**, porque ser
+  miembro no depende de seguir sabiendo el código.
+- Da igual mayúsculas, minúsculas o espacios sobrantes: llega copiado de un
+  WhatsApp y nadie lo pega limpio.
 
 ---
 
@@ -191,7 +204,8 @@ vistas funcionan sin conexión.
 | ------- | ------------------ |
 | Sigue el aviso naranja de demostración | Faltan las variables en Vercel, o no se recompiló después de añadirlas |
 | El enlace del correo lleva a `localhost` | Falta el paso 5 |
-| Entra pero el recetario sale vacío | Su correo no está en la lista de invitados |
+| Sale la pantalla de bienvenida en vez del recetario | Aún no ha entrado con el código, o lo escribió mal |
+| «Ese codigo no vale» | Está mal escrito, o pertenece a otra familia |
 | No aparece la opción de instalar | No estás en HTTPS, o ya está instalada |
 | «Failed to fetch» | Proyecto pausado por inactividad: reactívalo en el panel |
 

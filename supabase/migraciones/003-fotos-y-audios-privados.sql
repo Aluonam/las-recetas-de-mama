@@ -15,6 +15,16 @@
 --  obtiene ese enlace, y uno viejo deja de funcionar solo.
 --
 --  Ejecutar DESPUÉS de 002-lista-de-invitados.sql.
+--
+--  ⚠ NO LO EJECUTES SI YA PASASTE EL 004
+--
+--  Este archivo reescribe las reglas de las fotos con el modelo de
+--  la lista de invitados, que el 004 sustituyó por el de recetarios
+--  separados por familia. Pasarlo después desharía esa separación.
+--
+--  Si ya estás en el 004 y el almacén sigue público, usa
+--  006-almacen-privado.sql: hace solo el cambio del interruptor y
+--  no toca ninguna regla.
 -- ============================================================
 
 begin;

@@ -12,15 +12,26 @@ Para el paso a paso de la instalación, ver
 | Orden | Archivo | Qué deja hecho |
 | ----- | ------- | -------------- |
 | 1 | [`schema.sql`](../supabase/schema.sql) | Tablas, índices, permisos, protección por filas y el almacén |
-| 2 | [`migraciones/002-lista-de-invitados.sql`](../supabase/migraciones/002-lista-de-invitados.sql) | Entrar deja de bastar: hay que estar en la lista |
-| 3 | [`migraciones/003-fotos-y-audios-privados.sql`](../supabase/migraciones/003-fotos-y-audios-privados.sql) | Las fotos dejan de tener direcciones permanentes |
-| — | [`comprobar.sql`](../supabase/comprobar.sql) | No cambia nada: da un parte de si todo lo anterior está bien |
-| — | [`migraciones/001-renombrar-ocasiones.sql`](../supabase/migraciones/001-renombrar-ocasiones.sql) | Solo si ya había recetas escritas antes del cambio de nombres |
+| 2 | [`migraciones/004-varios-recetarios.sql`](../supabase/migraciones/004-varios-recetarios.sql) | Un recetario por familia, con código para entrar |
+| 3 | [`migraciones/005-codigo-a-medida.sql`](../supabase/migraciones/005-codigo-a-medida.sql) | El código se puede elegir en vez de generarlo |
+| 4 | [`migraciones/006-almacen-privado.sql`](../supabase/migraciones/006-almacen-privado.sql) | Las fotos dejan de tener direcciones permanentes |
+| — | [`comprobar.sql`](../supabase/comprobar.sql) | No cambia nada: dice hasta dónde llegas |
+| — | [`migraciones/001-renombrar-ocasiones.sql`](../supabase/migraciones/001-renombrar-ocasiones.sql) | Solo si ya había recetas antes del cambio de nombres |
 
-**El orden no es decorativo.** El 002 reescribe políticas que crea el 001, y
-el 003 depende de la función que crea el 002. Pasarlos salteados deja la
-base a medias **sin dar ningún error**, que es la peor forma de fallar. Por
-eso existe `comprobar.sql`.
+**El orden no es decorativo.** El 005 sustituye una función que crea el
+004. Pasarlos salteados deja la base a medias **sin dar ningún error**, que
+es la peor forma de fallar. Por eso existe `comprobar.sql`.
+
+### Los que ya no se usan
+
+El **002** y el **003** son el modelo anterior: un solo recetario y una
+lista de correos que se editaba a mano con SQL. El 004 los sustituyó.
+
+Se quedan en el repositorio para poder consultar de dónde viene algo, pero
+**no hay que ejecutarlos**. El 003 en particular, pasado después del 004,
+reescribiría las reglas de las fotos con el modelo viejo y desharía la
+separación entre familias. Por eso su parte útil —cerrar el almacén— vive
+ahora en el 006, que no toca ninguna regla y se puede pasar cuando sea.
 
 ---
 
@@ -107,17 +118,48 @@ GIN sin migrar nada.
 
 ---
 
-## Si algún día sois más de una familia
+## Cómo se entra a un recetario
 
-El modelo actual es de **una sola familia**: quien está invitado ve todo.
+Cada familia tiene el suyo, con un código que hace de llave. No hay
+invitaciones que aprobar ni correos que enviar: el código se pasa por
+WhatsApp y quien lo escriba entra.
 
-Para pasar a varias:
+| Función | Qué hace |
+| ------- | -------- |
+| `crear_recetario(nombre, codigo)` | Crea el recetario y te hace miembro. Sin código, genera uno. |
+| `unirse_con_codigo(codigo)` | Comprueba el código y te da de alta |
+| `establecer_codigo(id, codigo)` | Pone el que se le diga |
+| `cambiar_codigo(id)` | Genera uno al azar |
+| `mis_recetarios()` | A qué recetarios perteneces. La usan todas las políticas. |
 
-1. Añadir `familia_id uuid` a `receta` y `variante`.
-2. Crear `miembro (usuario_id, familia_id)`.
-3. Cambiar `es_de_la_familia()` para que compare familias en vez de
-   consultar la lista de invitados.
+Son funciones de la base y no consultas sueltas porque cada una son varios
+pasos que tienen que ocurrir juntos o no ocurrir: crear un recetario
+implica además hacerse miembro, y entrar con un código implica comprobarlo
+y darse de alta. Dejarlo en manos del navegador sería confiar en que nadie
+interrumpe a mitad.
 
-Nada del código de la aplicación cambia salvo el alta de familia. Es la
-ventaja de que los permisos vivan en la base y no repartidos por las
-pantallas.
+Detalles que parecen menores y no lo son:
+
+- **Un código equivocado da siempre el mismo mensaje.** Si dijera «ese
+  recetario no existe» frente a «ese código no es el tuyo», cualquiera
+  podría ir probando para averiguar cuáles existen.
+- **Se guarda en mayúsculas y se compara igual**, sin espacios. Llega
+  copiado de un WhatsApp y nadie lo pega limpio.
+- **Sin acentos ni eñes.** Se dicta por teléfono y se teclea en una tablet:
+  todo lo que se pueda escribir de dos maneras acaba en «pues a mí no me
+  entra».
+- **Cambiar el código no echa a nadie.** Ser miembro está en `miembro`, no
+  en saberse la llave.
+- **Las fotos se guardan en una carpeta por recetario**, y las reglas la
+  miran. Sin eso, adivinar una ruta bastaría para colarse en el álbum de
+  otra casa.
+
+### Lo que esto NO protege
+
+El código es lo único que separa un recetario del resto de internet, y no
+hay límite de intentos. Un código corto y adivinable —una palabra suelta,
+un nombre— se puede encontrar probando. Por eso la app avisa cuando el
+elegido no lleva ningún número.
+
+Si algún día esto creciera, lo siguiente sería limitar los intentos por
+usuario y hora.

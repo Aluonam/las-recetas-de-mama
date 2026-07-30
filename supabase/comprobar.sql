@@ -1,118 +1,134 @@
 -- ============================================================
 --  Comprobación de la instalación
 --
---  Ejecuta esto en SQL Editor DESPUÉS de haber pasado, en orden:
---    1. schema.sql
---    2. migraciones/002-lista-de-invitados.sql
---    3. migraciones/003-fotos-y-audios-privados.sql
+--  NO CAMBIA NADA. Solo mira y da un parte.
 --
---  No cambia nada: solo mira y da un parte. Todas las filas deben
---  salir con OK. La columna «qué hacer» dice qué falta si no.
+--  Pega esto en SQL Editor → Run. Dice qué archivos están
+--  aplicados y cuáles faltan, sin tener que acordarse de nada.
 -- ============================================================
 
 with pruebas as (
 
-  -- ---------- Las tablas ----------
-  select 1 as orden,
+  -- ---------- schema.sql ----------
+  select 1 as orden, 'schema' as archivo,
     'Tabla de recetas' as comprueba,
-    to_regclass('public.receta') is not null as bien,
-    'Pasa schema.sql' as que_hacer
+    to_regclass('public.receta') is not null as bien
 
-  union all select 2,
+  union all select 2, 'schema',
     'Tabla de variantes',
-    to_regclass('public.variante') is not null,
-    'Pasa schema.sql'
+    to_regclass('public.variante') is not null
 
-  union all select 3,
-    'Tabla de invitados',
-    to_regclass('public.invitado') is not null,
-    'Pasa migraciones/002'
-
-  -- ---------- La protección por filas ----------
-  union all select 4,
+  union all select 3, 'schema',
     'Recetas protegidas por filas',
     coalesce((select relrowsecurity from pg_class
-              where oid = to_regclass('public.receta')), false),
-    'Pasa schema.sql'
+              where oid = to_regclass('public.receta')), false)
 
-  union all select 5,
-    'Variantes protegidas por filas',
-    coalesce((select relrowsecurity from pg_class
-              where oid = to_regclass('public.variante')), false),
-    'Pasa schema.sql'
+  union all select 4, 'schema',
+    'Sin sesion no se ve nada',
+    not has_table_privilege('anon', 'public.receta', 'SELECT')
 
-  union all select 6,
-    'Invitados protegidos por filas',
-    coalesce((select relrowsecurity from pg_class
-              where oid = to_regclass('public.invitado')), false),
-    'Pasa migraciones/002'
+  union all select 5, 'schema',
+    'Con sesion si se ve',
+    has_table_privilege('authenticated', 'public.receta', 'SELECT')
 
-  -- ---------- Las políticas ----------
-  union all select 7,
-    'Recetas con sus cuatro políticas',
-    (select count(*) from pg_policies
-     where schemaname = 'public' and tablename = 'receta') = 4,
-    'Pasa schema.sql y luego migraciones/002'
+  union all select 6, 'schema',
+    'Almacen de fotos creado',
+    exists (select 1 from storage.buckets where id = 'recetas')
 
-  union all select 8,
-    'La lista de invitados manda',
+  -- ---------- 003 ----------
+  union all select 7, '003',
+    'Fotos y audios PRIVADOS',
+    coalesce((select not public from storage.buckets
+              where id = 'recetas'), false)
+
+  -- ---------- 004 ----------
+  union all select 8, '004',
+    'Tabla de recetarios',
+    to_regclass('public.familia') is not null
+
+  union all select 9, '004',
+    'Tabla de miembros',
+    to_regclass('public.miembro') is not null
+
+  union all select 10, '004',
+    'Las recetas saben de que casa son',
+    exists (select 1 from information_schema.columns
+            where table_schema = 'public' and table_name = 'receta'
+              and column_name = 'familia_id')
+
+  union all select 11, '004',
+    'Funcion mis_recetarios',
     exists (select 1 from pg_proc p
             join pg_namespace n on n.oid = p.pronamespace
-            where n.nspname = 'public' and p.proname = 'es_de_la_familia'),
-    'Pasa migraciones/002'
+            where n.nspname = 'public' and p.proname = 'mis_recetarios')
 
-  union all select 9,
-    'Las políticas consultan la lista',
+  union all select 12, '004',
+    'Las politicas miran el recetario',
     exists (select 1 from pg_policies
             where schemaname = 'public' and tablename = 'receta'
-              and qual like '%es_de_la_familia%'),
-    'Pasa migraciones/002 DESPUÉS de schema.sql'
+              and qual like '%mis_recetarios%')
 
-  -- ---------- Los permisos ----------
-  union all select 10,
-    'Sin sesión no se ve nada',
-    not has_table_privilege('anon', 'public.receta', 'SELECT'),
-    'Pasa schema.sql (versión actual, con los permisos)'
+  union all select 13, '004',
+    'Las fotos se separan por recetario',
+    exists (select 1 from pg_policies
+            where schemaname = 'storage' and tablename = 'objects'
+              and policyname = 'recetas_ver'
+              and qual like '%mis_recetarios%')
 
-  union all select 11,
-    'Con sesión sí se ve',
-    has_table_privilege('authenticated', 'public.receta', 'SELECT'),
-    'Pasa schema.sql (versión actual, con los permisos)'
-
-  union all select 12,
+  union all select 14, '004',
     'La lista de correos es ilegible desde fuera',
-    not has_table_privilege('authenticated', 'public.invitado', 'SELECT'),
-    'Pasa migraciones/002'
+    not has_table_privilege('authenticated', 'public.miembro', 'SELECT')
 
-  -- ---------- El almacén ----------
-  union all select 13,
-    'Almacén de fotos y audios creado',
-    exists (select 1 from storage.buckets where id = 'recetas'),
-    'Pasa schema.sql'
+  -- ---------- 005 ----------
+  union all select 15, '005',
+    'Se puede elegir el codigo a mano',
+    exists (select 1 from pg_proc p
+            join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'public' and p.proname = 'establecer_codigo')
 
-  union all select 14,
-    'Fotos y audios privados',
-    coalesce((select not public from storage.buckets
-              where id = 'recetas'), false),
-    'Pasa migraciones/003'
-
-  -- ---------- La familia ----------
-  union all select 15,
-    'Hay alguien invitado',
-    coalesce((select count(*) > 0 from public.invitado), false),
-    'Añade correos al final de migraciones/002 y vuelve a pasarlo'
+  union all select 16, '005',
+    'Crear recetario acepta codigo propio',
+    exists (select 1 from pg_proc p
+            join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'public' and p.proname = 'crear_recetario'
+              and p.pronargs = 2)
 )
 
 select
   case when bien then 'OK' else 'FALTA' end as estado,
-  comprueba,
-  case when bien then '' else que_hacer end as que_hacer
+  archivo,
+  comprueba
 from pruebas
 order by orden;
 
+
 -- ------------------------------------------------------------
---  Y quién puede entrar ahora mismo
+--  Resumen: qué archivos están aplicados
 -- ------------------------------------------------------------
-select correo, nombre, invitado_en
-from public.invitado
-order by invitado_en;
+select
+  case
+    when to_regclass('public.receta') is null then 'NADA. Empieza por schema.sql'
+    when to_regclass('public.familia') is null then 'Hasta schema.sql (y quiza 002). Falta 004'
+    when not exists (select 1 from pg_proc p
+                     join pg_namespace n on n.oid = p.pronamespace
+                     where n.nspname = 'public'
+                       and p.proname = 'establecer_codigo')
+      then 'Hasta 004. Falta 005 (elegir el codigo a mano)'
+    else 'Todo aplicado: schema, 003, 004 y 005'
+  end as hasta_donde_llegas,
+  coalesce((select case when not public then 'privado' else 'PUBLICO - falta pasar 003' end
+            from storage.buckets where id = 'recetas'), 'sin almacen') as estado_de_las_fotos;
+
+
+-- ------------------------------------------------------------
+--  Los recetarios que existen ahora mismo
+-- ------------------------------------------------------------
+select
+  f.nombre,
+  f.codigo,
+  count(m.usuario_id) as miembros,
+  (select count(*) from public.receta r where r.familia_id = f.id) as recetas
+from public.familia f
+left join public.miembro m on m.familia_id = f.id
+group by f.id, f.nombre, f.codigo
+order by f.creada_en;
