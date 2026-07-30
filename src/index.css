@@ -473,41 +473,120 @@
    propia animación.
    --------------------------------------------------------------- */
 .pasando {
-  perspective: 1800px;
+  perspective: 1600px;
+  /* El punto de fuga en el lomo: la hoja gira sobre la costura, no
+     sobre el centro de la pantalla. */
+  perspective-origin: 50% 45%;
 }
 
+/**
+ * La hoja cae.
+ *
+ * Tres cosas a la vez, y las tres importan:
+ * - Gira desde casi de canto hasta quedar plana.
+ * - Se oscurece cuando está de canto, porque una hoja levantada recibe
+ *   menos luz. Sin esto parece una diapositiva, no papel.
+ * - Se desplaza un poco: el papel no gira clavado, se arrastra.
+ */
 @keyframes hoja-adelante {
-  from {
-    transform: rotateY(72deg);
+  0% {
+    transform: rotateY(82deg) translateX(7%) scale(0.97);
+    filter: brightness(0.74);
     opacity: 0;
   }
-  to {
-    transform: rotateY(0);
+  35% {
+    opacity: 1;
+  }
+  70% {
+    filter: brightness(0.93);
+  }
+  100% {
+    transform: rotateY(0) translateX(0) scale(1);
+    filter: brightness(1);
     opacity: 1;
   }
 }
 
 @keyframes hoja-atras {
-  from {
-    transform: rotateY(-72deg);
+  0% {
+    transform: rotateY(-82deg) translateX(-7%) scale(0.97);
+    filter: brightness(0.74);
     opacity: 0;
   }
-  to {
-    transform: rotateY(0);
+  35% {
+    opacity: 1;
+  }
+  70% {
+    filter: brightness(0.93);
+  }
+  100% {
+    transform: rotateY(0) translateX(0) scale(1);
+    filter: brightness(1);
     opacity: 1;
   }
 }
 
 .pasa-adelante {
   transform-origin: left center;
-  animation: hoja-adelante 0.42s ease-out;
+  animation: hoja-adelante 0.55s cubic-bezier(0.22, 0.8, 0.3, 1);
   backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .pasa-atras {
   transform-origin: right center;
-  animation: hoja-atras 0.42s ease-out;
+  animation: hoja-atras 0.55s cubic-bezier(0.22, 0.8, 0.3, 1);
   backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/**
+ * La sombra que deja la hoja al pasar por encima de la de abajo.
+ *
+ * Es lo que más ayuda a leerlo como papel: sin ella el giro parece un
+ * efecto de presentación.
+ */
+@keyframes barrido-adelante {
+  0% {
+    opacity: 0.5;
+    transform: translateX(-45%) skewX(-6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(115%) skewX(-6deg);
+  }
+}
+
+@keyframes barrido-atras {
+  0% {
+    opacity: 0.5;
+    transform: translateX(115%) skewX(6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-45%) skewX(6deg);
+  }
+}
+
+.barrido {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--tinta) 34%, transparent) 45%,
+    transparent
+  );
+}
+
+.barrido-adelante {
+  animation: barrido-adelante 0.55s ease-out forwards;
+}
+
+.barrido-atras {
+  animation: barrido-atras 0.55s ease-out forwards;
 }
 
 /* Quien pide menos movimiento no debería marearse pasando páginas. */
@@ -515,5 +594,9 @@
   .pasa-adelante,
   .pasa-atras {
     animation: none;
+  }
+
+  .barrido {
+    display: none;
   }
 }

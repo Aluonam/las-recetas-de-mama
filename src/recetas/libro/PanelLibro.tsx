@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom'
 import type { Receta, RecetaResumen } from '../tipos'
 import { textoCantidad, textoTiempo } from '../formato'
 import { tituloParaOrdenar } from '../indice/agrupar'
-import { useNavegacionLibro, type Sentido } from './useNavegacionLibro'
+import { useNavegacionLibro } from './useNavegacionLibro'
+import type { Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
+import { HojaIndice } from './HojaIndice'
 import { Imagen } from '../archivos/Imagen'
 
 /** Un libro va en orden, ignorando el artículo del título. */
@@ -15,12 +17,14 @@ function ordenarComoLibro(recetas: RecetaResumen[]) {
 }
 
 /**
- * El recetario como libro: cada receta ocupa una hoja, y las hojas se
- * pasan pulsando sobre ellas.
+ * El recetario como libro.
  *
- * La hoja izquierda se pinta con lo que ya tenemos del listado, así que
- * nunca parpadea al pasar. La derecha necesita la receta entera y aparece
- * en cuanto llega; en la práctica es instantáneo salvo la primera vez.
+ * A la izquierda el índice, a la derecha la receta abierta. Es como está
+ * hecho un recetario de casa: abres por cualquier sitio y en la página de
+ * al lado tienes la lista para saltar a otra.
+ *
+ * En pantallas pequeñas solo cabe una página, así que se queda la receta
+ * y el índice desaparece: para buscar ya está la vista de Índice.
  */
 export function PanelLibro({
   recetas,
@@ -39,18 +43,19 @@ export function PanelLibro({
    */
   const paginaDe = useMemo(() => {
     const tomo = ordenarComoLibro(todas)
-    return new Map(tomo.map((receta, posicion) => [receta.id, posicion * 2 + 1]))
+    return new Map(tomo.map((receta, posicion) => [receta.id, posicion * 2 + 2]))
   }, [todas])
 
-  const { indice, sentido, pasar, gestos } = useNavegacionLibro(enOrden.length)
+  const { indice, sentido, pasar, irA, gestos } = useNavegacionLibro(
+    enOrden.length,
+  )
   const resumen = enOrden[indice]
   const { receta } = useRecetaCompleta(resumen?.id)
 
   /**
-   * Pulsar en una hoja la pasa: la de la izquierda va hacia atrás y la de
-   * la derecha hacia delante. Se aparta cuando lo pulsado es un enlace o
-   * cuando hay texto seleccionado, para no pasar hoja a quien solo estaba
-   * copiando un ingrediente.
+   * Pulsar en la hoja de la receta la pasa. Se aparta cuando lo pulsado es
+   * un enlace o cuando hay texto seleccionado, para no pasar hoja a quien
+   * solo estaba copiando un ingrediente.
    */
   const alPulsarHoja =
     (haciaDonde: Sentido) => (evento: React.MouseEvent<HTMLElement>) => {
@@ -60,10 +65,6 @@ export function PanelLibro({
     }
 
   if (!resumen) return null
-
-  const primeraPagina = paginaDe.get(resumen.id) ?? indice * 2 + 1
-  const quedaAtras = indice > 0
-  const quedaAdelante = indice < enOrden.length - 1
 
   return (
     <div className="pasando" {...gestos}>
@@ -76,24 +77,33 @@ export function PanelLibro({
             className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
           >
             <div className="relative grid md:grid-cols-2">
-              <HojaIzquierda
-                resumen={resumen}
-                numero={primeraPagina}
-                alPulsar={alPulsarHoja('atras')}
-                activa={quedaAtras}
+              <HojaIndice
+                recetas={enOrden}
+                abierta={resumen.id}
+                alElegir={irA}
               />
-              <HojaDerecha
+
+              <HojaReceta
                 receta={receta}
                 resumen={resumen}
-                numero={primeraPagina + 1}
+                numero={paginaDe.get(resumen.id) ?? indice * 2 + 2}
                 alPulsar={alPulsarHoja('adelante')}
-                activa={quedaAdelante}
+                activa={indice < enOrden.length - 1}
               />
 
               {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
               <div
                 aria-hidden="true"
                 className="lomo pointer-events-none absolute inset-y-0 left-1/2 hidden w-10 -translate-x-1/2 md:block"
+              />
+
+              {/* La sombra que deja la hoja al caer sobre la de abajo. */}
+              <div
+                aria-hidden="true"
+                className={
+                  'barrido ' +
+                  (sentido === 'adelante' ? 'barrido-adelante' : 'barrido-atras')
+                }
               />
             </div>
           </div>
@@ -105,71 +115,7 @@ export function PanelLibro({
   )
 }
 
-/** El cursor solo promete pasar hoja si de verdad queda hoja que pasar. */
-function claseHoja(base: string, activa: boolean) {
-  return `${base} ${activa ? 'cursor-pointer' : 'cursor-default'}`
-}
-
-function HojaIzquierda({
-  resumen,
-  numero,
-  alPulsar,
-  activa,
-}: {
-  resumen: RecetaResumen
-  numero: number
-  alPulsar: (evento: React.MouseEvent<HTMLElement>) => void
-  activa: boolean
-}) {
-  const tiempo = textoTiempo(resumen.tiempoMinutos)
-
-  return (
-    <article
-      onClick={alPulsar}
-      className={claseHoja(
-        'hoja hoja-izq relative flex flex-col p-6 pb-14 text-center sm:p-8 sm:pb-16',
-        activa,
-      )}
-    >
-      <Imagen
-        archivo={resumen.fotoPortadaUrl}
-        className="arco marco-doble mx-auto mb-6 aspect-[4/3] w-full max-w-xs object-cover"
-        hueco={<div className="guirnalda mb-4" aria-hidden="true" />}
-      />
-
-      {resumen.autorNombre && (
-        <p className="versalitas mb-2 text-rosa-texto">De {resumen.autorNombre}</p>
-      )}
-
-      <h2 className="mb-3 text-2xl sm:text-3xl">{resumen.titulo}</h2>
-
-      {resumen.descripcion && (
-        <p className="font-titulo italic text-tinta-suave">
-          {resumen.descripcion}
-        </p>
-      )}
-
-      <dl className="mt-6 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm">
-        {tiempo && (
-          <div>
-            <dt className="versalitas text-tinta-suave">Tiempo</dt>
-            <dd className="m-0 font-semibold">{tiempo}</dd>
-          </div>
-        )}
-        {resumen.ocasiones.length > 0 && (
-          <div>
-            <dt className="versalitas text-tinta-suave">Se hace en</dt>
-            <dd className="m-0 font-semibold">{resumen.ocasiones.join(', ')}</dd>
-          </div>
-        )}
-      </dl>
-
-      <PieDePagina numero={numero} alineado="izquierda" />
-    </article>
-  )
-}
-
-function HojaDerecha({
+function HojaReceta({
   receta,
   resumen,
   numero,
@@ -182,90 +128,114 @@ function HojaDerecha({
   alPulsar: (evento: React.MouseEvent<HTMLElement>) => void
   activa: boolean
 }) {
+  const tiempo = textoTiempo(resumen.tiempoMinutos)
+
   return (
     <article
       onClick={alPulsar}
-      className={claseHoja(
-        'hoja hoja-der relative flex flex-col p-6 pb-14 sm:p-8 sm:pb-16',
-        activa,
-      )}
+      className={
+        'hoja hoja-der relative flex flex-col p-6 pb-14 sm:p-8 sm:pb-16 ' +
+        (activa ? 'cursor-pointer' : 'cursor-default')
+      }
     >
-      {receta ? (
-        <>
-          {receta.porQueEspecial && (
-            <p className="mb-6 border-l-4 border-rosa-medio pl-4 font-titulo italic">
-              {receta.porQueEspecial}
-            </p>
+      <div className="text-center">
+        <Imagen
+          archivo={resumen.fotoPortadaUrl}
+          className="arco marco-doble mx-auto mb-5 aspect-[4/3] w-full max-w-[15rem] object-cover"
+          hueco={<div className="guirnalda mb-3" aria-hidden="true" />}
+        />
+
+        {resumen.autorNombre && (
+          <p className="versalitas mb-1 text-rosa-texto">
+            De {resumen.autorNombre}
+          </p>
+        )}
+
+        <h2 className="mb-2 text-2xl sm:text-3xl">{resumen.titulo}</h2>
+
+        {resumen.descripcion && (
+          <p className="font-titulo italic text-tinta-suave">
+            {resumen.descripcion}
+          </p>
+        )}
+
+        <dl className="mt-4 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm">
+          {tiempo && (
+            <div>
+              <dt className="versalitas text-tinta-suave">Tiempo</dt>
+              <dd className="m-0 font-semibold">{tiempo}</dd>
+            </div>
           )}
-
-          <h3 className="versalitas mb-3 text-tinta-suave">Ingredientes</h3>
-          <ul className="m-0 mb-6 list-none space-y-1.5 p-0">
-            {receta.ingredientes.map((ingrediente) => {
-              const cantidad = textoCantidad(ingrediente)
-              return (
-                <li key={ingrediente.id} className="flex flex-wrap gap-x-2">
-                  <span>{ingrediente.nombre}</span>
-                  {cantidad && (
-                    <span className="text-rosa-texto">— {cantidad}</span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-
-          {receta.trucos.length > 0 && (
-            <>
-              <h3 className="versalitas mb-2 text-tinta-suave">
-                El truco de la casa
-              </h3>
-              <p className="mb-6 text-tinta-suave">{receta.trucos[0].texto}</p>
-            </>
+          {resumen.ocasiones.length > 0 && (
+            <div>
+              <dt className="versalitas text-tinta-suave">Se hace en</dt>
+              <dd className="m-0 font-semibold">
+                {resumen.ocasiones.join(', ')}
+              </dd>
+            </div>
           )}
+        </dl>
+      </div>
 
-          <Link
-            to={`/receta/${resumen.id}`}
-            className="boton-principal mt-auto self-center no-underline"
-          >
-            Abrir la receta
-          </Link>
-        </>
-      ) : (
-        <p role="status" className="my-auto text-center text-tinta-suave">
-          Abriendo la hoja…
-        </p>
-      )}
+      <div className="mt-6 flex-1">
+        {receta ? (
+          <>
+            {receta.porQueEspecial && (
+              <p className="mb-5 border-l-4 border-rosa-medio pl-4 font-titulo italic">
+                {receta.porQueEspecial}
+              </p>
+            )}
 
-      <PieDePagina numero={numero} alineado="derecha" />
+            <h3 className="versalitas mb-2 text-tinta-suave">Ingredientes</h3>
+            <ul className="m-0 mb-5 list-none space-y-1.5 p-0">
+              {receta.ingredientes.map((ingrediente) => {
+                const cantidad = textoCantidad(ingrediente)
+                return (
+                  <li key={ingrediente.id} className="flex flex-wrap gap-x-2">
+                    <span>{ingrediente.nombre}</span>
+                    {cantidad && (
+                      <span className="text-rosa-texto">— {cantidad}</span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+
+            {receta.trucos.length > 0 && (
+              <>
+                <h3 className="versalitas mb-1 text-tinta-suave">
+                  El truco de la casa
+                </h3>
+                <p className="mb-5 text-tinta-suave">{receta.trucos[0].texto}</p>
+              </>
+            )}
+
+            <div className="text-center">
+              <Link
+                to={`/receta/${resumen.id}`}
+                className="boton-principal no-underline"
+              >
+                Abrir la receta
+              </Link>
+            </div>
+          </>
+        ) : (
+          <p role="status" className="py-8 text-center text-tinta-suave">
+            Abriendo la hoja…
+          </p>
+        )}
+      </div>
+
+      <p
+        aria-hidden="true"
+        className="absolute bottom-5 right-6 font-titulo text-sm text-tinta-suave sm:right-8"
+      >
+        {numero}
+      </p>
     </article>
   )
 }
 
-function PieDePagina({
-  numero,
-  alineado,
-}: {
-  numero: number
-  alineado: 'izquierda' | 'derecha'
-}) {
-  // Clavado al pie de la hoja, como en un libro: si va en el flujo, se
-  // queda colgando justo debajo del texto y sube o baja con cada receta.
-  return (
-    <p
-      aria-hidden="true"
-      className={
-        'absolute bottom-6 font-titulo text-sm text-tinta-suave sm:bottom-8 ' +
-        (alineado === 'izquierda' ? 'left-6 sm:left-8' : 'right-6 sm:right-8')
-      }
-    >
-      {numero}
-    </p>
-  )
-}
-
-/**
- * Sin botones, nada delata que las hojas se pasan solas al pulsarlas: el
- * pie hace de instrucción además de contar por dónde vas.
- */
 function Contador({
   indice,
   total,
@@ -279,13 +249,6 @@ function Contador({
     <p role="status" className="mt-6 text-center text-sm text-tinta-suave">
       <span className="sr-only">Hoja abierta: {receta.titulo}. </span>
       {indice + 1} de {total}
-      <span aria-hidden="true" className="mx-2">
-        ·
-      </span>
-      <span aria-hidden="true">Pulsa en la hoja para pasarla</span>
-      <span className="sr-only">
-        Usa las flechas izquierda y derecha para pasar de hoja.
-      </span>
     </p>
   )
 }
