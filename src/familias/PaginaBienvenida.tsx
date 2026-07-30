@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import { crearRecetario, unirseConCodigo } from './api'
 import { useFamilia } from './contexto'
-import type { Familia } from './tipos'
-import { Aviso } from '../ui/Estado'
-import { CampoTexto } from '../ui/Campo'
+import { FormularioCrear, FormularioEntrar } from './Formularios'
 
 /**
  * La primera y única pantalla antes de entrar.
@@ -15,6 +12,9 @@ import { CampoTexto } from '../ui/Campo'
  * «Ya tengo código» va primero porque casi todo el mundo llega aquí
  * desde un WhatsApp con un código dentro. Crear recetario lo hace una
  * persona por familia, una sola vez.
+ *
+ * Aquí no hay nada de administradoras a propósito: todo el mundo entra
+ * igual. Quien administra se identifica después, desde Ajustes.
  */
 export function PaginaBienvenida() {
   const { entrar } = useFamilia()
@@ -51,155 +51,13 @@ export function PaginaBienvenida() {
         </button>
       </div>
 
-      {modo === 'entrar' ? (
-        <FormularioEntrar alEntrar={entrar} />
-      ) : (
-        <FormularioCrear alEntrar={entrar} />
-      )}
-
-      {/* Aquí no hay nada de administradoras a propósito: todo el mundo
-          entra igual, con el código. Quien administra se identifica
-          después, desde Ajustes, y solo si le hace falta. */}
+      <div className="tarjeta p-5">
+        {modo === 'entrar' ? (
+          <FormularioEntrar alEntrar={entrar} />
+        ) : (
+          <FormularioCrear alEntrar={entrar} />
+        )}
+      </div>
     </div>
-  )
-}
-
-/** Campo de correo, igual en los dos formularios. */
-function CampoCorreo({
-  valor,
-  alCambiar,
-}: {
-  valor: string
-  alCambiar: (correo: string) => void
-}) {
-  return (
-    <CampoTexto
-      etiqueta="Tu correo"
-      ayuda="Solo para saber quién ha escrito cada receta. No te vamos a mandar nada."
-      type="email"
-      required
-      autoComplete="email"
-      placeholder="nombre@correo.com"
-      value={valor}
-      onChange={(e) => alCambiar(e.target.value)}
-    />
-  )
-}
-
-function FormularioEntrar({
-  alEntrar,
-}: {
-  alEntrar: (familia: Familia) => void
-}) {
-  const [correo, setCorreo] = useState('')
-  const [codigo, setCodigo] = useState('')
-  const [enviando, setEnviando] = useState(false)
-  const [error, setError] = useState<unknown>(null)
-
-  const enviar = async (evento: React.FormEvent) => {
-    evento.preventDefault()
-    setEnviando(true)
-    setError(null)
-    try {
-      alEntrar(await unirseConCodigo(codigo, correo))
-    } catch (e) {
-      setError(e)
-    } finally {
-      setEnviando(false)
-    }
-  }
-
-  return (
-    <form onSubmit={enviar} className="tarjeta space-y-4 p-5">
-      <CampoCorreo valor={correo} alCambiar={setCorreo} />
-
-      <CampoTexto
-        etiqueta="El código de tu familia"
-        ayuda="Te lo habrán pasado por WhatsApp. Da igual mayúsculas o minúsculas."
-        required
-        autoCapitalize="characters"
-        autoComplete="off"
-        placeholder="MEMBRILLO-4821"
-        value={codigo}
-        onChange={(e) => setCodigo(e.target.value)}
-      />
-
-      {error != null && <Aviso error={error} />}
-
-      <button type="submit" className="boton-principal w-full" disabled={enviando}>
-        {enviando ? 'Entrando…' : 'Entrar en el recetario'}
-      </button>
-    </form>
-  )
-}
-
-function FormularioCrear({
-  alEntrar,
-}: {
-  alEntrar: (familia: Familia) => void
-}) {
-  const [correo, setCorreo] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [codigo, setCodigo] = useState('')
-  const [enviando, setEnviando] = useState(false)
-  const [error, setError] = useState<unknown>(null)
-
-  // Una palabra suelta se adivina. Se avisa, no se prohíbe.
-  const flojo = codigo.trim().length >= 5 && !/\d/.test(codigo)
-
-  const enviar = async (evento: React.FormEvent) => {
-    evento.preventDefault()
-    setEnviando(true)
-    setError(null)
-    try {
-      alEntrar(await crearRecetario(nombre, codigo, correo))
-    } catch (e) {
-      setError(e)
-    } finally {
-      setEnviando(false)
-    }
-  }
-
-  return (
-    <form onSubmit={enviar} className="tarjeta space-y-4 p-5">
-      <CampoCorreo valor={correo} alCambiar={setCorreo} />
-
-      <CampoTexto
-        etiqueta="¿Cómo se llama vuestro recetario?"
-        ayuda="El nombre que le pondríais en casa."
-        required
-        placeholder="Las recetas de los Cano"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-      />
-
-      <CampoTexto
-        etiqueta="La contraseña familiar"
-        ayuda="Entre 5 y 32 caracteres: letras sin tilde, números y guiones. Déjala vacía y se genera una."
-        autoCapitalize="characters"
-        autoComplete="off"
-        placeholder="ROGELIO162"
-        value={codigo}
-        onChange={(e) => setCodigo(e.target.value)}
-      />
-
-      {flojo && (
-        <p className="text-sm text-tinta-suave">
-          Es una palabra sola. Añadirle un número la hace mucho más difícil
-          de adivinar, y sigue siendo igual de fácil de dictar.
-        </p>
-      )}
-
-      <p className="text-sm text-tinta-suave">
-        Esa contraseña es la llave: pásala a tu familia por WhatsApp y
-        entrarán aquí mismo. Se puede cambiar cuando quieras.
-      </p>
-
-      {error != null && <Aviso error={error} />}
-
-      <button type="submit" className="boton-principal w-full" disabled={enviando}>
-        {enviando ? 'Creando…' : 'Crear el recetario'}
-      </button>
-    </form>
   )
 }

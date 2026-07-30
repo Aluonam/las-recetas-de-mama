@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useSesion } from '../nucleo/sesion'
 import { HAY_SUPABASE } from '../nucleo/entorno'
+import { SelectorRecetario } from '../familias/SelectorRecetario'
 
 /**
  * Cabecera + contenido + pie.
@@ -95,6 +96,8 @@ export function Marco({ children, navegacion = true }: Props) {
             </NavLink>
 
           </nav>
+
+          {navegacion && <SelectorRecetario />}
         </div>
       </header>
 

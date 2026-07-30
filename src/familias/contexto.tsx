@@ -34,7 +34,36 @@ interface ContextoFamilia {
   error: unknown
   /** Tras crear uno o entrar con código. */
   entrar: (familia: Familia) => void
+  /** Cambiar al recetario que se diga, de entre los tuyos. */
+  elegir: (familiaId: string) => void
   recargar: () => void
+}
+
+/**
+ * Cuál estaba abierto.
+ *
+ * Se guarda porque hay idas y vueltas que remontan la app entera —salir a
+ * verificar el correo y volver, sobre todo— y sin esto se abría siempre
+ * el primero de la lista. Quien tiene dos recetarios acababa mirando el
+ * que no era sin saber por qué.
+ */
+const CLAVE_ABIERTO = 'recetario-abierto'
+
+function recordado(): string | null {
+  try {
+    return localStorage.getItem(CLAVE_ABIERTO)
+  } catch {
+    return null
+  }
+}
+
+function recordar(id: string | null) {
+  try {
+    if (id) localStorage.setItem(CLAVE_ABIERTO, id)
+    else localStorage.removeItem(CLAVE_ABIERTO)
+  } catch {
+    // Ventana privada: se abrirá el primero. Tampoco es grave.
+  }
 }
 
 const Contexto = createContext<ContextoFamilia | undefined>(undefined)
@@ -58,8 +87,9 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
     misRecetarios()
       .then((suyas) => {
         setTodas(suyas)
-        // Con uno solo, que es lo normal, no hay nada que elegir.
-        setFamilia(suyas[0] ?? null)
+        // El que estaba abierto, si sigue siendo suyo. Si no, el primero.
+        const antes = recordado()
+        setFamilia(suyas.find((f) => f.id === antes) ?? suyas[0] ?? null)
         setError(null)
       })
       .catch(setError)
@@ -69,9 +99,11 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
   useEffect(recargar, [recargar])
 
   // La capa de datos lo lee desde fuera de React para saber dónde
-  // guardar cada receta y cada foto.
+  // guardar cada receta y cada foto. Y se anota cuál queda abierto, para
+  // volver a él tras cualquier ida y vuelta.
   useEffect(() => {
     recordarFamilia(familia?.id ?? null)
+    if (familia) recordar(familia.id)
   }, [familia])
 
   const entrar = useCallback((nueva: Familia) => {
@@ -80,6 +112,14 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
     )
     setFamilia(nueva)
   }, [])
+
+  const elegir = useCallback(
+    (familiaId: string) => {
+      const suya = todas.find((f) => f.id === familiaId)
+      if (suya) setFamilia(suya)
+    },
+    [todas],
+  )
 
   const valor = useMemo<ContextoFamilia>(
     () => ({
@@ -93,9 +133,10 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
       cargando,
       error,
       entrar,
+      elegir,
       recargar,
     }),
-    [familia, usuarioId, todas, cargando, error, entrar, recargar],
+    [familia, usuarioId, todas, cargando, error, entrar, elegir, recargar],
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

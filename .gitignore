@@ -15,6 +15,11 @@ dist-ssr
 # Service worker de desarrollo, generado por vite-plugin-pwa
 dev-dist
 
+# Apunte de trabajo: qué SQL queda por ejecutar en la base. Se arma
+# juntando archivos de supabase/migraciones, así que no aporta nada al
+# repositorio y se desincronizaría enseguida.
+supabase/EJECUTAR-AHORA.sql
+
 # Claves de Supabase: nunca al repositorio (usa .env.example como plantilla)
 .env
 .env.local

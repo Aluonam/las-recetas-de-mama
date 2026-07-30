@@ -3,6 +3,7 @@ import { PanelCodigo } from '../familias/PanelCodigo'
 import { BotonCopia } from '../copias/BotonCopia'
 import { EscribirAlAdministrador } from './EscribirAlAdministrador'
 import { PanelJefe } from './PanelJefe'
+import { PanelRecetarios } from '../familias/PanelRecetarios'
 import { useFamilia } from '../familias/contexto'
 
 /**
@@ -24,6 +25,7 @@ export function PaginaAjustes() {
       )}
 
       <div className="space-y-8">
+        <PanelRecetarios />
         <PanelJefe />
         <PanelCodigo />
         <EscribirAlAdministrador />
