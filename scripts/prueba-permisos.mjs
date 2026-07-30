@@ -199,6 +199,31 @@ async function principal() {
     `borró ${borradaPorJefa?.length ?? '?'}`,
   )
 
+  // ---------- CAMBIAR EL CÓDIGO: solo la creadora ----------
+  // Cambiarlo deja fuera a quien todavía no lo tenga, así que no puede
+  // hacerlo cualquiera.
+  const { error: falloCambioAjeno } = await familiar.rpc('establecer_codigo', {
+    p_familia_id: recetario.id,
+    p_codigo: `ROBADO-${SUFIJO}`,
+  })
+
+  comprobar(
+    'El familiar NO puede cambiar el código',
+    Boolean(falloCambioAjeno),
+    falloCambioAjeno ? '' : 'lo cambió',
+  )
+
+  const { data: codigoNuevo, error: falloCambioPropio } = await creadora.rpc(
+    'establecer_codigo',
+    { p_familia_id: recetario.id, p_codigo: `ROMAN-${SUFIJO}B` },
+  )
+
+  comprobar(
+    'La creadora SÍ puede cambiar el código',
+    !falloCambioPropio && Boolean(codigoNuevo),
+    falloCambioPropio?.message,
+  )
+
   // ---------- Aislamiento entre familias ----------
   const { data: loQueVeElDesconocido } = await desconocido
     .from('receta')

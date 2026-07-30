@@ -12,7 +12,7 @@ import { CampoTexto } from '../ui/Campo'
  * explicárselo cada vez.
  */
 export function PanelCodigo() {
-  const { familia, entrar } = useFamilia()
+  const { familia, soyDuena, entrar } = useFamilia()
   const [copiado, setCopiado] = useState(false)
   const [cambiando, setCambiando] = useState(false)
   const [editando, setEditando] = useState(false)
@@ -74,24 +74,31 @@ export function PanelCodigo() {
         <button type="button" className="boton-principal" onClick={copiar}>
           {copiado ? 'Copiado ✓' : 'Copiar invitación'}
         </button>
-        <button
-          type="button"
-          className="boton-secundario"
-          onClick={() => setEditando((antes) => !antes)}
-        >
-          Elegir otro código
-        </button>
-        <button
-          type="button"
-          className="boton-secundario"
-          onClick={regenerar}
-          disabled={cambiando}
-        >
-          {cambiando ? 'Generando…' : 'Generar uno al azar'}
-        </button>
+        {/* Cambiar el código deja fuera a quien no lo sepa todavía, así
+            que solo lo toca quien administra. El resto puede compartirlo
+            igual: para eso está «Copiar invitación». */}
+        {soyDuena && (
+          <>
+            <button
+              type="button"
+              className="boton-secundario"
+              onClick={() => setEditando((antes) => !antes)}
+            >
+              Elegir otro código
+            </button>
+            <button
+              type="button"
+              className="boton-secundario"
+              onClick={regenerar}
+              disabled={cambiando}
+            >
+              {cambiando ? 'Generando…' : 'Generar uno al azar'}
+            </button>
+          </>
+        )}
       </div>
 
-      {editando && (
+      {editando && soyDuena && (
         <FormularioCodigo
           familiaId={familia.id}
           alCambiar={(nuevo) => {
