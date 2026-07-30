@@ -11,7 +11,19 @@ import { HAY_SUPABASE } from '../nucleo/entorno'
  * estampado. En móvil no hay márgenes y el estampado sencillamente no se
  * ve: mejor eso que un fondo con ruido detrás de la letra.
  */
-export function Marco({ children }: { children: ReactNode }) {
+interface Props {
+  children: ReactNode
+  /**
+   * Los botones de la cabecera.
+   *
+   * Se apagan en la bienvenida: allí no hay recetario todavía, así que
+   * «Escribir una receta» llevaría a un sitio que no existe y «Salir» no
+   * tendría de dónde. Un botón que no puede hacer nada no debe estar.
+   */
+  navegacion?: boolean
+}
+
+export function Marco({ children, navegacion = true }: Props) {
   const { salir } = useSesion()
 
   return (
@@ -32,7 +44,10 @@ export function Marco({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          <nav
+            hidden={!navegacion}
+            className="mt-5 flex flex-wrap items-center justify-center gap-2"
+          >
             <NavLink
               to="/nueva"
               className={({ isActive }) =>

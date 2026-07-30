@@ -18,7 +18,7 @@ export function RutaConRecetario({ children }: { children: ReactNode }) {
 
   if (error != null) {
     return (
-      <Marco>
+      <Marco navegacion={false}>
         <Aviso error={error} />
       </Marco>
     )
@@ -26,7 +26,7 @@ export function RutaConRecetario({ children }: { children: ReactNode }) {
 
   if (!familia) {
     return (
-      <Marco>
+      <Marco navegacion={false}>
         <PaginaBienvenida />
       </Marco>
     )
