@@ -210,10 +210,36 @@ Actions* con los mismos valores del paso 4:
 Lánzala una vez a mano desde **Actions** para comprobar que responde.
 
 > **Ojo:** GitHub desactiva las tareas programadas en repositorios que
-> pasan **60 días sin ningún commit**. Si el proyecto va a estar parado
-> mucho tiempo, haz lo mismo desde [cron-job.org](https://cron-job.org),
-> que no depende de eso: una petición a `TU-URL/auth/v1/health` con la
-> cabecera `apikey: TU-CLAVE-ANON`.
+> pasan **60 días sin ningún commit**. Y ese es justo el escenario que
+> importa aquí: dejar el proyecto quieto unos meses apagaría el
+> despertador y detrás el servidor.
+
+### El despertador principal: cron-job.org
+
+Por eso conviene un segundo despertador que **no dependa de tocar el
+repositorio**. En [cron-job.org](https://cron-job.org), gratis:
+
+| Campo | Valor |
+| ----- | ----- |
+| **URL** | `https://TU-PROYECTO.supabase.co/auth/v1/health` |
+| **Programación** | Cada día |
+| **Encabezado** | Nombre `apikey`, valor la clave *anon* |
+
+El encabezado va en la pestaña **Avanzado**, sección **Encabezados** →
+*Añadir*. No es lo mismo que «Requiere autenticación HTTP», que se queda
+apagado.
+
+**Diario, no mensual.** Supabase pausa a los pocos días, no al mes: una
+llamada mensual dejaría el proyecto dormido tres semanas de cada cuatro.
+
+Con los dos montados —cron-job.org a diario y GitHub dos veces por
+semana— tendrían que fallar ambos a la vez.
+
+### No, no se puede desactivar en Supabase
+
+No hay ningún ajuste: es política del plan gratuito, no una opción. Las
+únicas alternativas son pagar el plan Pro (25 $/mes, los proyectos de pago
+no se pausan) o alojarlo uno mismo.
 
 Si aun así se duerme, **no se pierde nada**: se reactiva desde el panel en
 un par de minutos, y la app lo dice con palabras claras en vez de con un
