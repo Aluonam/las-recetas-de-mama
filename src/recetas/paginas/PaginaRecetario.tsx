@@ -120,6 +120,8 @@ export function PaginaRecetario() {
       <AvisoInstalar />
 
       <div className="mb-6 flex flex-col gap-3">
+        {/* `items-end`: la lupa se apoya en la misma raya en la que se
+            apoyan las solapas, que es lo que las alinea. */}
         <div className="flex flex-wrap items-end gap-3">
           {/* En el libro no hay lupa: no se busca en un libro abierto, se
               va por las letras del canto. Enseñarla y que no filtrara

@@ -37,16 +37,21 @@ export function BuscadorLupa({
   }
 
   return (
-    <div className="flex min-w-[13rem] flex-1 items-center gap-2">
+    <div className="flex items-center gap-2">
       <label htmlFor="buscar" className="sr-only">
         Buscar receta
       </label>
+      {/* Ancho fijo y corto. Estirándose se comía la fila entera y
+          empujaba las solapas al renglón de abajo cada vez que se abría;
+          además, para buscar «torrijas» no hace falta media pantalla. */}
       <input
         id="buscar"
         type="search"
         autoFocus
-        className="campo flex-1"
-        placeholder="Buscar por plato o por quién la hacía…"
+        // Los 44px de los botones, clavados: si el campo midiera un poco
+        // más, abrir la búsqueda bajaría las solapas tres píxeles.
+        className="campo h-11 w-52"
+        placeholder="Buscar receta…"
         value={busqueda}
         onChange={(evento) => alBuscar(evento.target.value)}
         onKeyDown={(evento) => {
