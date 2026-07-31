@@ -5,6 +5,7 @@ import type { RecetaResumen } from '../tipos'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { TarjetaReceta } from '../componentes/TarjetaReceta'
 import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
+import { BuscadorLupa } from '../componentes/BuscadorLupa'
 import { PanelIndice } from '../indice/PanelIndice'
 import { PanelLibro } from '../libro/PanelLibro'
 import { LibroPantallaCompleta } from '../libro/LibroPantallaCompleta'
@@ -85,28 +86,35 @@ export function PaginaRecetario() {
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl sm:text-4xl">El recetario</h1>
+      {/* El «+» va aquí y no en la cabecera: escribir una receta es una
+          acción sobre el recetario, y en su esquina está donde se está
+          mirando en vez de arriba del todo. */}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <h1 className="m-0 text-3xl sm:text-4xl">El recetario</h1>
+
+        <Link
+          to="/nueva"
+          aria-label="Escribir una receta"
+          title="Escribir una receta"
+          // 44px de lado: el mínimo para acertar con el dedo.
+          className="boton-principal flex size-11 shrink-0 items-center justify-center p-0 text-2xl leading-none no-underline"
+        >
+          <span aria-hidden="true">+</span>
+        </Link>
+      </div>
 
       <AvisoInstalar />
 
       <div className="mb-6 flex flex-col gap-3">
-        <label htmlFor="buscar" className="sr-only">
-          Buscar receta
-        </label>
-        <input
-          id="buscar"
-          type="search"
-          className="campo"
-          placeholder="Buscar por plato o por quién la hacía…"
-          value={busqueda}
-          onChange={(evento) => setBusqueda(evento.target.value)}
-        />
+        <div className="flex flex-wrap items-end gap-3">
+          <BuscadorLupa busqueda={busqueda} alBuscar={setBusqueda} />
 
-        <SelectorVista
-          vista={vista}
-          agrupacion={agrupacion}
-          alCambiar={cambiarVista}
-        />
+          <SelectorVista
+            vista={vista}
+            agrupacion={agrupacion}
+            alCambiar={cambiarVista}
+          />
+        </div>
 
         {/* Los filtros de celebración viven dentro de Fichas: es la vista
             para rebuscar. «Todas» enseña el recetario entero sin recortes. */}

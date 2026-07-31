@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { HAY_SUPABASE } from '../nucleo/entorno'
 
@@ -46,21 +46,10 @@ export function Marco({ children, navegacion = true }: Props) {
             </span>
           </Link>
 
-          <nav
-            hidden={!navegacion}
-            className="mt-5 flex flex-wrap items-center justify-center gap-2"
-          >
-            <NavLink
-              to="/nueva"
-              className={({ isActive }) =>
-                (isActive ? 'boton-principal' : 'boton-secundario') +
-                ' whitespace-nowrap px-4 py-2 text-sm no-underline sm:text-base'
-              }
-            >
-              Escribir una receta
-            </NavLink>
-
-          </nav>
+          {/* Sin botones aquí. «Escribir una receta» se fue al recetario,
+              a la esquina de su propio apartado: es una acción sobre las
+              recetas, no sobre la web entera, y ahí está donde se está
+              mirando en vez de arriba del todo. */}
         </div>
       </header>
 

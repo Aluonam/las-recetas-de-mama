@@ -147,6 +147,21 @@
 
   body {
     margin: 0;
+    /**
+     * Ni un dedo de margen por los lados.
+     *
+     * Cortar el rebote no bastaba: si algo se sale un poco por la
+     * derecha —una sombra, un libro que se estira, una tabla— la página
+     * se puede arrastrar de lado, y ahí ya no llega el papel pintado,
+     * que es una capa del tamaño de la pantalla. Aparecía una franja
+     * lisa donde debería seguir el estampado.
+     *
+     * `clip` y no `hidden` a propósito: los dos cortan lo que sobra,
+     * pero `hidden` convierte esto en una caja con desplazamiento propio
+     * y eso rompe los botones que se quedan pegados abajo mientras
+     * escribes una receta. `clip` corta y ya está.
+     */
+    overflow-x: clip;
     background: transparent;
     color: var(--color-tinta);
     font-family: var(--font-sans);
