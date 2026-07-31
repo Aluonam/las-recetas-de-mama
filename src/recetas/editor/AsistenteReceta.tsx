@@ -60,11 +60,21 @@ const PASOS: Array<{
   {
     clave: 'hace',
     titulo: 'Cómo se hace',
+    // Los trucos van aquí, pegados a los pasos: son parte de cómo se
+    // hace. Estaban con el recuerdo y la procedencia, que es de dónde
+    // viene la receta, y son cosas distintas —uno se lee cocinando y lo
+    // otro se lee para saber de quién era.
     pintar: ({ receta, cambiar }) => (
-      <EditorPasos
-        pasos={receta.pasos}
-        alCambiar={(pasos) => cambiar({ pasos })}
-      />
+      <div className="space-y-8">
+        <EditorPasos
+          pasos={receta.pasos}
+          alCambiar={(pasos) => cambiar({ pasos })}
+        />
+        <EditorTrucos
+          trucos={receta.trucos}
+          alCambiar={(trucos) => cambiar({ trucos })}
+        />
+      </div>
     ),
   },
   {
@@ -76,10 +86,6 @@ const PASOS: Array<{
         <CamposProcedencia
           procedencia={receta.procedencia}
           alCambiar={(procedencia) => cambiar({ procedencia })}
-        />
-        <EditorTrucos
-          trucos={receta.trucos}
-          alCambiar={(trucos) => cambiar({ trucos })}
         />
       </div>
     ),
