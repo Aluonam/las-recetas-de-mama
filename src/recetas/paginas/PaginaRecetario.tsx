@@ -78,7 +78,9 @@ export function PaginaRecetario() {
    * el buscador y las solapas. En Fichas y en Índice no se hace, porque
    * ahí lo que se busca es la vista general.
    */
-  const zonaLibro = useAbrirEnGrande(vista === 'libro' && visibles.length > 0)
+  const zonaLibro = useAbrirEnGrande<HTMLDivElement>(
+    vista === 'libro' && visibles.length > 0,
+  )
 
   if (error != null) return <Aviso error={error} />
   if (!recetas) return <Cargando que="Sacando el recetario" />

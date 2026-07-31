@@ -16,6 +16,10 @@ import { useEffect, useRef } from 'react'
  * El desplazamiento es suave a propósito. Ver la cabecera irse es lo que
  * te enseña que sigue ahí arriba: si apareciera ya colocado, parecería
  * que ha desaparecido y nadie iría a buscarla.
+ *
+ * Hay que decirle el tipo de elemento al llamarlo —`useAbrirEnGrande<
+ * HTMLDivElement>(…)`—: no se deduce de nada, porque no llega por los
+ * argumentos sino por dónde se enganche el `ref`.
  */
 export function useAbrirEnGrande<T extends HTMLElement>(activo: boolean) {
   const zona = useRef<T>(null)

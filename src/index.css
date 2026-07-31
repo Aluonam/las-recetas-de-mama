@@ -77,51 +77,22 @@
    */
   --cenefa: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='40' viewBox='0 0 160 40'%3E%3Crect width='160' height='40' fill='%23fdf8f5'/%3E%3Cg fill='none' stroke='%23b8566c' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 3.4h160M0 36.6h160' stroke-width='1.5'/%3E%3Cpath d='M0 6.6h160M0 33.4h160' stroke-width='.6' opacity='.7'/%3E%3Cpath d='M0 24c14-9 26 7 40 0s26-11 40-2 26 11 40 4 26-9 40-4' stroke-width='1.1'/%3E%3Cg transform='translate(52 28) rotate(16)'%3E%3Cpath d='M0 0c3-6 7-7 9-4 2-2 5 0 4 3 2 2 0 5-3 4-1 3-5 4-7 1-2 0-4-2-3-4z' fill='%23f4dde2'/%3E%3Cpath d='M1 0l10-1M4-1l2-3M4 1l2 3'/%3E%3C/g%3E%3Cg transform='translate(98 13) rotate(-160)'%3E%3Cpath d='M0 0c3-6 7-7 9-4 2-2 5 0 4 3 2 2 0 5-3 4-1 3-5 4-7 1-2 0-4-2-3-4z' fill='%23f4dde2'/%3E%3Cpath d='M1 0l10-1M4-1l2-3M4 1l2 3'/%3E%3C/g%3E%3Cg transform='translate(140 28) rotate(8)'%3E%3Cpath d='M0 0c3-6 7-7 9-4 2-2 5 0 4 3 2 2 0 5-3 4-1 3-5 4-7 1-2 0-4-2-3-4z' fill='%23f4dde2'/%3E%3Cpath d='M1 0l10-1M4-1l2-3M4 1l2 3'/%3E%3C/g%3E%3Cg transform='translate(70 14)'%3E%3Cpath d='M0 0c3.6 0 5.2 3.6 2.5 4.9-2.5 1.2-3.7-1.2-2.5-2.5 1.2-1.2 2.5 0 2.5 1.2'/%3E%3C/g%3E%3Cg transform='translate(130 12) rotate(150)'%3E%3Cpath d='M0 0c3.6 0 5.2 3.6 2.5 4.9-2.5 1.2-3.7-1.2-2.5-2.5 1.2-1.2 2.5 0 2.5 1.2'/%3E%3C/g%3E%3Cg transform='translate(24 17)'%3E%3Ccircle r='7.2' fill='%23fbeef0'/%3E%3Cpath d='M-4.3 2.2a4.8 4.8 0 1 1 4.8-4.8'/%3E%3Cpath d='M-2.1 1a2.7 2.7 0 1 1 2.7-2.7'/%3E%3Cpath d='M.5.3a.9.9 0 1 1-.9-.9'/%3E%3Cpath d='M-7.2 0a7.2 7.2 0 0 1 2.7-5.6M7.2.3a7.2 7.2 0 0 1-2.7 5.6'/%3E%3C/g%3E%3Cg transform='translate(112 27) scale(.82)'%3E%3Ccircle r='7.2' fill='%23fbeef0'/%3E%3Cpath d='M-4.3 2.2a4.8 4.8 0 1 1 4.8-4.8'/%3E%3Cpath d='M-2.1 1a2.7 2.7 0 1 1 2.7-2.7'/%3E%3Cpath d='M.5.3a.9.9 0 1 1-.9-.9'/%3E%3Cpath d='M-7.2 0a7.2 7.2 0 0 1 2.7-5.6M7.2.3a7.2 7.2 0 0 1-2.7 5.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fondo: #1a1d16;
-    --papel: #1d201a;
-    --superficie: #24281f;
-    --superficie-2: #30352a;
-
-    --tinta: #ece7dc;
-    --tinta-suave: #a8a294;
-    --borde: #3a4033;
-
-    --verde-claro: #2a3529;
-    --verde-medio: #6f8a63;
-    --verde-texto: #a8c49a;
-
-    --rosa: #4a3038;
-    --rosa-medio: #d98ea0;
-    --rosa-texto: #e8a3b0;
-
-    --filete: #6f8a63;
-
-    --acento: #8fbb87;
-    --acento-tinta: #142013;
-    --acento-suave: #26301f;
-
-    --especial-fondo: #2b2226;
-    --especial-borde: #b8566c;
-
-    --exito: #8fbb87;
-
-    /* De noche el papel no puede ser crema: sería un foco. */
-    --tapa: #16241a;
-    --tapa-alta: #243a28;
-    --oro-tapa: #9c8850;
-    --hoja-papel: #262b23;
-    --canto-1: #333a2e;
-    --canto-2: #2b3127;
-
-    /* El toile es de tono claro: a plena opacidad sería un foco en una
-       pantalla a oscuras. Se queda como una textura tenue. */
-    --toile-opacidad: 0.12;
-  }
+  /**
+   * Siempre en claro, aunque el aparato esté en modo oscuro.
+   *
+   * Esto es un recetario de papel: crema, tinta marrón, rosa de La
+   * Cartuja y verde damasco. Invertirlo de noche no daba un recetario
+   * oscuro, daba otra web —el toile había que apagarlo casi del todo, la
+   * tapa de tela dejaba de parecer tela y las cenefas, que son dibujos
+   * de porcelana con el fondo blanco metido dentro, se quedaban
+   * flotando en recuadros claros sobre el negro.
+   *
+   * `color-scheme: light` no es un adorno: sin ello el navegador sigue
+   * pintando de oscuro lo que dibuja él —desplegables, calendarios,
+   * barras de desplazamiento, el relleno de los campos— y esos trozos
+   * desentonarían con el resto.
+   */
+  color-scheme: light;
 }
 
 @theme {
@@ -299,12 +270,6 @@
     background-image: var(--cenefa);
     background-repeat: repeat-x;
     background-size: auto 100%;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .cenefa {
-      filter: brightness(0.62) saturate(0.85);
-    }
   }
 
   /* Número de paso como ficha de azulejo, con las esquinas recortadas. */
