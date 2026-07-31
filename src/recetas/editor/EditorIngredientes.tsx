@@ -38,6 +38,9 @@ export function EditorIngredientes({ ingredientes, alCambiar }: Props) {
     alCambiar(copia)
   }
 
+  const ultimo = ingredientes[ingredientes.length - 1]
+  const ultimoSinNombre = Boolean(ultimo) && !ultimo.nombre.trim()
+
   return (
     <fieldset className="tarjeta m-0 p-4 sm:p-5">
       <legend className="px-2 font-titulo text-xl font-semibold">
@@ -117,13 +120,27 @@ export function EditorIngredientes({ ingredientes, alCambiar }: Props) {
         ))}
       </ul>
 
+      {/**
+       * No se añade otro mientras el último esté sin nombre.
+       *
+       * Pulsando seguido salían filas en blanco que no dicen nada y hay
+       * que borrar una a una. Y una lista donde la mitad son huecos deja
+       * de leerse como una lista.
+       */}
       <button
         type="button"
         className="boton-secundario mt-4 w-full sm:w-auto"
+        disabled={ultimoSinNombre}
         onClick={() => alCambiar([...ingredientes, { id: nuevoId(), nombre: '' }])}
       >
         Añadir ingrediente
       </button>
+
+      {ultimoSinNombre && (
+        <p className="mt-2 text-sm text-tinta-suave">
+          Escribe el producto para poder añadir otro.
+        </p>
+      )}
     </fieldset>
   )
 }

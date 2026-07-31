@@ -4,6 +4,27 @@ import { aEditable, recetaVacia } from '../tipos'
 import type { RecetaEditable } from '../tipos'
 
 /**
+ * Fuera las filas que se quedaron en blanco.
+ *
+ * Se puede añadir un ingrediente y no llegar a escribirlo, o borrar un
+ * paso dejando el hueco. Guardarlo tal cual mete renglones vacíos en la
+ * receta, que luego salen en el libro como una línea muda que nadie sabe
+ * qué era.
+ *
+ * Se limpia al guardar y no mientras se escribe: quitarle a alguien la
+ * fila donde está a punto de escribir sería mucho peor que el hueco.
+ */
+function sinHuecos(receta: RecetaEditable): RecetaEditable {
+  return {
+    ...receta,
+    ingredientes: receta.ingredientes.filter((uno) => uno.nombre.trim()),
+    materiales: receta.materiales.filter((uno) => uno.nombre.trim()),
+    pasos: receta.pasos.filter((uno) => uno.texto.trim()),
+    trucos: receta.trucos.filter((uno) => uno.texto.trim()),
+  }
+}
+
+/**
  * Estado del formulario de receta: cargar, editar y guardar.
  *
  * La página se queda solo con pintar campos. Toda la lógica vive aquí, así
@@ -40,9 +61,10 @@ export function useFormularioReceta(id?: string) {
     setGuardando(true)
     setError(null)
     try {
+      const limpia = sinHuecos(receta)
       const guardada = id
-        ? await actualizarReceta(id, receta)
-        : await crearReceta(receta)
+        ? await actualizarReceta(id, limpia)
+        : await crearReceta(limpia)
       return guardada.id
     } catch (e) {
       setError(e)
