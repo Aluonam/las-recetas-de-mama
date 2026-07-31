@@ -538,37 +538,70 @@
 /**
  * LA HOJA QUE GIRA
  *
- * Media página de papel que se levanta sobre el lomo y cae al otro
- * lado, tapando el contenido nuevo mientras llega y destapándolo al
- * terminar. Es lo que convierte el efecto en un libro.
+ * Una hoja de papel que se levanta sobre la costura y cae al otro lado,
+ * tapando la página nueva mientras llega y destapándola al terminar. Es
+ * lo que convierte el efecto en un libro.
  *
- * Va en blanco a propósito. En un libro de verdad la hoja que pasa se
- * mueve deprisa y no se lee: lo que se ve es papel, su sombra y el
- * canto. Duplicar el contenido para verlo medio segundo costaría el
- * doble de trabajo y se notaría menos.
+ * Gira siempre la hoja derecha, porque es la que cambia de sitio: hacia
+ * delante se levanta y cae sobre la izquierda; hacia atrás desanda el
+ * mismo gesto y vuelve a su lado.
  *
- * Solo con dos páginas a la vista. En móvil hay una sola y una hoja
+ * Solo con las dos páginas a la vista. En móvil hay una sola y una hoja
  * girando sobre sí misma no significaría nada.
  */
 .hoja-girando {
   position: absolute;
   inset-block: 0;
+  left: 50%;
   width: 50%;
   z-index: 20;
   pointer-events: none;
-  /* Sin esto las dos caras se aplastan en el mismo plano y el giro deja
-     de tener volumen. */
+  transform-origin: left center;
+  /* Sin esto los tramos se aplastan en el mismo plano y el giro deja de
+     tener volumen. */
   transform-style: preserve-3d;
 }
 
 /**
- * Las dos caras de la hoja.
+ * LOS TRAMOS
  *
- * Por delante, la página que estabas leyendo. Por detrás, la que queda
- * al otro lado cuando la hoja termina de caer. `backface-visibility`
- * hace que cada una se vea solo desde su lado: al pasar la vertical,
- * desaparece la de delante y aparece la de detrás, que es exactamente lo
- * que hace el papel.
+ * La hoja va partida en trozos encajados uno dentro de otro, colgando
+ * cada uno del anterior como una cadena de bisagras. Cada tramo hereda
+ * el giro de su padre y le suma el suyo, así que los ángulos se acumulan
+ * solos y el papel sale arqueado sin calcular nada.
+ *
+ * El primero está clavado a la costura y no gira por su cuenta: es el
+ * canto pegado al lomo, que es justo el que no se despega.
+ */
+.tramo {
+  position: absolute;
+  inset-block: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+}
+
+.tramo-primero {
+  left: 0;
+  /* Un tercio de la hoja. Los otros dos cuelgan de este. */
+  width: 33.3333%;
+}
+
+/* Cada uno arranca donde acaba su padre y mide lo mismo que él. */
+.tramo-colgado {
+  left: 100%;
+  width: 100%;
+}
+
+/**
+ * Las dos caras de cada tramo.
+ *
+ * Por delante, la página derecha. Por detrás, la izquierda.
+ * `backface-visibility` hace que cada una se vea solo desde su lado: al
+ * pasar la vertical desaparece la de delante y aparece la de detrás, que
+ * es exactamente lo que hace el papel.
+ *
+ * Sin borde lateral a propósito: dibujaría una raya en cada junta y
+ * delataría que la hoja está partida.
  */
 .cara {
   position: absolute;
@@ -576,7 +609,6 @@
   overflow: hidden;
   backface-visibility: hidden;
   background: var(--hoja-papel);
-  border-inline: 1px solid var(--canto-2);
 }
 
 .cara-dorso {
@@ -584,48 +616,124 @@
 }
 
 /**
- * La sombra del canillo.
+ * El trozo de página que le toca a cada tramo.
  *
- * En un libro encuadernado el papel se hunde hacia la costura y esa
- * franja queda siempre más oscura. Es un detalle pequeño que hace mucho:
- * sin él la hoja parece una lámina plana, no una página cosida.
- *
- * En el dorso va al otro lado, porque al darse la vuelta la costura
- * queda enfrente.
+ * La página entera se pinta a triple ancho dentro de una ventana que la
+ * recorta, y cada tramo la corre lo suyo para enseñar su tercio. Así los
+ * tres trozos son la misma página partida, no tres cosas distintas: la
+ * foto o el texto que cae en una junta sigue cuadrando al otro lado.
  */
+.ventana {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 300%;
+}
+
+.ventana-0 {
+  left: 0;
+}
+
+.ventana-1 {
+  left: -100%;
+}
+
+.ventana-2 {
+  left: -200%;
+}
+
+/**
+ * El doblez.
+ *
+ * Cuando pasas una hoja la coges por el canto de fuera y tiras: ese
+ * canto va por delante y la parte pegada a la costura se queda atrás.
+ * Por eso los tramos giran en el mismo sentido que la hoja pero un poco
+ * más, y el papel se arquea. Al final vuelven a cero y la hoja aterriza
+ * plana.
+ */
+@keyframes plegar-adelante {
+  0%,
+  100% {
+    transform: rotateY(0);
+  }
+  28% {
+    transform: rotateY(-11deg);
+  }
+  55% {
+    transform: rotateY(-14deg);
+  }
+  80% {
+    transform: rotateY(-7deg);
+  }
+}
+
+@keyframes plegar-atras {
+  0%,
+  100% {
+    transform: rotateY(0);
+  }
+  28% {
+    transform: rotateY(11deg);
+  }
+  55% {
+    transform: rotateY(14deg);
+  }
+  80% {
+    transform: rotateY(7deg);
+  }
+}
+
+.pliega-adelante {
+  animation: plegar-adelante 0.62s ease-in-out forwards;
+}
+
+.pliega-atras {
+  animation: plegar-atras 0.62s ease-in-out forwards;
+}
+
+/**
+ * La luz sobre el doblez.
+ *
+ * El pliegue existe en la geometría, pero en pantalla no se ve hasta que
+ * le da la luz: los tramos se van oscureciendo hacia fuera, como se
+ * oscurece el papel según se aparta de la ventana. Cada tramo trae su
+ * `--sombra`.
+ *
+ * Solo durante el giro. Con la hoja plana no hay doblez que sombrear.
+ */
+@keyframes sombra-pliegue {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  55% {
+    opacity: var(--sombra, 0);
+  }
+}
+
 .cara::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--tinta) 16%, transparent),
-    transparent 14%
-  );
+  opacity: 0;
+  background: var(--tinta);
+  animation: sombra-pliegue 0.62s ease-in-out forwards;
 }
 
-.cara-dorso::after {
-  background: linear-gradient(
-    to left,
-    color-mix(in srgb, var(--tinta) 16%, transparent),
-    transparent 14%
-  );
-}
-
+/**
+ * `filter` no aparece por ninguna parte a propósito: oscurecer la hoja
+ * con `brightness` obliga al navegador a aplanar el 3D y deja el giro
+ * sin volumen. Por eso la sombra se pinta encima, con una capa.
+ */
 @keyframes girar-adelante {
   0% {
     transform: rotateY(0);
     box-shadow: -10px 0 26px -8px rgba(0, 0, 0, 0.28);
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(0.86);
   }
   100% {
     transform: rotateY(-180deg);
     box-shadow: 10px 0 26px -8px rgba(0, 0, 0, 0.34);
-    filter: brightness(1);
   }
 }
 
@@ -633,34 +741,18 @@
  * Atrás es el mismo movimiento del revés: la hoja vuelve.
  *
  * Empieza tumbada sobre la izquierda —como quedó al pasarla— y se
- * levanta hasta caer otra vez a la derecha. Es exactamente desandar el
- * gesto, y por eso gira siempre la misma hoja: la derecha.
- *
- * Aquí la izquierda es el índice y no cambia nunca. Levantarla para ir
- * hacia atrás era el error: se veía desaparecer y volver algo que
- * siempre está.
+ * levanta hasta caer otra vez a la derecha. Es desandar el gesto, y por
+ * eso gira la misma hoja que al ir hacia delante.
  */
 @keyframes girar-atras {
   0% {
     transform: rotateY(-180deg);
     box-shadow: 10px 0 26px -8px rgba(0, 0, 0, 0.34);
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(0.86);
   }
   100% {
     transform: rotateY(0);
     box-shadow: -10px 0 26px -8px rgba(0, 0, 0, 0.28);
-    filter: brightness(1);
   }
-}
-
-/* Las dos giran la hoja derecha, sobre el lomo. Solo cambia el sentido. */
-.gira-adelante,
-.gira-atras {
-  left: 50%;
-  transform-origin: left center;
 }
 
 .gira-adelante {
@@ -706,6 +798,80 @@
     transparent 72%
   );
   animation: sombra-lomo 0.62s ease-in-out forwards;
+}
+
+/**
+ * LAS PESTAÑAS DEL CANTO
+ *
+ * El índice troquelado en el borde, como las agendas de teléfonos de
+ * toda la vida: unas lengüetas de cartulina con la letra escrita, y
+ * metes el dedo por la que buscas.
+ *
+ * Van repartidas a lo alto del libro, así que se escalonan solas: cuanto
+ * más abajo la letra, más abajo la lengüeta. Es lo que hace legible un
+ * canto de agenda, y sale gratis de repartir el espacio.
+ *
+ * La página izquierda se aparta con su `pl-14` para dejarles sitio: sin
+ * eso las lengüetas caerían encima del texto.
+ */
+.pestanas {
+  position: absolute;
+  left: 0;
+  inset-block: 1.25rem;
+  z-index: 30;
+  width: 2rem;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pestana {
+  flex: 1;
+  min-height: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-titulo);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--tinta-suave);
+  /* Más clara por el borde y fundiéndose con la hoja hacia dentro: es
+     una cartulina metida entre las páginas, no un botón encima. */
+  background: linear-gradient(to right, var(--canto-1), var(--hoja-papel));
+  border: 1px solid var(--borde);
+  border-right: none;
+  border-radius: 0.3rem 0 0 0.3rem;
+  transition:
+    transform 0.16s ease-out,
+    color 0.16s ease-out,
+    background 0.16s ease-out;
+}
+
+.pestana:hover {
+  color: var(--tinta);
+  transform: translateX(-2px);
+}
+
+/* La letra por la que está abierto el libro asoma un poco más, como
+   cuando dejas el dedo metido. */
+.pestana-abierta {
+  color: var(--rosa-texto);
+  font-weight: 600;
+  background: linear-gradient(to right, var(--rosa), var(--hoja-papel));
+  transform: translateX(-3px);
+}
+
+/**
+ * El alto del libro no depende de la receta.
+ *
+ * Una receta de tres líneas y otra de treinta tienen que ocupar lo
+ * mismo, o el libro pega un salto cada vez que pasas hoja y la hoja que
+ * gira se queda a media altura. Lo que sobra se desplaza dentro de la
+ * página; lo que falta se queda en blanco, como en el papel.
+ */
+@media (width >= 48rem) {
+  .doble-pagina {
+    min-height: 36rem;
+  }
 }
 
 /* Quien pide menos movimiento no debería marearse pasando páginas. */

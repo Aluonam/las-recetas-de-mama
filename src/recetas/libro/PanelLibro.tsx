@@ -1,14 +1,15 @@
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import type { Receta, RecetaResumen } from '../tipos'
-import { textoCantidad, textoTiempo } from '../formato'
+import { useEffect, useMemo, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import type { RecetaResumen } from '../tipos'
 import { tituloParaOrdenar } from '../indice/agrupar'
 import { useNavegacionLibro } from './useNavegacionLibro'
 import type { Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
 import { useHojaGirando } from './useHojaGirando'
-import { HojaIndice } from './HojaIndice'
-import { Imagen } from '../archivos/Imagen'
+import { PaginaIzquierda } from './PaginaIzquierda'
+import { PaginaDerecha } from './PaginaDerecha'
+import { PestanasIndice } from './PestanasIndice'
+import { HojaGirando } from './HojaGirando'
 
 /** Un libro va en orden, ignorando el artículo del título. */
 function ordenarComoLibro(recetas: RecetaResumen[]) {
@@ -17,15 +18,23 @@ function ordenarComoLibro(recetas: RecetaResumen[]) {
   )
 }
 
+/** Margen para distinguir un clic suelto de los dos de abrir, en ms. */
+const ESPERA_DOBLE_CLIC = 260
+
 /**
  * El recetario como libro.
  *
- * A la izquierda el índice, a la derecha la receta abierta. Es como está
- * hecho un recetario de casa: abres por cualquier sitio y en la página de
- * al lado tienes la lista para saltar a otra.
+ * Cada receta ocupa las dos páginas: a la izquierda la foto y los
+ * ingredientes —lo que se mira antes de cocinar—, a la derecha la
+ * elaboración. Es el reparto de cualquier libro de cocina, y le da a
+ * cada receta el sitio que en media página no tenía.
  *
- * En pantallas pequeñas solo cabe una página, así que se queda la receta
- * y el índice desaparece: para buscar ya está la vista de Índice.
+ * El índice no ocupa ninguna hoja: va troquelado en el canto, que es
+ * donde vive en un recetario de casa.
+ *
+ * En pantallas pequeñas solo cabe una página, así que se queda la
+ * elaboración escondida detrás del desplazamiento y desaparecen las
+ * pestañas: para buscar ya está la vista de Índice.
  */
 export function PanelLibro({
   recetas,
@@ -36,11 +45,14 @@ export function PanelLibro({
   todas: RecetaResumen[]
 }) {
   const enOrden = useMemo(() => ordenarComoLibro(recetas), [recetas])
+  const navegar = useNavigate()
 
   /**
    * La página es la del tomo, no la del montón que tengas delante: buscar
    * o filtrar enseña unas hojas y esconde otras, pero a nadie se le
    * renumeran las páginas de un libro por leerlo salteado.
+   *
+   * Cada receta se lleva dos números, porque ocupa las dos caras.
    */
   const paginaDe = useMemo(() => {
     const tomo = ordenarComoLibro(todas)
@@ -55,43 +67,105 @@ export function PanelLibro({
   const girando = useHojaGirando(resumen ? { resumen, receta } : null)
 
   /**
-   * Pulsar en la hoja de la receta la pasa. Se aparta cuando lo pulsado es
-   * un enlace o cuando hay texto seleccionado, para no pasar hoja a quien
-   * solo estaba copiando un ingrediente.
+   * Un clic pasa hoja; dos abren la receta.
+   *
+   * El navegador manda el primer clic antes de saber que viene el
+   * segundo, así que pasar hoja espera un momento: si llega el doble
+   * clic se cancela y se abre la receta. Sin esa espera, abrir una receta
+   * pasaría dos hojas por el camino.
+   */
+  const relojClic = useRef<number | null>(null)
+
+  const cancelarClic = () => {
+    if (relojClic.current === null) return
+    window.clearTimeout(relojClic.current)
+    relojClic.current = null
+  }
+
+  useEffect(() => cancelarClic, [])
+
+  /**
+   * Pulsar en una hoja la pasa. Se aparta cuando lo pulsado es un enlace
+   * o un botón, o cuando hay texto seleccionado, para no pasar hoja a
+   * quien solo estaba copiando un ingrediente.
    */
   const alPulsarHoja =
     (haciaDonde: Sentido) => (evento: React.MouseEvent<HTMLElement>) => {
       if ((evento.target as HTMLElement).closest('a, button')) return
       if (window.getSelection()?.toString()) return
-      pasar(haciaDonde)
+
+      cancelarClic()
+      relojClic.current = window.setTimeout(() => {
+        relojClic.current = null
+        pasar(haciaDonde)
+      }, ESPERA_DOBLE_CLIC)
     }
 
+  const alPulsarDosVeces = (evento: React.MouseEvent<HTMLElement>) => {
+    if ((evento.target as HTMLElement).closest('a, button')) return
+
+    cancelarClic()
+    navegar(`/receta/${resumen.id}`)
+  }
+
   if (!resumen) return null
+
+  const numero = paginaDe.get(resumen.id) ?? indice * 2 + 2
 
   return (
     <div {...gestos}>
       <div className="libro">
         <div className="paginas overflow-hidden">
           <div
-            // Cambiar la key reinicia la animación: cada hoja entra girada
-            // sobre el lomo y cae hasta quedar plana.
+            // Cambiar la key reinicia las animaciones: cada receta las
+            // arranca de cero.
             key={resumen.id}
             className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
           >
-            <div className="doble-pagina relative grid md:grid-cols-2">
-              <HojaIndice
-                recetas={enOrden}
-                abierta={resumen.id}
-                alElegir={irA}
-              />
+            <div
+              onDoubleClick={alPulsarDosVeces}
+              className="doble-pagina relative grid md:grid-cols-2"
+            >
+              {/* Izquierda pasa atrás, derecha adelante: se pasa hoja
+                  hacia el lado que se toca, como en el papel. */}
+              <div
+                onClick={alPulsarHoja('atras')}
+                className={
+                  'hidden md:block md:h-full ' +
+                  (indice > 0 ? 'cursor-pointer' : 'cursor-default')
+                }
+              >
+                <PaginaIzquierda
+                  receta={receta}
+                  resumen={resumen}
+                  numero={numero}
+                />
+              </div>
 
-              <HojaReceta
-                receta={receta}
-                resumen={resumen}
-                numero={paginaDe.get(resumen.id) ?? indice * 2 + 2}
-                alPulsar={alPulsarHoja('adelante')}
-                activa={indice < enOrden.length - 1}
-              />
+              {/* En móvil solo hay una página y es esta, así que lleva
+                  las dos mitades una debajo de otra. */}
+              <div
+                onClick={alPulsarHoja('adelante')}
+                className={
+                  'md:h-full ' +
+                  (indice < enOrden.length - 1
+                    ? 'cursor-pointer'
+                    : 'cursor-default')
+                }
+              >
+                <div className="md:hidden">
+                  <PaginaIzquierda
+                    receta={receta}
+                    resumen={resumen}
+                    numero={numero}
+                  />
+                </div>
+                <PaginaDerecha
+                  receta={receta}
+                  resumen={resumen}
+                  numero={numero + 1}
+                />
+              </div>
 
               {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
               <div
@@ -100,58 +174,52 @@ export function PanelLibro({
               />
 
               {/**
-               * La hoja que gira, con sus dos caras.
+               * La hoja que pasa.
                *
-               * Gira siempre la hoja derecha, porque es la única que
-               * cambia: la izquierda es el índice y se queda.
+               * Lleva por delante la página derecha y por detrás la
+               * izquierda, que es como está hecha una hoja de verdad: lo
+               * que dejas de leer y lo que aparece al otro lado.
                *
-               * Hacia delante se levanta —con la receta que estabas
-               * leyendo puesta— y cae sobre el índice. Hacia atrás
-               * desanda ese mismo gesto: viene tumbada desde la
-               * izquierda y se posa a la derecha enseñando la receta a la
-               * que vuelves.
-               *
-               * Solo con dos páginas a la vista: en móvil hay una sola y
-               * una hoja girando sobre sí misma no significaría nada.
+               * Hacia delante se levanta la receta que estabas leyendo y
+               * al caer enseña la portada de la siguiente. Hacia atrás
+               * viene tumbada desde la izquierda con la portada de la que
+               * dejas, y se posa enseñando la elaboración de la que
+               * recuperas.
                */}
               {girando && (
-                <div
-                  aria-hidden="true"
-                  className={
-                    'hoja-girando hidden md:block ' +
-                    (sentido === 'adelante' ? 'gira-adelante' : 'gira-atras')
+                <HojaGirando
+                  sentido={sentido}
+                  delante={
+                    sentido === 'adelante' ? (
+                      <PaginaDerecha
+                        receta={girando.receta}
+                        resumen={girando.resumen}
+                        numero={(paginaDe.get(girando.resumen.id) ?? 0) + 1}
+                      />
+                    ) : (
+                      <PaginaDerecha
+                        receta={receta}
+                        resumen={resumen}
+                        numero={numero + 1}
+                      />
+                    )
                   }
-                >
-                  {/**
-                   * La cara de la receta es la que se ve cuando la hoja
-                   * está en su sitio, a la derecha.
-                   *
-                   * Yendo hacia delante es la que estabas leyendo, que se
-                   * levanta. Yendo hacia atrás es la que vuelve, y por eso
-                   * es la actual: la hoja llega a su sitio enseñándola.
-                   */}
-                  <div className="cara">
-                    {sentido === 'adelante' ? (
-                      <HojaReceta
+                  detras={
+                    sentido === 'adelante' ? (
+                      <PaginaIzquierda
+                        receta={receta}
+                        resumen={resumen}
+                        numero={numero}
+                      />
+                    ) : (
+                      <PaginaIzquierda
                         receta={girando.receta}
                         resumen={girando.resumen}
                         numero={paginaDe.get(girando.resumen.id) ?? 0}
                       />
-                    ) : (
-                      <HojaReceta
-                        receta={receta}
-                        resumen={resumen}
-                        numero={paginaDe.get(resumen.id) ?? 0}
-                      />
-                    )}
-                  </div>
-
-                  {/* El dorso siempre es el índice: es lo que queda al
-                      otro lado cuando la hoja está tumbada. */}
-                  <div className="cara cara-dorso">
-                    <HojaIndice recetas={enOrden} abierta={resumen.id} />
-                  </div>
-                </div>
+                    )
+                  }
+                />
               )}
 
               {/* La sombra que proyecta la hoja al quedarse de canto. */}
@@ -161,6 +229,12 @@ export function PanelLibro({
                   className="sombra-lomo hidden md:block"
                 />
               )}
+
+              <PestanasIndice
+                recetas={enOrden}
+                abierta={indice}
+                alElegir={irA}
+              />
             </div>
           </div>
         </div>
@@ -168,128 +242,6 @@ export function PanelLibro({
 
       <Contador indice={indice} total={enOrden.length} receta={resumen} />
     </div>
-  )
-}
-
-function HojaReceta({
-  receta,
-  resumen,
-  numero,
-  alPulsar,
-  activa = false,
-}: {
-  receta: Receta | null
-  resumen: RecetaResumen
-  numero: number
-  /** Sin esto la hoja solo se pinta: es lo que se usa al girar. */
-  alPulsar?: (evento: React.MouseEvent<HTMLElement>) => void
-  activa?: boolean
-}) {
-  const tiempo = textoTiempo(resumen.tiempoMinutos)
-
-  return (
-    <article
-      onClick={alPulsar}
-      className={
-        'hoja hoja-der relative flex h-full flex-col p-6 pb-14 sm:p-8 sm:pb-16 ' +
-        (activa ? 'cursor-pointer' : 'cursor-default')
-      }
-    >
-      <div className="text-center">
-        <Imagen
-          archivo={resumen.fotoPortadaUrl}
-          className="arco marco-doble mx-auto mb-5 aspect-[4/3] w-full max-w-[15rem] object-cover"
-          hueco={<div className="guirnalda mb-3" aria-hidden="true" />}
-        />
-
-        {resumen.autorNombre && (
-          <p className="versalitas mb-1 text-rosa-texto">
-            De {resumen.autorNombre}
-          </p>
-        )}
-
-        <h2 className="mb-2 text-2xl sm:text-3xl">{resumen.titulo}</h2>
-
-        {resumen.descripcion && (
-          <p className="font-titulo italic text-tinta-suave">
-            {resumen.descripcion}
-          </p>
-        )}
-
-        <dl className="mt-4 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm">
-          {tiempo && (
-            <div>
-              <dt className="versalitas text-tinta-suave">Tiempo</dt>
-              <dd className="m-0 font-semibold">{tiempo}</dd>
-            </div>
-          )}
-          {resumen.ocasiones.length > 0 && (
-            <div>
-              <dt className="versalitas text-tinta-suave">Se hace en</dt>
-              <dd className="m-0 font-semibold">
-                {resumen.ocasiones.join(', ')}
-              </dd>
-            </div>
-          )}
-        </dl>
-      </div>
-
-      <div className="mt-6 flex-1">
-        {receta ? (
-          <>
-            {receta.porQueEspecial && (
-              <p className="mb-5 border-l-4 border-rosa-medio pl-4 font-titulo italic">
-                {receta.porQueEspecial}
-              </p>
-            )}
-
-            <h3 className="versalitas mb-2 text-tinta-suave">Ingredientes</h3>
-            <ul className="m-0 mb-5 list-none space-y-1.5 p-0">
-              {receta.ingredientes.map((ingrediente) => {
-                const cantidad = textoCantidad(ingrediente)
-                return (
-                  <li key={ingrediente.id} className="flex flex-wrap gap-x-2">
-                    <span>{ingrediente.nombre}</span>
-                    {cantidad && (
-                      <span className="text-rosa-texto">— {cantidad}</span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-
-            {receta.trucos.length > 0 && (
-              <>
-                <h3 className="versalitas mb-1 text-tinta-suave">
-                  El truco de la casa
-                </h3>
-                <p className="mb-5 text-tinta-suave">{receta.trucos[0].texto}</p>
-              </>
-            )}
-
-            <div className="text-center">
-              <Link
-                to={`/receta/${resumen.id}`}
-                className="boton-principal no-underline"
-              >
-                Abrir la receta
-              </Link>
-            </div>
-          </>
-        ) : (
-          <p role="status" className="py-8 text-center text-tinta-suave">
-            Abriendo la hoja…
-          </p>
-        )}
-      </div>
-
-      <p
-        aria-hidden="true"
-        className="absolute bottom-5 right-6 font-titulo text-sm text-tinta-suave sm:right-8"
-      >
-        {numero}
-      </p>
-    </article>
   )
 }
 
