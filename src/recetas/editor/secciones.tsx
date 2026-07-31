@@ -1,5 +1,6 @@
 import type { RecetaEditable } from '../tipos'
 import { Campo, CampoArea, CampoTexto } from '../../ui/Campo'
+import { textoTiempo } from '../formato'
 import { SelectorOcasiones } from './SelectorOcasiones'
 import { SubirFoto } from './SubirFoto'
 import { EditorAudio } from '../audio/EditorAudio'
@@ -16,6 +17,21 @@ import { EditorAudio } from '../audio/EditorAudio'
 
 /** De uno a cincuenta. Por encima ya no es una comida de casa. */
 const COMENSALES = Array.from({ length: 50 }, (_, n) => n + 1)
+
+/**
+ * Los tiempos que se dicen de verdad, en minutos.
+ *
+ * Nadie cocina «37 minutos»: se dice media hora, tres cuartos, hora y
+ * media. Van más juntos al principio, donde la diferencia importa —de
+ * 5 a 10 minutos se duplica el trabajo—, y más sueltos al final, donde
+ * un guiso de cuatro o cinco horas es lo mismo: ponerlo y olvidarse.
+ *
+ * El texto lo pone `textoTiempo`, el mismo que lo enseña luego en la
+ * receta, así que la lista y la ficha dicen lo mismo.
+ */
+const TIEMPOS = [
+  5, 10, 15, 20, 30, 45, 60, 90, 120, 150, 180, 240, 300, 360, 480, 720,
+]
 
 export interface Props {
   receta: RecetaEditable
@@ -50,6 +66,10 @@ export function SeccionPlato({ receta, cambiar }: Props) {
    */
   const raciones = receta.raciones?.trim() ?? ''
   const aMano = raciones && !COMENSALES.some((n) => String(n) === raciones)
+
+  // Lo mismo con el tiempo, que antes se escribía en minutos sueltos.
+  const tiempoAMano =
+    receta.tiempoMinutos != null && !TIEMPOS.includes(receta.tiempoMinutos)
 
   return (
     <Bloque titulo="La receta">
@@ -91,19 +111,33 @@ export function SeccionPlato({ receta, cambiar }: Props) {
           )}
         </Campo>
 
-        <CampoTexto
-          etiqueta="Tiempo (minutos)"
-          type="number"
-          min="1"
-          placeholder="90"
-          value={receta.tiempoMinutos ?? ''}
-          onChange={(e) =>
-            cambiar({
-              tiempoMinutos:
-                e.target.value === '' ? null : Number(e.target.value),
-            })
-          }
-        />
+        <Campo etiqueta="¿Cuánto lleva?">
+          {(id) => (
+            <select
+              id={id}
+              className="campo"
+              value={receta.tiempoMinutos ?? ''}
+              onChange={(e) =>
+                cambiar({
+                  tiempoMinutos:
+                    e.target.value === '' ? null : Number(e.target.value),
+                })
+              }
+            >
+              <option value="">Sin indicar</option>
+              {tiempoAMano && (
+                <option value={receta.tiempoMinutos!}>
+                  {textoTiempo(receta.tiempoMinutos)}
+                </option>
+              )}
+              {TIEMPOS.map((minutos) => (
+                <option key={minutos} value={minutos}>
+                  {textoTiempo(minutos)}
+                </option>
+              ))}
+            </select>
+          )}
+        </Campo>
       </div>
 
       <SelectorOcasiones
