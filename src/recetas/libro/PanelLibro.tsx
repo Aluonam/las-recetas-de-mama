@@ -52,7 +52,7 @@ export function PanelLibro({
   )
   const resumen = enOrden[indice]
   const { receta } = useRecetaCompleta(resumen?.id)
-  const girando = useHojaGirando(resumen?.id)
+  const girando = useHojaGirando(resumen ? { resumen, receta } : null)
 
   /**
    * Pulsar en la hoja de la receta la pasa. Se aparta cuando lo pulsado es
@@ -100,7 +100,15 @@ export function PanelLibro({
               />
 
               {/**
-               * La hoja que gira.
+               * La hoja que gira, con sus dos caras.
+               *
+               * Hacia delante: se levanta la página derecha —la que
+               * estabas leyendo— y cae hacia la izquierda. Por detrás
+               * lleva el índice, que es lo que queda a ese lado.
+               *
+               * Hacia atrás, al revés: se levanta la izquierda, que es
+               * el índice, y al caer hacia la derecha enseña por detrás
+               * la receta a la que vuelves.
                *
                * Solo con dos páginas a la vista: en móvil hay una sola y
                * una hoja girando sobre sí misma no significaría nada.
@@ -112,7 +120,31 @@ export function PanelLibro({
                     'hoja-girando hidden md:block ' +
                     (sentido === 'adelante' ? 'gira-adelante' : 'gira-atras')
                   }
-                />
+                >
+                  <div className="cara">
+                    {sentido === 'adelante' ? (
+                      <HojaReceta
+                        receta={girando.receta}
+                        resumen={girando.resumen}
+                        numero={paginaDe.get(girando.resumen.id) ?? 0}
+                      />
+                    ) : (
+                      <HojaIndice recetas={enOrden} abierta={resumen.id} />
+                    )}
+                  </div>
+
+                  <div className="cara cara-dorso">
+                    {sentido === 'adelante' ? (
+                      <HojaIndice recetas={enOrden} abierta={resumen.id} />
+                    ) : (
+                      <HojaReceta
+                        receta={receta}
+                        resumen={resumen}
+                        numero={paginaDe.get(resumen.id) ?? 0}
+                      />
+                    )}
+                  </div>
+                </div>
               )}
 
               {/* La sombra que deja al caer sobre la de abajo. */}
@@ -138,13 +170,14 @@ function HojaReceta({
   resumen,
   numero,
   alPulsar,
-  activa,
+  activa = false,
 }: {
   receta: Receta | null
   resumen: RecetaResumen
   numero: number
-  alPulsar: (evento: React.MouseEvent<HTMLElement>) => void
-  activa: boolean
+  /** Sin esto la hoja solo se pinta: es lo que se usa al girar. */
+  alPulsar?: (evento: React.MouseEvent<HTMLElement>) => void
+  activa?: boolean
 }) {
   const tiempo = textoTiempo(resumen.tiempoMinutos)
 
@@ -152,7 +185,7 @@ function HojaReceta({
     <article
       onClick={alPulsar}
       className={
-        'hoja hoja-der relative flex flex-col p-6 pb-14 sm:p-8 sm:pb-16 ' +
+        'hoja hoja-der relative flex h-full flex-col p-6 pb-14 sm:p-8 sm:pb-16 ' +
         (activa ? 'cursor-pointer' : 'cursor-default')
       }
     >

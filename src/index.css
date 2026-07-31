@@ -540,10 +540,31 @@
   width: 50%;
   z-index: 20;
   pointer-events: none;
-  background: var(--hoja-papel);
+  /* Sin esto las dos caras se aplastan en el mismo plano y el giro deja
+     de tener volumen. */
   transform-style: preserve-3d;
-  /* El canto: el borde exterior de la hoja levantada. */
+}
+
+/**
+ * Las dos caras de la hoja.
+ *
+ * Por delante, la página que estabas leyendo. Por detrás, la que queda
+ * al otro lado cuando la hoja termina de caer. `backface-visibility`
+ * hace que cada una se vea solo desde su lado: al pasar la vertical,
+ * desaparece la de delante y aparece la de detrás, que es exactamente lo
+ * que hace el papel.
+ */
+.cara {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background: var(--hoja-papel);
   border-inline: 1px solid var(--canto-2);
+}
+
+.cara-dorso {
+  transform: rotateY(180deg);
 }
 
 @keyframes girar-adelante {
@@ -555,14 +576,10 @@
   50% {
     filter: brightness(0.86);
   }
-  92% {
-    opacity: 1;
-  }
   100% {
-    transform: rotateY(-178deg);
+    transform: rotateY(-180deg);
     box-shadow: 10px 0 26px -8px rgba(0, 0, 0, 0.34);
-    filter: brightness(0.97);
-    opacity: 0;
+    filter: brightness(1);
   }
 }
 
@@ -575,14 +592,10 @@
   50% {
     filter: brightness(0.86);
   }
-  92% {
-    opacity: 1;
-  }
   100% {
-    transform: rotateY(178deg);
+    transform: rotateY(180deg);
     box-shadow: -10px 0 26px -8px rgba(0, 0, 0, 0.34);
-    filter: brightness(0.97);
-    opacity: 0;
+    filter: brightness(1);
   }
 }
 

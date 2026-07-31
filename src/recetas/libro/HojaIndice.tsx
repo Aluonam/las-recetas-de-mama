@@ -6,7 +6,8 @@ interface Props {
   /** Ya en el orden del libro. */
   recetas: RecetaResumen[]
   abierta: string
-  alElegir: (indice: number) => void
+  /** Sin esto el índice solo se pinta: es lo que se usa al girar. */
+  alElegir?: (indice: number) => void
 }
 
 /**
@@ -39,7 +40,7 @@ export function HojaIndice({ recetas, abierta, alElegir }: Props) {
   }, [recetas])
 
   return (
-    <article className="hoja hoja-izq hidden flex-col p-6 pb-14 sm:p-8 sm:pb-16 md:flex">
+    <article className="hoja hoja-izq hidden h-full flex-col p-6 pb-14 sm:p-8 sm:pb-16 md:flex">
       <p className="versalitas mb-1 text-center text-rosa-texto">Índice</p>
       <div className="guirnalda mb-4" aria-hidden="true" />
 
@@ -59,7 +60,7 @@ export function HojaIndice({ recetas, abierta, alElegir }: Props) {
                   <li key={receta.id}>
                     <button
                       type="button"
-                      onClick={() => alElegir(indice)}
+                      onClick={() => alElegir?.(indice)}
                       aria-current={esta ? 'true' : undefined}
                       className={
                         'flex w-full items-baseline gap-1 rounded px-1 py-1 text-left transition-colors ' +
