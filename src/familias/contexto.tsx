@@ -66,6 +66,20 @@ function recordar(id: string | null) {
   }
 }
 
+/**
+ * Deja constancia del recetario abierto ANTES de que nadie lo pregunte.
+ *
+ * Esto tiene que pasar en el mismo momento del cambio y no en un efecto
+ * posterior. React ejecuta los efectos de los hijos antes que los del
+ * padre, así que la pantalla del recetario pedía sus recetas mientras el
+ * dato seguía siendo el del recetario anterior: al cambiar a la yaya
+ * salían las de mamá.
+ */
+function abrirFamilia(familia: Familia | null) {
+  recordarFamilia(familia?.id ?? null)
+  if (familia) recordar(familia.id)
+}
+
 const Contexto = createContext<ContextoFamilia | undefined>(undefined)
 
 export function ProveedorFamilia({ children }: { children: ReactNode }) {
@@ -89,7 +103,9 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
         setTodas(suyas)
         // El que estaba abierto, si sigue siendo suyo. Si no, el primero.
         const antes = recordado()
-        setFamilia(suyas.find((f) => f.id === antes) ?? suyas[0] ?? null)
+        const abierto = suyas.find((f) => f.id === antes) ?? suyas[0] ?? null
+        abrirFamilia(abierto)
+        setFamilia(abierto)
         setError(null)
       })
       .catch(setError)
@@ -98,19 +114,17 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
 
   useEffect(recargar, [recargar])
 
-  // La capa de datos lo lee desde fuera de React para saber dónde
-  // guardar cada receta y cada foto. Y se anota cuál queda abierto, para
-  // volver a él tras cualquier ida y vuelta.
+  // Red de seguridad. Lo importante ya lo hace abrirFamilia en el momento
+  // del cambio; esto solo cubre que el estado llegue por otro camino.
   useEffect(() => {
-    recordarFamilia(familia?.id ?? null)
-    if (familia) recordar(familia.id)
+    abrirFamilia(familia)
   }, [familia])
 
   const entrar = useCallback(
     (nueva: Familia) => {
       // Se anota antes de recargar, para que la recarga vuelva a este y
       // no al primero de la lista.
-      recordar(nueva.id)
+      abrirFamilia(nueva)
       setTodas((previas) =>
         previas.some((f) => f.id === nueva.id) ? previas : [...previas, nueva],
       )
@@ -132,7 +146,11 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
   const elegir = useCallback(
     (familiaId: string) => {
       const suya = todas.find((f) => f.id === familiaId)
-      if (suya) setFamilia(suya)
+      if (!suya) return
+      // Antes de tocar el estado: si no, la pantalla pediría las recetas
+      // del recetario anterior.
+      abrirFamilia(suya)
+      setFamilia(suya)
     },
     [todas],
   )
