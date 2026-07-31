@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { BotonDictar } from './BotonDictar'
 
 /**
  * Una lista que se escribe de una tirada, una cosa por línea.
@@ -90,6 +91,19 @@ export function ListaEnTexto({
         onChange={(evento) => {
           setTexto(evento.target.value)
           alCambiar(evento.target.value)
+        }}
+      />
+
+      {/* Cada trozo dictado empieza una línea nueva: aquí una línea es
+          una cosa —un cacharro, un truco—, y empalmarlos en la misma
+          los convertiría en uno solo. */}
+      <BotonDictar
+        valor={texto}
+        etiqueta={etiqueta.toLowerCase()}
+        enLineaAparte
+        alCambiar={(nuevo) => {
+          setTexto(nuevo)
+          alCambiar(nuevo)
         }}
       />
     </fieldset>

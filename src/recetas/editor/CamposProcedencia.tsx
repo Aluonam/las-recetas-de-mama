@@ -36,6 +36,7 @@ export function CamposProcedencia({ procedencia, alCambiar }: Props) {
         placeholder="De su madre, Josefa, en el pueblo."
         value={procedencia.aprendidaDe ?? ''}
         onChange={(e) => cambiar({ aprendidaDe: e.target.value })}
+        dictable={(aprendidaDe) => cambiar({ aprendidaDe })}
       />
 
       <CampoTexto

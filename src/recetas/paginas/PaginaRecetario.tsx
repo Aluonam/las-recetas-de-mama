@@ -46,16 +46,19 @@ export function PaginaRecetario() {
   }, [familia])
 
   /**
-   * Al salir de Fichas se limpia el filtro de celebración.
+   * Al salir de Fichas se limpia el filtro de celebración, y al entrar en
+   * el Libro se limpia también la búsqueda.
    *
-   * Los filtros solo se ven ahí, así que dejarlos puestos escondería
-   * recetas en el libro o en el índice sin nada en pantalla que explicara
-   * por qué faltan.
+   * Un filtro puesto que no se ve escondería recetas sin nada en pantalla
+   * que explicara por qué faltan.
    */
   const cambiarVista = (parche: Parameters<typeof cambiar>[0]) => {
-    if (parche.vista && parche.vista !== 'fichas') setOcasion(null)
+    if (!parche.vista) return cambiar(parche)
+
+    if (parche.vista !== 'fichas') setOcasion(null)
+    if (parche.vista === 'libro') setBusqueda('')
     // Elegir «Libro» es pedir el libro, así que se abre como se mira.
-    if (parche.vista) setPantallaCompleta(parche.vista === 'libro')
+    setPantallaCompleta(parche.vista === 'libro')
     cambiar(parche)
   }
 
@@ -79,6 +82,17 @@ export function PaginaRecetario() {
         .some((campo) => campo!.toLowerCase().includes(texto))
     })
   }, [recetas, busqueda, ocasion])
+
+  /**
+   * El libro va siempre entero.
+   *
+   * Es el recetario ordenado por letras, y un libro no se hojea a
+   * trozos: si buscar dejara fuera la mitad, el índice del canto tendría
+   * letras que no llevan a ninguna parte y el «3 de 7» de abajo estaría
+   * contando otra cosa. Para rebuscar están las Fichas, que es la vista
+   * hecha para eso.
+   */
+  const enLaVista = vista === 'libro' ? (recetas ?? []) : visibles
 
   if (error != null) return <Aviso error={error} />
   if (!recetas) return <Cargando que="Sacando el recetario" />
@@ -107,7 +121,12 @@ export function PaginaRecetario() {
 
       <div className="mb-6 flex flex-col gap-3">
         <div className="flex flex-wrap items-end gap-3">
-          <BuscadorLupa busqueda={busqueda} alBuscar={setBusqueda} />
+          {/* En el libro no hay lupa: no se busca en un libro abierto, se
+              va por las letras del canto. Enseñarla y que no filtrara
+              sería peor que no tenerla. */}
+          {vista !== 'libro' && (
+            <BuscadorLupa busqueda={busqueda} alBuscar={setBusqueda} />
+          )}
 
           <SelectorVista
             vista={vista}
@@ -127,7 +146,7 @@ export function PaginaRecetario() {
         )}
       </div>
 
-      {visibles.length === 0 ? (
+      {enLaVista.length === 0 ? (
         <p className="py-12 text-center text-tinta-suave">
           Ninguna receta encaja con esa búsqueda.
         </p>
@@ -142,13 +161,13 @@ export function PaginaRecetario() {
               Ver a pantalla completa
             </button>
           </div>
-          <PanelLibro recetas={visibles} todas={recetas} />
+          <PanelLibro recetas={enLaVista} todas={recetas} />
         </div>
       ) : vista === 'indice' ? (
-        <PanelIndice recetas={visibles} modo={agrupacion} />
+        <PanelIndice recetas={enLaVista} modo={agrupacion} />
       ) : (
         <ul className="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
-          {visibles.map((receta) => (
+          {enLaVista.map((receta) => (
             <li key={receta.id}>
               <TarjetaReceta receta={receta} />
             </li>
@@ -157,9 +176,9 @@ export function PaginaRecetario() {
       )}
 
       {/* Va al final y por encima de todo: tapa la página entera. */}
-      {vista === 'libro' && pantallaCompleta && visibles.length > 0 && (
+      {vista === 'libro' && pantallaCompleta && enLaVista.length > 0 && (
         <LibroPantallaCompleta
-          recetas={visibles}
+          recetas={enLaVista}
           todas={recetas}
           alCerrar={() => setPantallaCompleta(false)}
         />

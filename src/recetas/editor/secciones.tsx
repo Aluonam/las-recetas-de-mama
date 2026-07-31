@@ -165,6 +165,9 @@ export function SeccionEspecial({ receta, cambiar }: Props) {
         placeholder="Es lo primero que olía la casa cuando llegábamos en Navidad. La abuela empezaba el día antes y no dejaba entrar a nadie en la cocina."
         value={receta.porQueEspecial ?? ''}
         onChange={(e) => cambiar({ porQueEspecial: e.target.value })}
+        // Este es el campo que más se queda en blanco y el que más vale:
+        // hay quien no lo escribe pero lo cuenta sin pensarlo.
+        dictable={(porQueEspecial) => cambiar({ porQueEspecial })}
       />
     </Bloque>
   )

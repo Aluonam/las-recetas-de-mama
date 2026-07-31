@@ -2,6 +2,7 @@ import { ListaEditable } from '../../ui/ListaEditable'
 import { nuevoId } from '../formato'
 import type { Paso } from '../tipos'
 import { SubirFoto } from './SubirFoto'
+import { BotonDictar } from '../../ui/BotonDictar'
 
 interface Props {
   pasos: Paso[]
@@ -26,6 +27,12 @@ export function EditorPasos({ pasos, alCambiar }: Props) {
             aria-label="Texto del paso"
             value={paso.texto}
             onChange={(e) => cambiar({ texto: e.target.value })}
+          />
+
+          <BotonDictar
+            valor={paso.texto}
+            etiqueta="el paso"
+            alCambiar={(texto) => cambiar({ texto })}
           />
 
           <SubirFoto

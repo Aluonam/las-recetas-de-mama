@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { ReactNode } from 'react'
+import { BotonDictar } from './BotonDictar'
 
 interface PropsBase {
   etiqueta: string
@@ -45,19 +46,41 @@ export function CampoTexto({ etiqueta, ayuda, ...resto }: PropsTexto) {
 }
 
 type PropsArea = PropsBase &
-  Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'>
+  Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> & {
+    /**
+     * Añade el botón de dictar debajo. Solo donde se escribe de
+     * corrido: hay quien no escribe la historia de una receta pero la
+     * cuenta de viva voz sin pensarlo.
+     */
+    dictable?: (texto: string) => void
+  }
 
-export function CampoArea({ etiqueta, ayuda, rows = 4, ...resto }: PropsArea) {
+export function CampoArea({
+  etiqueta,
+  ayuda,
+  rows = 4,
+  dictable,
+  ...resto
+}: PropsArea) {
   return (
     <Campo etiqueta={etiqueta} ayuda={ayuda}>
       {(id, idAyuda) => (
-        <textarea
-          id={id}
-          rows={rows}
-          aria-describedby={idAyuda}
-          className="campo"
-          {...resto}
-        />
+        <>
+          <textarea
+            id={id}
+            rows={rows}
+            aria-describedby={idAyuda}
+            className="campo"
+            {...resto}
+          />
+          {dictable && (
+            <BotonDictar
+              valor={String(resto.value ?? '')}
+              alCambiar={dictable}
+              etiqueta={etiqueta.toLowerCase()}
+            />
+          )}
+        </>
       )}
     </Campo>
   )
