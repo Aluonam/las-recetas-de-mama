@@ -6,6 +6,15 @@ pierde es quién las hacía, cómo las contaba y por qué esa y no otra.
 
 **En marcha:** [las-recetas-de-mama.vercel.app](https://las-recetas-de-mama.vercel.app)
 
+| | Servicio | Para qué |
+| --- | -------- | -------- |
+| 🌐 | [Vercel](https://vercel.com) | Publica la web y cuenta las visitas |
+| 🗄️ | [Supabase](https://supabase.com) | Recetas, fotos, audios y accesos |
+| ⏰ | [cron-job.org](https://cron-job.org) | Que Supabase no se duerma |
+
+Todos con plan gratuito. Detalle de cada uno, con sus ajustes y qué hacer
+si falla, en **[docs/servicios.md](docs/servicios.md)**.
+
 ---
 
 ## Qué guarda una receta
@@ -97,8 +106,14 @@ src/
 └── pwa/           Instalación en la pantalla de inicio
 ```
 
-Más detalle en [`docs/arquitectura.md`](docs/arquitectura.md) y
-[`docs/base-de-datos.md`](docs/base-de-datos.md).
+## Documentación
+
+| Archivo | Qué cuenta |
+| ------- | ---------- |
+| [`docs/servicios.md`](docs/servicios.md) | Qué servicios se usan, sus ajustes y qué hacer si alguno falla |
+| [`docs/puesta-en-marcha.md`](docs/puesta-en-marcha.md) | Montarlo de cero, paso a paso |
+| [`docs/base-de-datos.md`](docs/base-de-datos.md) | El modelo, los permisos y la seguridad |
+| [`docs/arquitectura.md`](docs/arquitectura.md) | Por qué el código está así |
 
 ---
 
