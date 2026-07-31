@@ -6,6 +6,7 @@ import { useNavegacionLibro } from './useNavegacionLibro'
 import type { Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
 import { useHojaGirando } from './useHojaGirando'
+import type { Pagina } from './useHojaGirando'
 import { PaginaIzquierda } from './PaginaIzquierda'
 import { PaginaDerecha } from './PaginaDerecha'
 import { PestanasIndice } from './PestanasIndice'
@@ -118,6 +119,32 @@ export function PanelLibro({
   if (!resumen) return null
 
   const numero = paginaDe.get(resumen.id) ?? indice * 2 + 2
+  const abierta: Pagina = { resumen, receta }
+
+  /**
+   * Mientras la hoja gira, la página que todavía no ha tapado sigue
+   * enseñando lo de antes.
+   *
+   * Sin esto, las dos caras cambiaban de contenido en el instante cero y
+   * se leía la receta nueva antes de que nada se hubiera movido: la hoja
+   * llegaba tarde a tapar algo que ya se había visto.
+   *
+   * Cuál es esa página depende del sentido, y es siempre la contraria a
+   * la que la hoja levanta. Yendo hacia delante se levanta la derecha,
+   * así que la izquierda es la que queda a la vista y no debe cambiar
+   * hasta que la hoja caiga encima. Yendo hacia atrás, al revés.
+   *
+   * La otra mitad sí cambia ya, y da igual: al empezar está debajo de la
+   * hoja, y para cuando asoma es justo lo que toca ver.
+   */
+  const congelada = (lado: 'izquierda' | 'derecha'): Pagina => {
+    if (!girando) return abierta
+    const laQueEsper = sentido === 'adelante' ? 'izquierda' : 'derecha'
+    return lado === laQueEsper ? girando : abierta
+  }
+
+  const paginaDeLa = (pagina: Pagina) =>
+    paginaDe.get(pagina.resumen.id) ?? numero
 
   return (
     <div {...gestos} className={lleno ? 'libro-lleno flex h-full flex-col' : ''}>
@@ -153,9 +180,9 @@ export function PanelLibro({
                 }
               >
                 <PaginaIzquierda
-                  receta={receta}
-                  resumen={resumen}
-                  numero={numero}
+                  receta={congelada('izquierda').receta}
+                  resumen={congelada('izquierda').resumen}
+                  numero={paginaDeLa(congelada('izquierda'))}
                 />
               </div>
 
@@ -178,9 +205,9 @@ export function PanelLibro({
                   />
                 </div>
                 <PaginaDerecha
-                  receta={receta}
-                  resumen={resumen}
-                  numero={numero + 1}
+                  receta={congelada('derecha').receta}
+                  resumen={congelada('derecha').resumen}
+                  numero={paginaDeLa(congelada('derecha')) + 1}
                 />
               </div>
 

@@ -24,6 +24,12 @@ export interface Pagina {
  * No gira en la primera carga: entrar en el recetario no es pasar una
  * hoja.
  */
+/**
+ * A partir de aquí caben las dos páginas y hay hoja que girar. Es el
+ * corte `md` de Tailwind, el mismo que decide el libro abierto.
+ */
+const HAY_DOS_PAGINAS = '(width >= 48rem)'
+
 export function useHojaGirando(actual: Pagina | null) {
   const [congelada, setCongelada] = useState<Pagina | null>(null)
   const anterior = useRef<Pagina | null>(null)
@@ -37,6 +43,15 @@ export function useHojaGirando(actual: Pagina | null) {
       primera.current = false
       return
     }
+
+    /**
+     * En móvil no se congela nada.
+     *
+     * Allí hay una sola página y ninguna hoja girando, así que quedarse
+     * con la anterior no taparía nada: solo retrasaría medio segundo la
+     * receta nueva, sin motivo visible.
+     */
+    if (!window.matchMedia(HAY_DOS_PAGINAS).matches) return
 
     // `anterior` todavía tiene la página del render pasado: la que hay
     // que enseñar girando.
