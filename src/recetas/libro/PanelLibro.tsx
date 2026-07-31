@@ -6,6 +6,7 @@ import { tituloParaOrdenar } from '../indice/agrupar'
 import { useNavegacionLibro } from './useNavegacionLibro'
 import type { Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
+import { useHojaGirando } from './useHojaGirando'
 import { HojaIndice } from './HojaIndice'
 import { Imagen } from '../archivos/Imagen'
 
@@ -51,6 +52,7 @@ export function PanelLibro({
   )
   const resumen = enOrden[indice]
   const { receta } = useRecetaCompleta(resumen?.id)
+  const girando = useHojaGirando(resumen?.id)
 
   /**
    * Pulsar en la hoja de la receta la pasa. Se aparta cuando lo pulsado es
@@ -97,7 +99,23 @@ export function PanelLibro({
                 className="lomo pointer-events-none absolute inset-y-0 left-1/2 hidden w-10 -translate-x-1/2 md:block"
               />
 
-              {/* La sombra que deja la hoja al caer sobre la de abajo. */}
+              {/**
+               * La hoja que gira.
+               *
+               * Solo con dos páginas a la vista: en móvil hay una sola y
+               * una hoja girando sobre sí misma no significaría nada.
+               */}
+              {girando && (
+                <div
+                  aria-hidden="true"
+                  className={
+                    'hoja-girando hidden md:block ' +
+                    (sentido === 'adelante' ? 'gira-adelante' : 'gira-atras')
+                  }
+                />
+              )}
+
+              {/* La sombra que deja al caer sobre la de abajo. */}
               <div
                 aria-hidden="true"
                 className={
