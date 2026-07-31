@@ -2,7 +2,9 @@
 --  Limpieza: recetarios de prueba y cuentas huérfanas
 --
 --  Dos cosas, en este orden:
---    1. Los recetarios que crea scripts/prueba-permisos.mjs
+--    1. Los recetarios de prueba, por su código:
+--         ROMAN-, YAYA-   scripts/prueba-permisos.mjs
+--         ABC-            scripts/recetario-abecedario.mjs
 --    2. Las sesiones anónimas que no pertenecen a nada
 --
 --  El orden importa: al borrar un recetario desaparecen también
@@ -30,6 +32,7 @@ select
   (select count(*) from public.miembro m where m.familia_id = f.id) as miembros,
   case
     when f.codigo like 'ROMAN-%' or f.codigo like 'YAYA-%'
+      or f.codigo like 'ABC-%'
       then '>>> SE BORRA (prueba)'
     else 'se queda'
   end as que_pasa
@@ -48,7 +51,8 @@ begin;
 
 delete from public.familia
 where codigo like 'ROMAN-%'
-   or codigo like 'YAYA-%';
+   or codigo like 'YAYA-%'
+   or codigo like 'ABC-%';
 
 commit;
 
