@@ -83,7 +83,9 @@ function Identificarse({ soyDuena }: { soyDuena: boolean }) {
           email: correo.trim(),
           options: {
             shouldCreateUser: false,
-            emailRedirectTo: window.location.origin + '/ajustes',
+            // Al volver del correo, al recetario. Lo primero que se
+            // quiere ver al entrar son las recetas, no los ajustes.
+            emailRedirectTo: window.location.origin,
           },
         })
         if (fallo) throw fallo
@@ -103,8 +105,8 @@ function Identificarse({ soyDuena }: { soyDuena: boolean }) {
         <h2 className="mb-1 text-xl">Mira tu correo</h2>
         <p className="text-tinta-suave">
           Te hemos mandado un enlace a <strong>{correo}</strong>. Pincha en él
-          y volverás aquí como administradora, con los botones para borrar
-          recetas.
+          y entrarás al recetario como administradora, con los botones para
+          borrar recetas.
         </p>
       </section>
     )
