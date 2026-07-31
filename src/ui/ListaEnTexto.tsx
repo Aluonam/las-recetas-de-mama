@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 
 /**
  * Una lista que se escribe de una tirada, una cosa por línea.
@@ -11,6 +11,19 @@ import { useId } from 'react'
  * El cuadro crece con lo que llevas escrito y nunca encoge por debajo de
  * lo que se pidió: ver el hueco pequeño invita a poner tres cosas, y ver
  * sitio invita a seguir.
+ *
+ * MIENTRAS SE ESCRIBE, MANDA EL CUADRO
+ *
+ * Lo escrito se guarda aquí y solo sale hacia fuera. Al principio no:
+ * el texto se sacaba de la lista ya interpretada, así que cada tecla
+ * hacía el viaje entero —texto a lista y lista a texto— y en ese viaje
+ * se recortan los espacios del final y se tiran las líneas en blanco.
+ * Resultado: pulsabas espacio o Enter y desaparecían al momento, porque
+ * eran justo lo que la ida y vuelta limpiaba.
+ *
+ * Que quien escribe pueda dejar una línea a medias, o dos vacías para
+ * separar, no es un capricho: es lo que hace que un cuadro de texto se
+ * comporte como un cuadro de texto.
  */
 export function ListaEnTexto({
   etiqueta,
@@ -24,6 +37,7 @@ export function ListaEnTexto({
   etiqueta: string
   ayuda?: string
   placeholder?: string
+  /** Lo que había guardado. Solo se lee al abrir. */
   valor: string
   alCambiar: (texto: string) => void
   /** Líneas visibles como mínimo. */
@@ -33,7 +47,11 @@ export function ListaEnTexto({
 }) {
   const id = useId()
   const idAyuda = ayuda ? `${id}-ayuda` : undefined
-  const escritas = valor.split('\n').length
+
+  // Se parte de lo guardado y a partir de ahí manda esto. La receta ya
+  // está cargada cuando esto aparece, así que no hay nada que esperar.
+  const [texto, setTexto] = useState(valor)
+  const escritas = texto.split('\n').length
 
   return (
     <fieldset
@@ -68,8 +86,11 @@ export function ListaEnTexto({
         className="campo"
         rows={Math.max(minimo, escritas + 1)}
         placeholder={placeholder}
-        value={valor}
-        onChange={(evento) => alCambiar(evento.target.value)}
+        value={texto}
+        onChange={(evento) => {
+          setTexto(evento.target.value)
+          alCambiar(evento.target.value)
+        }}
       />
     </fieldset>
   )
