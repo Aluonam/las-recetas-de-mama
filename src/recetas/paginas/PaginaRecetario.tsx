@@ -7,11 +7,11 @@ import { TarjetaReceta } from '../componentes/TarjetaReceta'
 import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
 import { PanelIndice } from '../indice/PanelIndice'
 import { PanelLibro } from '../libro/PanelLibro'
+import { LibroPantallaCompleta } from '../libro/LibroPantallaCompleta'
 import { useFamilia } from '../../familias/contexto'
 import { AvisoInstalar } from '../../pwa/AvisoInstalar'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
-import { useAbrirEnGrande } from '../../ui/useAbrirEnGrande'
 
 /** Portada: todas las recetas, con buscador y filtro por ocasión. */
 export function PaginaRecetario() {
@@ -21,6 +21,13 @@ export function PaginaRecetario() {
   const [ocasion, setOcasion] = useState<string | null>(null)
   const { vista, agrupacion, cambiar } = usePreferenciaVista()
   const { familia } = useFamilia()
+
+  /**
+   * El libro se abre a pantalla completa, que es como se mira un libro:
+   * él solo, sin web alrededor. Con la X se vuelve a la página de
+   * siempre, y desde ahí se puede entrar otra vez.
+   */
+  const [pantallaCompleta, setPantallaCompleta] = useState(vista === 'libro')
 
   /**
    * Se vuelven a pedir al cambiar de recetario.
@@ -46,6 +53,8 @@ export function PaginaRecetario() {
    */
   const cambiarVista = (parche: Parameters<typeof cambiar>[0]) => {
     if (parche.vista && parche.vista !== 'fichas') setOcasion(null)
+    // Elegir «Libro» es pedir el libro, así que se abre como se mira.
+    if (parche.vista) setPantallaCompleta(parche.vista === 'libro')
     cambiar(parche)
   }
 
@@ -69,18 +78,6 @@ export function PaginaRecetario() {
         .some((campo) => campo!.toLowerCase().includes(texto))
     })
   }, [recetas, busqueda, ocasion])
-
-  /**
-   * El libro se abre a pantalla completa.
-   *
-   * Es lo que se viene a ver, así que se lleva la pantalla entera y la
-   * cabecera se queda justo encima: deslizando hacia abajo vuelve, con
-   * el buscador y las solapas. En Fichas y en Índice no se hace, porque
-   * ahí lo que se busca es la vista general.
-   */
-  const zonaLibro = useAbrirEnGrande<HTMLDivElement>(
-    vista === 'libro' && visibles.length > 0,
-  )
 
   if (error != null) return <Aviso error={error} />
   if (!recetas) return <Cargando que="Sacando el recetario" />
@@ -127,7 +124,16 @@ export function PaginaRecetario() {
           Ninguna receta encaja con esa búsqueda.
         </p>
       ) : vista === 'libro' ? (
-        <div ref={zonaLibro} className="flex min-h-svh flex-col justify-center">
+        <div>
+          <div className="mb-4 text-center">
+            <button
+              type="button"
+              onClick={() => setPantallaCompleta(true)}
+              className="boton-secundario"
+            >
+              Ver a pantalla completa
+            </button>
+          </div>
           <PanelLibro recetas={visibles} todas={recetas} />
         </div>
       ) : vista === 'indice' ? (
@@ -142,6 +148,14 @@ export function PaginaRecetario() {
         </ul>
       )}
 
+      {/* Va al final y por encima de todo: tapa la página entera. */}
+      {vista === 'libro' && pantallaCompleta && visibles.length > 0 && (
+        <LibroPantallaCompleta
+          recetas={visibles}
+          todas={recetas}
+          alCerrar={() => setPantallaCompleta(false)}
+        />
+      )}
     </div>
   )
 }

@@ -39,10 +39,17 @@ const ESPERA_DOBLE_CLIC = 260
 export function PanelLibro({
   recetas,
   todas,
+  lleno = false,
 }: {
   recetas: RecetaResumen[]
   /** El recetario entero, para numerar las páginas. */
   todas: RecetaResumen[]
+  /**
+   * A pantalla completa manda el alto de la pantalla y no el del papel:
+   * el libro se estira hasta llenarla, en vez de medir lo que mida la
+   * receta más larga.
+   */
+  lleno?: boolean
 }) {
   const enOrden = useMemo(() => ordenarComoLibro(recetas), [recetas])
   const navegar = useNavigate()
@@ -113,18 +120,28 @@ export function PanelLibro({
   const numero = paginaDe.get(resumen.id) ?? indice * 2 + 2
 
   return (
-    <div {...gestos}>
-      <div className="libro">
-        <div className="paginas overflow-hidden">
+    <div {...gestos} className={lleno ? 'libro-lleno flex h-full flex-col' : ''}>
+      <div className={'libro' + (lleno ? ' flex min-h-0 flex-1 flex-col' : '')}>
+        <div
+          className={
+            'paginas overflow-hidden' + (lleno ? ' min-h-0 flex-1' : '')
+          }
+        >
           <div
             // Cambiar la key reinicia las animaciones: cada receta las
             // arranca de cero.
             key={resumen.id}
-            className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
+            className={
+              (sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras') +
+              (lleno ? ' h-full' : '')
+            }
           >
             <div
               onDoubleClick={alPulsarDosVeces}
-              className="doble-pagina relative grid md:grid-cols-2"
+              className={
+                'doble-pagina relative grid md:grid-cols-2' +
+                (lleno ? ' h-full' : '')
+              }
             >
               {/* Izquierda pasa atrás, derecha adelante: se pasa hoja
                   hacia el lado que se toca, como en el papel. */}
@@ -240,7 +257,12 @@ export function PanelLibro({
         </div>
       </div>
 
-      <Contador indice={indice} total={enOrden.length} receta={resumen} />
+      <Contador
+        indice={indice}
+        total={enOrden.length}
+        receta={resumen}
+        lleno={lleno}
+      />
     </div>
   )
 }
@@ -249,13 +271,20 @@ function Contador({
   indice,
   total,
   receta,
+  lleno,
 }: {
   indice: number
   total: number
   receta: RecetaResumen
+  lleno: boolean
 }) {
   return (
-    <p role="status" className="mt-6 text-center text-sm text-tinta-suave">
+    <p
+      role="status"
+      className={
+        'text-center text-sm text-tinta-suave ' + (lleno ? 'mt-3' : 'mt-6')
+      }
+    >
       <span className="sr-only">Hoja abierta: {receta.titulo}. </span>
       {indice + 1} de {total}
     </p>

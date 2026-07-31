@@ -119,6 +119,92 @@ const TRUCOS = [
 /** Un id por elemento, como los que pone el formulario. */
 const conIds = (cosas) => cosas.map((cosa) => ({ id: randomUUID(), ...cosa }))
 
+// ---------------------------------------------------------------
+//  Las fotos
+// ---------------------------------------------------------------
+
+/**
+ * Un plato visto desde arriba, dibujado.
+ *
+ * No son fotos de verdad, pero para lo que hacen falta —ver cómo queda
+ * la portada en la página izquierda, si el arco la recorta bien, si el
+ * marco doble aprieta— sirven igual, y tienen la ventaja de que se
+ * generan aquí sin descargar nada de fuera.
+ *
+ * Cada receta sale de un color distinto para que las veintinueve hojas
+ * no parezcan la misma. Los manteles son los de la web: verde damasco,
+ * rosa de La Cartuja y crema.
+ */
+const MANTELES = ['#dde5ce', '#f2dfe3', '#eee9dd', '#e3e8d8']
+
+/**
+ * Números repetibles a partir de la posición.
+ *
+ * Con `Math.random` cada ejecución daría platos distintos y no habría
+ * forma de comparar dos pruebas. Así la receta número 7 sale siempre
+ * igual.
+ */
+function dados(semilla) {
+  let estado = (semilla + 1) * 9301
+  return () => {
+    estado = (estado * 9301 + 49297) % 233280
+    return estado / 233280
+  }
+}
+
+function svgDePlato(posicion) {
+  const sacar = dados(posicion)
+  const tono = (28 + posicion * 43) % 360
+  const mantel = MANTELES[posicion % MANTELES.length]
+
+  // La comida: unos cuantos bultos dentro del plato, de tamaños y tonos
+  // parecidos pero no iguales, como un guiso de verdad.
+  const bultos = []
+  const cuantos = 5 + Math.floor(sacar() * 4)
+
+  for (let n = 0; n < cuantos; n++) {
+    const angulo = sacar() * Math.PI * 2
+    const lejos = sacar() * 52
+    const x = 240 + Math.cos(angulo) * lejos
+    const y = 180 + Math.sin(angulo) * lejos * 0.86
+    const ancho = 26 + sacar() * 24
+    const alto = ancho * (0.66 + sacar() * 0.3)
+    const claro = 38 + sacar() * 22
+    const giro = Math.floor(sacar() * 180)
+
+    bultos.push(
+      `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${ancho.toFixed(0)}" ry="${alto.toFixed(0)}"` +
+        ` fill="hsl(${tono} 58% ${claro.toFixed(0)}%)" transform="rotate(${giro} ${x.toFixed(0)} ${y.toFixed(0)})"/>`,
+    )
+  }
+
+  // Cuatro toques de verde por encima: perejil, y de paso rompen el
+  // color plano.
+  const hierbas = []
+  for (let n = 0; n < 4; n++) {
+    const x = 205 + sacar() * 70
+    const y = 145 + sacar() * 70
+    hierbas.push(
+      `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="7" ry="4"` +
+        ` fill="#5d7a55" opacity=".62" transform="rotate(${Math.floor(sacar() * 180)} ${x.toFixed(0)} ${y.toFixed(0)})"/>`,
+    )
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
+<rect width="480" height="360" fill="${mantel}"/>
+<g stroke="#ffffff" stroke-width="14" opacity=".28">
+  <path d="M60 0v360M180 0v360M300 0v360M420 0v360"/>
+</g>
+<ellipse cx="244" cy="192" rx="146" ry="132" fill="#000" opacity=".13"/>
+<circle cx="240" cy="180" r="146" fill="#fbf7ef"/>
+<circle cx="240" cy="180" r="146" fill="none" stroke="#e3dccd" stroke-width="3"/>
+<circle cx="240" cy="180" r="112" fill="none" stroke="#e8dfd0" stroke-width="2"/>
+<circle cx="240" cy="180" r="104" fill="hsl(${tono} 34% 88%)" opacity=".55"/>
+${bultos.join('\n')}
+${hierbas.join('\n')}
+</svg>`
+}
+
 function receta([titulo, autor, minutos, ocasiones], posicion) {
   // Cantidades distintas por receta para que las páginas no salgan
   // calcadas: un libro con veintinueve hojas idénticas no prueba nada.
@@ -190,11 +276,41 @@ async function principal() {
     process.exit(1)
   }
 
-  const filas = RECETAS.map((datos, posicion) => ({
-    ...receta(datos, posicion),
-    creada_por: sesion.user.id,
-    familia_id: recetario.id,
-  }))
+  /**
+   * Las portadas se suben antes, porque la receta guarda la ruta.
+   *
+   * Una de cada cuatro se queda sin foto a propósito: hay que ver
+   * también cómo respira la página cuando en su sitio solo va la
+   * guirnalda.
+   */
+  const filas = []
+
+  for (const [posicion, datos] of RECETAS.entries()) {
+    const fila = {
+      ...receta(datos, posicion),
+      creada_por: sesion.user.id,
+      familia_id: recetario.id,
+    }
+
+    if (posicion % 4 !== 3) {
+      const ruta = `${recetario.id}/fotos/${randomUUID()}.svg`
+      const { error: falloSubir } = await cliente.storage
+        .from('recetas')
+        .upload(ruta, Buffer.from(svgDePlato(posicion), 'utf8'), {
+          contentType: 'image/svg+xml',
+          cacheControl: '31536000',
+        })
+
+      if (falloSubir) {
+        console.error(`No se pudo subir la foto de ${datos[0]}:`, falloSubir.message)
+        process.exit(1)
+      }
+
+      fila.foto_portada_url = ruta
+    }
+
+    filas.push(fila)
+  }
 
   const { error: falloInsertar } = await cliente.from('receta').insert(filas)
 
@@ -221,6 +337,10 @@ async function principal() {
   console.log(`Recetario:  ${recetario.nombre}`)
   console.log(`Código:     ${recetario.codigo}`)
   console.log(`Recetas:    ${filas.length}`)
+  console.log(
+    `Con foto:   ${filas.filter((f) => f.foto_portada_url).length}` +
+      `  (el resto, a propósito sin ella)`,
+  )
   console.log(`Letras:     ${letras.join(' ')}  (${letras.length})\n`)
   console.log('Entra en la web, «Tengo un código» y pega el código de arriba.')
   console.log('Luego pon la vista en Libro y mira el canto izquierdo.\n')

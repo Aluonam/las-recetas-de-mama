@@ -838,6 +838,36 @@
 }
 
 /**
+ * EL LIBRO A PANTALLA COMPLETA
+ *
+ * Lleva el mismo papel pintado que la web para que no parezca otra
+ * aplicación: lo que se tapa es la página, no el sitio.
+ */
+.pantalla-libro {
+  background-color: var(--fondo);
+  background-image: url('/fondo-toile.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/**
+ * Ahí manda el alto de la pantalla, no el del papel.
+ *
+ * Los dos mínimos que hacen que el libro tenga cuerpo en la página
+ * —36rem la doble página y 24rem cada hoja— aquí sobran: si la pantalla
+ * es más baja que eso, el libro se saldría por abajo justo cuando lo que
+ * se pedía era que cupiera entero.
+ */
+.libro-lleno .doble-pagina {
+  min-height: 0;
+  height: 100%;
+}
+
+.libro-lleno .hoja {
+  min-height: 0;
+}
+
+/**
  * El alto del libro no depende de la receta.
  *
  * Una receta de tres líneas y otra de treinta tienen que ocupar lo
