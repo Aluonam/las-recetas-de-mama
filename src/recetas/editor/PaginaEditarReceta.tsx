@@ -1,27 +1,37 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { Aviso, Cargando } from '../../ui/Estado'
-import { CampoArea, CampoTexto } from '../../ui/Campo'
 import { useFormularioReceta } from './useFormularioReceta'
+import { AsistenteReceta } from './AsistenteReceta'
+import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
-import { SelectorOcasiones } from './SelectorOcasiones'
-import { SubirFoto } from './SubirFoto'
 import { EditorIngredientes, UnidadesSugeridas } from './EditorIngredientes'
 import { EditorMateriales } from './EditorMateriales'
 import { EditorPasos } from './EditorPasos'
 import { EditorTrucos } from './EditorTrucos'
-import { EditorAudio } from '../audio/EditorAudio'
 
 /**
- * Escribir o editar una receta. La misma pantalla para las dos cosas: sin
- * `id` crea, con `id` edita.
+ * Escribir o editar una receta.
  *
- * Aquí solo se colocan secciones. El estado vive en useFormularioReceta y
- * cada bloque de campos en su propio archivo.
+ * Sin `id` se escribe una nueva, y para eso está el asistente: quien
+ * empieza de cero no sabe cuántos campos hay ni cuáles importan, y
+ * veinte a la vez no se rellenan, se cierran.
+ *
+ * Con `id` se edita, y aquí el asistente estorbaría: si vienes a
+ * cambiarle el tiempo de horno a las torrijas, quieres ver la receta
+ * entera y tocar ese campo, no pasar por cinco pantallas buscándolo.
+ *
+ * Los campos son exactamente los mismos —viven en secciones.tsx— y las
+ * dos formas guardan por el mismo camino.
  */
 export function PaginaEditarReceta() {
   const { id } = useParams<{ id: string }>()
-  const navegar = useNavigate()
 
+  if (!id) return <AsistenteReceta />
+  return <Edicion id={id} />
+}
+
+function Edicion({ id }: { id: string }) {
+  const navegar = useNavigate()
   const { receta, cambiar, guardar, cargando, guardando, error } =
     useFormularioReceta(id)
 
@@ -38,101 +48,18 @@ export function PaginaEditarReceta() {
     <form onSubmit={enviar} className="space-y-10">
       <UnidadesSugeridas />
 
-      <h1 className="text-3xl sm:text-4xl">
-        {id ? 'Editar receta' : 'Escribir una receta'}
-      </h1>
+      <h1 className="text-3xl sm:text-4xl">Editar receta</h1>
 
-      <fieldset className="tarjeta m-0 space-y-4 p-4 sm:p-5">
-        <legend className="px-2 font-titulo text-xl font-semibold">
-          La receta
-        </legend>
-
-        <CampoTexto
-          etiqueta="¿Cómo se llama?"
-          required
-          placeholder="Croquetas de la abuela"
-          value={receta.titulo}
-          onChange={(e) => cambiar({ titulo: e.target.value })}
-        />
-
-        <CampoTexto
-          etiqueta="Una línea para reconocerla"
-          placeholder="Las de siempre, las de los domingos."
-          value={receta.descripcion ?? ''}
-          onChange={(e) => cambiar({ descripcion: e.target.value })}
-        />
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <CampoTexto
-            etiqueta="¿Para cuántos?"
-            ayuda="Como se diga en casa."
-            placeholder="Para 6, o para 4 si viene el tío"
-            value={receta.raciones ?? ''}
-            onChange={(e) => cambiar({ raciones: e.target.value })}
-          />
-
-          <CampoTexto
-            etiqueta="Tiempo (minutos)"
-            type="number"
-            min="1"
-            placeholder="90"
-            value={receta.tiempoMinutos ?? ''}
-            onChange={(e) =>
-              cambiar({
-                tiempoMinutos:
-                  e.target.value === '' ? null : Number(e.target.value),
-              })
-            }
-          />
-        </div>
-
-        <SelectorOcasiones
-          seleccionadas={receta.ocasiones}
-          alCambiar={(ocasiones) => cambiar({ ocasiones })}
-        />
-
-        <SubirFoto
-          etiqueta="Foto de portada"
-          url={receta.fotoPortadaUrl}
-          alSubir={(url) => cambiar({ fotoPortadaUrl: url })}
-          alQuitar={() => cambiar({ fotoPortadaUrl: null })}
-        />
-      </fieldset>
+      <SeccionPlato receta={receta} cambiar={cambiar} />
 
       <CamposProcedencia
         procedencia={receta.procedencia}
         alCambiar={(procedencia) => cambiar({ procedencia })}
       />
 
-      <fieldset className="tarjeta m-0 p-4 sm:p-5">
-        <legend className="px-2 font-titulo text-xl font-semibold">
-          Contada con su voz
-        </legend>
-        <p className="mb-3 text-sm text-tinta-suave">
-          Grábala mientras la cuenta, o sube esa nota de voz que ya tienes
-          guardada. Es lo único de una receta que no se puede reconstruir
-          después.
-        </p>
-        <EditorAudio
-          url={receta.audioUrl}
-          alGuardar={(audioUrl) => cambiar({ audioUrl })}
-          alQuitar={() => cambiar({ audioUrl: null })}
-        />
-      </fieldset>
+      <SeccionVoz receta={receta} cambiar={cambiar} />
 
-      <fieldset className="tarjeta m-0 p-4 sm:p-5">
-        <legend className="px-2 font-titulo text-xl font-semibold">
-          ¿Qué hace especial a esta receta?
-        </legend>
-        <CampoArea
-          etiqueta="Cuéntalo"
-          ayuda="La historia, el recuerdo, por qué esta y no otra. Este campo es el que hace que valga la pena guardarla."
-          rows={5}
-          placeholder="Es lo primero que olía la casa cuando llegábamos en Navidad. La abuela empezaba el día antes y no dejaba entrar a nadie en la cocina."
-          value={receta.porQueEspecial ?? ''}
-          onChange={(e) => cambiar({ porQueEspecial: e.target.value })}
-        />
-      </fieldset>
+      <SeccionEspecial receta={receta} cambiar={cambiar} />
 
       <EditorIngredientes
         ingredientes={receta.ingredientes}
