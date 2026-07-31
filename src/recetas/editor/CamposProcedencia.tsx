@@ -20,25 +20,18 @@ export function CamposProcedencia({ procedencia, alCambiar }: Props) {
         ¿De quién es esta receta?
       </legend>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <CampoTexto
-          etiqueta="¿Quién la hacía?"
-          placeholder="La abuela Carmen"
-          value={procedencia.autorNombre ?? ''}
-          onChange={(e) => cambiar({ autorNombre: e.target.value })}
-        />
-
-        <CampoTexto
-          etiqueta="¿Qué es tuya?"
-          placeholder="Abuela"
-          value={procedencia.autorRelacion ?? ''}
-          onChange={(e) => cambiar({ autorRelacion: e.target.value })}
-        />
-      </div>
+      {/* Sin «¿Qué es tuya?»: quien escribe «La abuela Carmen» ya lo ha
+          dicho, y era una casilla más que rellenar para no añadir nada.
+          El campo sigue en el modelo por lo que ya estaba escrito. */}
+      <CampoTexto
+        etiqueta="¿Quién la hacía?"
+        placeholder="La abuela Carmen"
+        value={procedencia.autorNombre ?? ''}
+        onChange={(e) => cambiar({ autorNombre: e.target.value })}
+      />
 
       <CampoArea
         etiqueta="¿Y ella de quién la aprendió?"
-        ayuda="Aunque sea a medias. Dentro de treinta años esto vale más que la receta."
         rows={2}
         placeholder="De su madre, Josefa, en el pueblo."
         value={procedencia.aprendidaDe ?? ''}
@@ -47,7 +40,7 @@ export function CamposProcedencia({ procedencia, alCambiar }: Props) {
 
       <CampoTexto
         etiqueta="¿Desde cuándo, más o menos?"
-        ayuda="Un año aproximado vale. Nadie lo sabe exacto."
+        ayuda="Un año aproximado vale."
         type="number"
         min="1850"
         max="2100"

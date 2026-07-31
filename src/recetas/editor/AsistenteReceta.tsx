@@ -5,7 +5,7 @@ import { Aviso } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
 import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
-import { EditorIngredientes, UnidadesSugeridas } from './EditorIngredientes'
+import { EditorIngredientes } from './EditorIngredientes'
 import { EditorMateriales } from './EditorMateriales'
 import { EditorPasos } from './EditorPasos'
 import { EditorTrucos } from './EditorTrucos'
@@ -30,24 +30,20 @@ interface Cambio {
 const PASOS: Array<{
   clave: string
   titulo: string
-  entradilla: string
   obligatorio?: boolean
   pintar: (props: Cambio) => React.ReactNode
 }> = [
   {
     clave: 'plato',
     titulo: 'Qué plato es',
-    entradilla: 'Con el nombre basta para empezar. Lo demás puede esperar.',
     obligatorio: true,
     pintar: ({ receta, cambiar }) => (
-      <SeccionPlato receta={receta} cambiar={cambiar} suelto />
+      <SeccionPlato receta={receta} cambiar={cambiar} />
     ),
   },
   {
     clave: 'lleva',
     titulo: 'Qué lleva',
-    entradilla:
-      'No hace falta pesar nada: «un puñado» o «un vaso de los del vino» es más fiel que los gramos.',
     pintar: ({ receta, cambiar }) => (
       <div className="space-y-8">
         <EditorIngredientes
@@ -64,7 +60,6 @@ const PASOS: Array<{
   {
     clave: 'hace',
     titulo: 'Cómo se hace',
-    entradilla: 'Un paso por cada cosa que hay que hacer, en orden.',
     pintar: ({ receta, cambiar }) => (
       <EditorPasos
         pasos={receta.pasos}
@@ -75,11 +70,9 @@ const PASOS: Array<{
   {
     clave: 'especial',
     titulo: 'Por qué es especial',
-    entradilla:
-      'Esto es lo que no está en ningún libro de cocina, y lo que de verdad se pierde si nadie lo escribe.',
     pintar: ({ receta, cambiar }) => (
       <div className="space-y-8">
-        <SeccionEspecial receta={receta} cambiar={cambiar} suelto />
+        <SeccionEspecial receta={receta} cambiar={cambiar} />
         <CamposProcedencia
           procedencia={receta.procedencia}
           alCambiar={(procedencia) => cambiar({ procedencia })}
@@ -94,9 +87,8 @@ const PASOS: Array<{
   {
     clave: 'voz',
     titulo: 'Su voz',
-    entradilla: 'El último paso, y el que más vale dentro de treinta años.',
     pintar: ({ receta, cambiar }) => (
-      <SeccionVoz receta={receta} cambiar={cambiar} suelto />
+      <SeccionVoz receta={receta} cambiar={cambiar} />
     ),
   },
 ]
@@ -147,18 +139,12 @@ export function AsistenteReceta() {
       }}
       className="mx-auto max-w-2xl"
     >
-      <UnidadesSugeridas />
 
       <h1 className="mb-2 text-3xl sm:text-4xl">Escribir una receta</h1>
 
       <Guia donde={donde} hayNombre={hayNombre} alIr={ir} />
 
-      <div className="tarjeta mt-6 p-4 sm:p-6">
-        <h2 className="mb-1 text-2xl">{paso.titulo}</h2>
-        <p className="mb-6 text-tinta-suave">{paso.entradilla}</p>
-
-        {paso.pintar({ receta, cambiar })}
-      </div>
+      <div className="mt-6">{paso.pintar({ receta, cambiar })}</div>
 
       {error != null && (
         <div className="mt-6">

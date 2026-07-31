@@ -152,22 +152,6 @@ export function normalizarOcasiones(ocasiones: string[]): string[] {
   return [...new Set(arregladas)]
 }
 
-export const UNIDADES_SUGERIDAS = [
-  'g',
-  'kg',
-  'ml',
-  'l',
-  'cucharada',
-  'cucharadita',
-  'taza',
-  'vaso',
-  'unidad',
-  'diente',
-  'pizca',
-  'rama',
-  'hoja',
-] as const
-
 /**
  * Quita los datos que pone la base (id, autoría, fechas) y deja lo
  * editable. Vive aquí y no en el formulario: qué campos son metadatos es

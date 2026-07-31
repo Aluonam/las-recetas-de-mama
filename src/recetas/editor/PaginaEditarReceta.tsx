@@ -4,7 +4,7 @@ import { useFormularioReceta } from './useFormularioReceta'
 import { AsistenteReceta } from './AsistenteReceta'
 import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
-import { EditorIngredientes, UnidadesSugeridas } from './EditorIngredientes'
+import { EditorIngredientes } from './EditorIngredientes'
 import { EditorMateriales } from './EditorMateriales'
 import { EditorPasos } from './EditorPasos'
 import { EditorTrucos } from './EditorTrucos'
@@ -46,7 +46,6 @@ function Edicion({ id }: { id: string }) {
 
   return (
     <form onSubmit={enviar} className="space-y-10">
-      <UnidadesSugeridas />
 
       <h1 className="text-3xl sm:text-4xl">Editar receta</h1>
 
