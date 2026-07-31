@@ -79,6 +79,19 @@ Dos ventajas concretas: la lógica se prueba sin montar la interfaz, y
 crear y editar comparten exactamente el mismo camino — sin `id` inserta,
 con `id` actualiza, y no hay dos pantallas que se desincronicen.
 
+## 6 bis. Un apunte fuera de React
+
+`familias/actual.ts` guarda el recetario abierto en una variable de
+módulo. Es feo y está acotado a propósito: la capa de datos necesita
+saberlo para guardar una receta o subir una foto, y ahí no hay contexto de
+React al que preguntar.
+
+Lo importante es **cuándo** se escribe. Tiene que ser en el mismo momento
+del cambio y no en un efecto posterior, porque React ejecuta los efectos
+de los hijos antes que los del padre: la pantalla del recetario pedía sus
+recetas mientras el apunte seguía teniendo el recetario anterior. Al
+cambiar a un recetario salían las recetas del otro.
+
 ## 7. Seguridad
 
 Toda la protección está en **RLS de PostgreSQL**, no en el cliente. La

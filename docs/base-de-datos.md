@@ -1,59 +1,144 @@
 # La base de datos
 
-Qué hace cada archivo SQL, en qué orden van y por qué están escritos así.
+Qué hay dentro, por qué está así, y qué archivo hace cada cosa.
 
-Para el paso a paso de la instalación, ver
-[puesta-en-marcha.md](puesta-en-marcha.md). Esto explica el **porqué**.
+Para instalarla paso a paso, ver [puesta-en-marcha.md](puesta-en-marcha.md).
+Esto explica el **porqué**.
 
 ---
 
-## Los archivos, en orden
+## El modelo
+
+| Tabla | Qué guarda |
+| ----- | ---------- |
+| `familia` | Un recetario: nombre, código de acceso y quién lo creó |
+| `miembro` | Quién pertenece a cada recetario, y con qué correo se presentó |
+| `receta` | La receta entera, incluido su `familia_id` |
+| `variante` | «La versión de mamá, con menos nuez moscada» |
+
+Y un almacén de archivos donde las fotos y los audios van en **una carpeta
+por recetario**.
+
+---
+
+## Los archivos SQL
+
+Se ejecutan **en orden**. Cada uno explica en su cabecera qué hace y por
+qué.
 
 | Orden | Archivo | Qué deja hecho |
 | ----- | ------- | -------------- |
-| 1 | [`schema.sql`](../supabase/schema.sql) | Tablas, índices, permisos, protección por filas y el almacén |
-| 2 | [`migraciones/004-varios-recetarios.sql`](../supabase/migraciones/004-varios-recetarios.sql) | Un recetario por familia, con código para entrar |
-| 3 | [`migraciones/005-codigo-a-medida.sql`](../supabase/migraciones/005-codigo-a-medida.sql) | El código se puede elegir en vez de generarlo |
-| 4 | [`migraciones/006-almacen-privado.sql`](../supabase/migraciones/006-almacen-privado.sql) | Las fotos dejan de tener direcciones permanentes |
-| — | [`comprobar.sql`](../supabase/comprobar.sql) | No cambia nada: dice hasta dónde llegas |
-| — | [`migraciones/001-renombrar-ocasiones.sql`](../supabase/migraciones/001-renombrar-ocasiones.sql) | Solo si ya había recetas antes del cambio de nombres |
+| 1 | `schema.sql` | Tablas, índices, permisos y el almacén |
+| 2 | `004-varios-recetarios.sql` | Un recetario por familia, con código |
+| 3 | `005-codigo-a-medida.sql` | El código se puede elegir |
+| 4 | `006-almacen-privado.sql` | Fotos y audios sin direcciones permanentes |
+| 5 | `007-mensajes-en-condiciones.sql` | Mensajes con tildes; arregla una ambigüedad de SQL |
+| 6 | `008-entrar-sin-correo.sql` | Sesiones anónimas: se entra solo con el código |
+| 7 | `009-solo-borra-quien-creo-el-recetario.sql` | Borrar, solo quien manda |
+| 8 | `010-escribir-a-quien-administra.sql` | Poder avisar a quien administra |
+| 9 | `011-usuario-jefe.sql` | Consultar y traspasar el mando |
+| 10 | `012-solo-el-jefe-cambia-el-codigo.sql` | Cambiar el código, solo quien manda |
 
-**El orden no es decorativo.** El 005 sustituye una función que crea el
-004. Pasarlos salteados deja la base a medias **sin dar ningún error**, que
-es la peor forma de fallar. Por eso existe `comprobar.sql`.
+**Sueltos, solo si hacen falta:**
+
+- `013-recuperar-el-mando.sql` — cuando un recetario se creó desde una
+  sesión anónima que se perdió y ya nadie puede borrar en él.
+- `001-renombrar-ocasiones.sql` — si había recetas escritas antes de que
+  cambiaran los nombres de las ocasiones.
+- `comprobar.sql` — no cambia nada: dice hasta dónde llega la instalación.
+- `limpiar-pruebas.sql` — quita los recetarios que crea el test.
 
 ### Los que ya no se usan
 
-El **002** y el **003** son el modelo anterior: un solo recetario y una
-lista de correos que se editaba a mano con SQL. El 004 los sustituyó.
+El **002** y el **003** son del modelo anterior: un solo recetario y una
+lista de correos editada a mano. El 004 los sustituyó.
 
-Se quedan en el repositorio para poder consultar de dónde viene algo, pero
-**no hay que ejecutarlos**. El 003 en particular, pasado después del 004,
-reescribiría las reglas de las fotos con el modelo viejo y desharía la
-separación entre familias. Por eso su parte útil —cerrar el almacén— vive
-ahora en el 006, que no toca ninguna regla y se puede pasar cuando sea.
+Se quedan para poder consultar de dónde viene algo, pero **no hay que
+ejecutarlos**. El 003 en particular, pasado después del 004, reescribiría
+las reglas de las fotos con el modelo viejo y desharía la separación entre
+familias.
 
 ---
 
-## Qué hace `schema.sql`, por bloques
+## Cómo se entra
 
-1. **Las tablas.** `receta` y `variante`.
-2. **Los índices.** Uno para buscar por ocasión y otro para buscar por
-   título o por quién la hacía. Sin ellos todo funciona igual hasta que
-   hay muchas recetas; con ellos sigue siendo instantáneo después.
-3. **Un disparador.** Pone al día la fecha de última modificación en cada
-   edición, para que la app no tenga que acordarse de hacerlo.
-4. **Los permisos.** Quién puede asomarse a cada tabla.
-5. **La protección por filas y sus políticas.** Qué filas ve quien se
-   asoma.
-6. **El almacén.** El sitio donde viven las fotos y los audios, con sus
-   propias reglas.
+No hay contraseñas ni enlaces al correo. Al abrir la web se crea una
+**sesión anónima** en silencio, y la llave es el **código familiar**, que
+se comparte por WhatsApp.
+
+El correo se pide, pero solo queda anotado para saber quién escribió cada
+receta. **No identifica a nadie**: cualquiera puede escribir el que
+quiera.
+
+| Función | Qué hace |
+| ------- | -------- |
+| `crear_recetario(nombre, codigo, correo)` | Crea el recetario y te hace miembro |
+| `unirse_con_codigo(codigo, correo)` | Comprueba el código y te da de alta |
+| `establecer_codigo(id, codigo)` | Pone el que se le diga |
+| `cambiar_codigo(id)` | Genera uno al azar |
+| `mis_recetarios()` | A cuáles perteneces. La usan todas las políticas |
+| `soy_jefe(id)` | Si mandas ahí. La app decide con esto si enseña el botón de borrar |
+| `traspasar_mando(id, correo)` | Deja el mando a otro miembro |
+| `administrador_del_recetario(id)` | El correo de quien manda, para poder escribirle |
+
+Son funciones de la base y no consultas sueltas porque cada una son varios
+pasos que tienen que ocurrir juntos: crear un recetario implica además
+hacerse miembro, y entrar con un código implica comprobarlo y darse de
+alta.
+
+Detalles que parecen menores y no lo son:
+
+- **Un código equivocado da siempre el mismo mensaje.** Si distinguiera
+  entre «no existe» y «no es el tuyo», se podrían probar códigos para
+  averiguar cuáles existen.
+- **Se guarda en mayúsculas y sin espacios.** Llega copiado de un WhatsApp
+  y nadie lo pega limpio.
+- **Sin acentos ni eñes.** Se dicta por teléfono y se teclea en una
+  tablet.
+- **Cambiar el código no echa a nadie.** Ser miembro está en `miembro`, no
+  en saberse la llave.
+
+---
+
+## Quién puede qué
+
+| | Ver | Añadir | Editar | Borrar | Cambiar el código |
+| --- | --- | --- | --- | --- | --- |
+| **Quien creó el recetario** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **El resto de la familia** | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **Quien no está dentro** | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+Borrar es solo de quien creó el recetario porque **una receta borrada por
+error no se recupera**, y el valor de esto está en que nada se pierda.
+
+Quien administra puede borrar **cualquier** receta, no solo las suyas.
+
+Todas estas reglas viven en las políticas de PostgreSQL, no en la
+interfaz. La app esconde los botones que no van a funcionar, pero eso es
+cortesía: **esconder un botón no impide nada** a quien sepa escribir una
+petición a mano.
+
+---
+
+## Quién manda, y por qué puede perderse
+
+Quien crea un recetario queda anotado en `familia.creada_por`. Si esa
+sesión era anónima y se pierde —al salir, al borrar el historial, al abrir
+la app en otro dispositivo— el mando queda en una cuenta a la que ya no se
+puede volver: sigues viendo y editando, pero no puedes borrar.
+
+Por eso quien administra debería **verificar su cuenta con un correo**
+desde Ajustes. Se usa `updateUser` sobre la sesión anónima, que le añade
+correo **sin cambiar de identidad**: es la misma cuenta, así que el
+recetario sigue siendo suyo y no hay que traspasar nada.
+
+Si el mando ya se perdió, `013-recuperar-el-mando.sql` lo devuelve.
 
 ---
 
 ## Permiso y política no son lo mismo
 
-Es la distinción que cuesta más de PostgreSQL y la que permite que esta
+Es la distinción que más cuesta de PostgreSQL y la que permite que esta
 web no necesite servidor propio.
 
 | | Qué pregunta | Se escribe con |
@@ -61,42 +146,19 @@ web no necesite servidor propio.
 | **Permiso** | ¿Puedes **asomarte** a esta tabla? | `grant` / `revoke` |
 | **Política** | Ya que te asomas, **¿qué filas** ves? | `create policy` (RLS) |
 
-Son dos cerraduras en serie:
-
-- Sin permiso no llegas ni a la puerta.
-- Con permiso pero sin política que te ampare, llegas y ves **una lista
-  vacía**. No un error: vacío. Es como se comporta la protección por filas.
-
-Los tres roles que importan:
+Son dos cerraduras en serie. Sin permiso no llegas a la puerta; con
+permiso pero sin política que te ampare, ves **una lista vacía** — no un
+error.
 
 | Rol | Quién es | Qué puede |
 | --- | -------- | --------- |
-| `anon` | Ha abierto la web pero **no ha entrado** | Nada |
-| `authenticated` | **Ha entrado** con su enlace del correo | Todo, **si está invitado** |
+| `anon` | Ha abierto la web pero no tiene sesión | Nada |
+| `authenticated` | Tiene sesión, aunque sea anónima | Lo de sus recetarios |
 | `service_role` | Poder absoluto | Nunca sale de Supabase |
 
-**Y todo esto vive dentro de la base, no en la web.** Por eso da igual que
-la clave `anon` sea pública y se vea en el navegador: aunque alguien la
-copie y escriba su propio programa, PostgreSQL le devuelve vacío.
-
----
-
-## Por qué hay tantos `drop ... if exists`
-
-Supabase avisa de que la consulta contiene «operaciones destructivas». El
-aviso salta por la palabra `drop`, sin mirar qué va detrás.
-
-Lo que hay detrás son once líneas, y **todas** son `drop policy if exists`
-o `drop trigger if exists`. No hay ni un `drop table`, ni un `truncate`,
-ni un `delete from`. **Nada que borre datos.**
-
-Están para que el archivo se pueda **volver a ejecutar**. Si mañana hay que
-retocar una regla, se cambia el archivo y se pasa entero: quita la vieja y
-pone la nueva. Sin esas líneas, la segunda ejecución se pararía con «esa
-regla ya existe» y habría que ir borrando a mano.
-
-En un proyecto recién creado no borran nada, porque no existe ninguna de
-esas reglas todavía.
+**Y todo esto vive dentro de la base.** Por eso da igual que la clave
+`anon` sea pública: aunque alguien la copie y escriba su propio programa,
+PostgreSQL le devuelve vacío.
 
 ---
 
@@ -105,114 +167,96 @@ esas reglas todavía.
 Ingredientes, materiales, pasos y trucos no son cuatro tablas: son cuatro
 columnas `jsonb` dentro de `receta`.
 
-El criterio es **cómo cambian los datos**, no cómo quedan en un diagrama.
-Esas cuatro listas se escriben y se guardan siempre juntas, en la misma
-pantalla y por la misma persona. Normalizarlas costaría cuatro joins en
-cada lectura y una transacción en cada guardado, a cambio de nada.
+El criterio es **cómo cambian los datos**. Esas cuatro listas se escriben
+y se guardan siempre juntas, en la misma pantalla y por la misma persona.
+Normalizarlas costaría cuatro joins en cada lectura y una transacción en
+cada guardado, a cambio de nada.
 
 Las variantes sí son tabla propia, y por el mismo criterio: **las escribe
-otra persona, en otro momento, sobre una receta que ya existe**.
+otra persona, en otro momento**, sobre una receta que ya existe.
 
-Si algún día hace falta buscar por ingrediente, PostgreSQL indexa JSONB con
-GIN sin migrar nada.
+Si algún día hace falta buscar por ingrediente, PostgreSQL indexa JSONB
+con GIN sin migrar nada.
 
 ---
 
-## Cómo se entra a un recetario
+## Un filtro que la base no puede poner por ti
 
-Cada familia tiene el suyo, con un código que hace de llave. No hay
-invitaciones que aprobar ni correos que enviar: el código se pasa por
-WhatsApp y quien lo escriba entra.
+Las políticas dejan ver las recetas de **todos** los recetarios a los que
+perteneces. Eso es correcto: son tuyas.
 
-| Función | Qué hace |
-| ------- | -------- |
-| `crear_recetario(nombre, codigo)` | Crea el recetario y te hace miembro. Sin código, genera uno. |
-| `unirse_con_codigo(codigo)` | Comprueba el código y te da de alta |
-| `establecer_codigo(id, codigo)` | Pone el que se le diga |
-| `cambiar_codigo(id)` | Genera uno al azar |
-| `mis_recetarios()` | A qué recetarios perteneces. La usan todas las políticas. |
+Pero quien está mirando el de la yaya no quiere ver mezcladas las de su
+madre, y la base no puede adivinar cuál tienes abierto. **El filtro por
+`familia_id` tiene que ponerlo la aplicación en cada consulta.**
 
-Son funciones de la base y no consultas sueltas porque cada una son varios
-pasos que tienen que ocurrir juntos o no ocurrir: crear un recetario
-implica además hacerse miembro, y entrar con un código implica comprobarlo
-y darse de alta. Dejarlo en manos del navegador sería confiar en que nadie
-interrumpe a mitad.
-
-Detalles que parecen menores y no lo son:
-
-- **Un código equivocado da siempre el mismo mensaje.** Si dijera «ese
-  recetario no existe» frente a «ese código no es el tuyo», cualquiera
-  podría ir probando para averiguar cuáles existen.
-- **Se guarda en mayúsculas y se compara igual**, sin espacios. Llega
-  copiado de un WhatsApp y nadie lo pega limpio.
-- **Sin acentos ni eñes.** Se dicta por teléfono y se teclea en una tablet:
-  todo lo que se pueda escribir de dos maneras acaba en «pues a mí no me
-  entra».
-- **Cambiar el código no echa a nadie.** Ser miembro está en `miembro`, no
-  en saberse la llave.
-- **Las fotos se guardan en una carpeta por recetario**, y las reglas la
-  miran. Sin eso, adivinar una ruta bastaría para colarse en el álbum de
-  otra casa.
+Costó un rato descubrirlo, así que está comprobado en el test.
 
 ---
 
 ## SEGURIDAD
 
-Conviene decir con claridad **hasta dónde llega y hasta dónde no**, porque
-un proyecto que promete más de lo que da es peor que uno modesto y
-honesto.
+Conviene decir hasta dónde llega y hasta dónde no, porque un proyecto que
+promete más de lo que da es peor que uno modesto y honesto.
 
-### Qué se protege, y cómo
+### Qué se protege
 
 | Capa | Qué impide |
 | ---- | ---------- |
-| Sesión por enlace al correo | Que entre alguien sin acceso a ese buzón |
-| `mis_recetarios()` en las políticas | Que veas un recetario que no es tuyo. Ni su nombre. |
-| Permisos por rol | Que `anon` —sin sesión— se asome a ninguna tabla |
+| `mis_recetarios()` en las políticas | Ver un recetario que no es tuyo. Ni su nombre |
+| Permisos por rol | Que `anon`, sin sesión, se asome a nada |
 | Carpeta por recetario en el almacén | Que adivinar una ruta te meta en el álbum de otra casa |
-| Almacén privado con enlaces firmados | Que una dirección de foto reenviada siga sirviendo. Caducan en una hora. |
-
-Y una decisión de fondo: **todo esto vive dentro de PostgreSQL**, no en el
-navegador. Da igual que la clave `anon` sea pública; aunque alguien la
-copie y escriba su propio programa, la base le devuelve vacío.
+| Almacén privado con enlaces firmados | Que una dirección de foto reenviada siga sirviendo. Caducan en una hora |
+| `creada_por` en las políticas de borrado | Que alguien haga desaparecer recetas que no son suyas |
 
 ### Qué NO se protege, a propósito
 
-**No hay límite de intentos al probar códigos.** Alguien puede escribir un
-programa que vaya probando hasta acertar uno. Un código corto o adivinable
-—una palabra suelta, un nombre— caería. Por eso la app avisa cuando el
-elegido no lleva ningún número, pero no lo impide.
+**No hay límite de intentos al probar códigos.** Un código corto o
+adivinable caería probando. Por eso la app avisa cuando el elegido no
+lleva ningún número, pero no lo impide.
 
-**Las fotos y los audios se sirven con enlaces temporales, no cifrados.**
-Quien tenga uno válido puede verlo durante esa hora.
+**El correo no está verificado** salvo el de quien administra. Cualquiera
+puede escribir el que quiera al entrar.
 
 **No hay registro de quién ha visto qué**, ni avisos de accesos raros, ni
 verificación en dos pasos.
 
 ### Por qué está bien así
 
-Esto es **el recetario de una familia**. Lo que hay dentro son croquetas,
-fotos de una comida y la voz de una abuela contando cómo se hacía el
-arroz. No hay dinero, ni datos de salud, ni documentos de identidad, ni
-nada que sirva para suplantar a nadie.
+Esto es **el recetario de una familia**. Dentro hay croquetas, fotos de
+una comida y la voz de una abuela contando cómo se hacía el arroz. No hay
+dinero, ni datos de salud, ni documentos de identidad.
 
 El peor caso realista de un fallo aquí es que un desconocido lea recetas
-de croquetas. Eso no justifica límites de intentos, auditorías de acceso ni
-doble factor: cada una de esas capas se paga en complicación, y la
-complicación se paga en que **la abuela no sepa entrar**.
-
-La seguridad se ha puesto donde de verdad importa —que un recetario no se
-mezcle con otro y que las fotos no queden colgadas en direcciones
-permanentes— y se ha parado ahí a conciencia.
+de croquetas. Eso no justifica límites de intentos, auditorías ni doble
+factor: cada una de esas capas se paga en complicación, y **la
+complicación se paga en que la abuela no sepa entrar**.
 
 ### Cuándo habría que subir el listón
 
-Si esto dejara de ser una app familiar y pasara a ser un producto con
-gente desconocida dentro, lo primero sería:
+Si esto dejara de ser familiar y entrara gente desconocida:
 
-1. **Limitar los intentos** de `unirse_con_codigo` por usuario y hora.
-2. **Caducidad o un solo uso** en los códigos de invitación.
-3. **Registro de accesos**, para poder mirar atrás cuando algo raro pase.
-4. **Copias automáticas**, que hoy dependen de que alguien pulse el botón.
+1. Limitar los intentos de `unirse_con_codigo` por usuario y hora.
+2. Caducidad o un solo uso en los códigos.
+3. Registro de accesos.
+4. Copias automáticas, que hoy dependen de que alguien pulse el botón.
 
-Ninguna hace falta hoy. Todas harían falta ese día.
+---
+
+## Comprobarlo, no creérselo
+
+Las reglas viven en PostgreSQL, así que la única forma honesta de saber
+que hacen lo que dicen es preguntárselo a la base de verdad:
+
+```bash
+node scripts/prueba-permisos.mjs
+```
+
+Abre tres sesiones —quien creó el recetario, un familiar y un
+desconocido— y comprueba quince cosas. Tarda unos segundos.
+
+**Merece la pena ejecutarlo cada vez que se toquen permisos.** Ya destapó
+una migración que se daba por aplicada y nunca se había ejecutado, y el
+filtro por recetario que faltaba.
+
+Deja creado un recetario de prueba cada vez; `limpiar-pruebas.sql` los
+quita.

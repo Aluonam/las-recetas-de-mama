@@ -4,150 +4,134 @@ El recetario de la familia. No es una app de cocina: es un **archivo
 familiar**. Las recetas se pueden encontrar en cualquier web; lo que se
 pierde es quién las hacía, cómo las contaba y por qué esa y no otra.
 
-Cada receta guarda:
+**En marcha:** [las-recetas-de-mama.vercel.app](https://las-recetas-de-mama.vercel.app)
+
+---
+
+## Qué guarda una receta
 
 - **Ingredientes** con medidas exactas *y* caseras — «un puñado», «un vaso
-  de los del vino», «harina la que admita».
+  de los del vino», «harina la que admita». Obligar a gramos no digitaliza
+  la receta: la sustituye por otra.
 - **Materiales**, porque «la cazuela de barro» a veces es media receta.
 - **Pasos**, con foto opcional en cada uno.
 - **Trucos**, y quién los decía.
 - **Procedencia**: de quién es, quién se la enseñó, desde cuándo.
 - **Por qué es especial**: la historia, el recuerdo, la ocasión.
+- **La voz de quien la cuenta**: grabada ahí mismo, o esa nota de WhatsApp
+  que ya tenías. Es lo único de una receta que no se puede reconstruir
+  después.
 - **Variantes**: «la versión de mamá, con menos nuez moscada».
+
+## Cómo se usa
+
+**Cada familia tiene su recetario**, con un código que se comparte por
+WhatsApp. Quien lo escribe entra: sin cuentas, sin contraseñas, sin
+esperar ningún correo. Un recetario ajeno no existe para quien no es
+miembro — no se ve ni su nombre.
+
+**Cuatro formas de mirarlo:** todas, fichas con filtro por ocasión, un
+libro de hojas que se pasan con el índice a la izquierda, y un índice
+alfabético.
+
+**Modo cocina:** texto grande, ingredientes fijos arriba, pasos que se
+tachan al tocarlos y la pantalla que no se apaga.
+
+**Se instala** en el móvil o la tablet como una aplicación más, y las
+recetas ya vistas funcionan sin conexión.
+
+**Copia de seguridad** en un ZIP que se abre sin esta aplicación.
 
 ---
 
 ## Puesta en marcha
 
-> Para compartir el recetario con la familia de verdad —cada uno desde su
-> móvil o su tablet— sigue la guía completa:
-> **[docs/puesta-en-marcha.md](docs/puesta-en-marcha.md)**. Incluye cerrar
-> el acceso a quien no esté invitado, que sin eso cualquiera que se
-> registre entraría a tus recetas.
+Para montarlo de cero —base de datos, publicación e instalación en la
+tablet— sigue la guía completa:
 
-Lo que sigue es solo para levantarlo en tu ordenador. Necesitas Node 20 o
-superior y una cuenta gratuita en [Supabase](https://supabase.com).
+**[docs/puesta-en-marcha.md](docs/puesta-en-marcha.md)**
 
-### 1. Instalar
+Para levantarlo solo en tu ordenador:
 
 ```bash
 npm install
-```
-
-### 2. Crear la base de datos
-
-1. Crea un proyecto nuevo en Supabase.
-2. Abre **SQL Editor**, pega el contenido de [`supabase/schema.sql`](supabase/schema.sql)
-   y pulsa *Run*. Eso crea las tablas, la seguridad por filas y el
-   almacén de fotos.
-
-### 3. Configurar las claves
-
-```bash
-cp .env.example .env.local
-```
-
-Rellena `.env.local` con los valores de **Project Settings → API**:
-
-| Variable                  | Dónde está           |
-| ------------------------- | -------------------- |
-| `VITE_SUPABASE_URL`       | *Project URL*        |
-| `VITE_SUPABASE_ANON_KEY`  | *anon public key*    |
-
-La clave `anon` es pública por diseño. Quien protege los datos es la
-seguridad a nivel de fila (RLS) del esquema, no la clave.
-
-### 4. Arrancar
-
-```bash
 npm run dev
 ```
 
-Se entra con el correo: Supabase manda un enlace y no hay contraseñas.
+Sin claves de Supabase arranca en **modo demostración**: guarda en el
+navegador y trae tres recetas de ejemplo. Para conectarlo de verdad, copia
+`.env.example` a `.env.local` y rellena las dos claves.
 
-### Comandos
-
-| Comando           | Qué hace                          |
-| ----------------- | --------------------------------- |
-| `npm run dev`     | Servidor de desarrollo            |
-| `npm run build`   | Comprueba tipos y compila         |
-| `npm run preview` | Sirve lo compilado                |
-| `npm run lint`    | Analiza el código                 |
+| Comando | Qué hace |
+| ------- | -------- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Comprueba tipos y compila |
+| `npm run lint` | Analiza el código |
+| `node scripts/prueba-permisos.mjs` | Comprueba los permisos contra la base real |
 
 ---
 
 ## Cómo está organizado
 
 Carpetas **por funcionalidad**, no por tipo de archivo. Para tocar las
-variantes vas a `src/variantes/` y está todo ahí: sus tipos, su acceso a
-datos y su interfaz.
+variantes vas a `src/variantes/` y está todo ahí.
 
 ```
 src/
-├── nucleo/            Infraestructura transversal
-│   ├── supabase.ts       Único punto que conoce a Supabase
-│   └── sesion.tsx        Contexto de sesión
-│
-├── ui/                Componentes sin dominio, reutilizables
-│   ├── Marco.tsx         Cabecera, contenido y pie
-│   ├── Campo.tsx         Input y textarea con etiqueta accesible
-│   ├── ListaEditable.tsx Añadir, quitar y reordenar
-│   └── Estado.tsx        Carga y error
-│
-├── autenticacion/     Entrar y proteger rutas
-│
-├── recetas/           La funcionalidad principal
-│   ├── tipos.ts          Modelo de dominio
-│   ├── api.ts            Acceso a datos
-│   ├── almacenamiento.ts Subida de fotos
-│   ├── formato.ts        Funciones puras de presentación
-│   ├── componentes/      Piezas de la ficha
-│   ├── paginas/          Recetario, ficha, modo cocina
-│   └── editor/           Escribir y editar
-│
-├── variantes/         "Cómo la hace cada uno"
-│
-├── rutas.tsx          Mapa de pantallas
-└── App.tsx            Composición
+├── nucleo/        Cliente de datos, sesión, entorno
+├── ui/            Componentes sin dominio: marco, campos, listas
+├── familias/      Recetarios, códigos, quién manda
+├── autenticacion/ Esperar a que la sesión esté abierta
+├── recetas/       La funcionalidad principal
+│   ├── tipos.ts · api.ts · almacenamiento.ts · formato.ts
+│   ├── componentes/  Piezas de la ficha
+│   ├── paginas/      Recetario, ficha, modo cocina
+│   ├── editor/       Escribir y editar
+│   ├── libro/        El libro de hojas que se pasan
+│   ├── indice/       Orden alfabético y agrupaciones
+│   ├── audio/        Grabar y reproducir
+│   └── archivos/     Enlaces firmados de fotos y audios
+├── variantes/     «Cómo la hace cada uno»
+├── ajustes/       Código, administración, copia de seguridad
+├── copias/        Exportar el recetario a un ZIP
+└── pwa/           Instalación en la pantalla de inicio
 ```
 
-Más detalle en [`docs/arquitectura.md`](docs/arquitectura.md).
+Más detalle en [`docs/arquitectura.md`](docs/arquitectura.md) y
+[`docs/base-de-datos.md`](docs/base-de-datos.md).
 
 ---
 
 ## Decisiones
 
-**KISS.** El cuerpo de la receta (ingredientes, materiales, pasos, trucos)
-va en columnas JSONB, no en cuatro tablas. Siempre se edita entero, así que
-partirlo solo añadiría joins. Las variantes sí son tabla aparte porque las
-escribe otra persona, en otro momento.
+**Las reglas viven en la base, no en la pantalla.** Quién ve qué y quién
+puede borrar lo deciden las políticas de PostgreSQL. La app esconde los
+botones que no funcionarían, pero eso es cortesía: esconder un botón no
+impide nada a quien sepa escribir una petición a mano. Por eso existe
+`scripts/prueba-permisos.mjs`, que lo comprueba contra la base de verdad.
 
-**Una responsabilidad por archivo.** Las páginas cargan datos y colocan
-secciones. El estado del formulario vive en un hook. Las funciones de
-presentación son puras y no saben que existe React.
+**KISS.** El cuerpo de la receta va en columnas JSONB, no en cuatro
+tablas: siempre se edita entero, así que partirlo solo añadiría joins.
 
-**Abierto a extensión, cerrado a modificación.** `ListaEditable` implementa
-añadir, quitar y reordenar una sola vez; ingredientes, materiales, pasos y
-trucos solo aportan sus campos. Añadir una quinta lista no toca ese archivo.
+**Las pantallas no conocen la base de datos.** Hablan con el `api.ts` de
+su funcionalidad. Eso permitió meter un modo demostración completo sin
+tocar ninguna vista.
 
-**Las pantallas no conocen la base de datos.** Hablan con `api.ts` de su
-funcionalidad. Cambiar de proveedor de datos toca un archivo por
-funcionalidad y ninguna vista.
-
-**Accesibilidad, no adorno.** Quien aporta el contenido tiene 70 u 80 años:
-base de 18px, contraste AA en claro y oscuro, foco siempre visible,
+**Accesibilidad, no adorno.** Quien aporta el contenido tiene 70 u 80
+años: base de 18px, contraste AA en claro y oscuro, foco siempre visible,
 objetivos táctiles de 44px y entrada sin contraseñas.
 
-**Responsive de verdad.** Se usa en móvil de pie en la cocina, en tablet
-apoyada en la encimera y en portátil sentada. Una columna en móvil, dos
-desde `sm`, ingredientes junto a los pasos desde `md`.
+**Seguridad proporcional.** Se protege que un recetario no se mezcle con
+otro y que las fotos no queden en direcciones permanentes. No hay límite
+de intentos ni doble factor: cada capa se paga en complicación, y la
+complicación se paga en que la abuela no sepa entrar. Está razonado en
+[`docs/base-de-datos.md`](docs/base-de-datos.md#seguridad).
 
 ---
 
 ## Lo que viene
 
-- **Audio**: grabar a quien cuenta la receta con su voz. Es la función más
-  valiosa y la más urgente. La columna `audio_url` ya existe.
-- **Exportar a PDF**: el recetario familiar impreso.
-- **Multi-familia**: cada familia con su espacio y código de invitación.
-  El camino está comentado en `supabase/schema.sql`.
+- **Exportar a PDF**, para el recetario familiar impreso.
+- **Limitar los intentos** al probar códigos, si esto dejara de ser
+  familiar.
+- **Copias automáticas**, que hoy dependen de pulsar un botón.
