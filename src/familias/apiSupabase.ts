@@ -82,6 +82,24 @@ export async function cambiarCodigo(familiaId: string): Promise<string> {
 }
 
 /**
+ * ¿Manda quien pregunta en este recetario?
+ *
+ * Se le pregunta a la base en lugar de deducirlo comparando quién lo creó
+ * con quién eres. Esa comparación dependía de que el dato hubiera llegado
+ * completo, y al crear un recetario o entrar con un código la base
+ * devuelve solo lo justo: el botón de borrar aparecía y desaparecía según
+ * por dónde hubieras pasado.
+ */
+export async function soyJefe(familiaId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('soy_jefe', {
+    p_familia_id: familiaId,
+  })
+
+  if (error) throw error
+  return data === true
+}
+
+/**
  * El correo de quien administra el recetario, para poder escribirle.
  *
  * Puede venir vacío: quien lo creó no está obligado a haber dejado un

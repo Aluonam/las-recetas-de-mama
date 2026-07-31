@@ -59,6 +59,11 @@ export async function cambiarCodigo(): Promise<string> {
   return nuevo
 }
 
+export async function soyJefe(): Promise<boolean> {
+  // En demostración quien mira es siempre quien lo creó.
+  return true
+}
+
 export async function correoDelAdministrador(): Promise<string | null> {
   // En demostración no hay nadie más al otro lado.
   return null

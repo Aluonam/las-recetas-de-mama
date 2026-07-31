@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react'
 import type { ReactNode } from 'react'
-import { misRecetarios } from './api'
+import { misRecetarios, soyJefe } from './api'
 import { recordarFamilia } from './actual'
 import type { Familia } from './tipos'
 import { useSesion } from '../nucleo/sesion'
@@ -88,6 +88,7 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
   const [familia, setFamilia] = useState<Familia | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<unknown>(null)
+  const [soyDuena, setSoyDuena] = useState(false)
 
   const recargar = useCallback(() => {
     if (!usuarioId) {
@@ -119,6 +120,34 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
   useEffect(() => {
     abrirFamilia(familia)
   }, [familia])
+
+  /**
+   * Si mandas aquí, lo dice la base.
+   *
+   * Se recalcula en cada cambio de recetario: se puede mandar en uno y no
+   * en otro, y quien administra dos tiene que poder borrar en los dos.
+   */
+  useEffect(() => {
+    if (!familia) {
+      setSoyDuena(false)
+      return
+    }
+
+    let vigente = true
+    soyJefe(familia.id)
+      .then((manda) => {
+        if (vigente) setSoyDuena(manda)
+      })
+      .catch(() => {
+        // Si no se puede saber, no se enseña el botón: más vale esconder
+        // uno de más que enseñar uno que va a fallar.
+        if (vigente) setSoyDuena(false)
+      })
+
+    return () => {
+      vigente = false
+    }
+  }, [familia, usuarioId])
 
   const entrar = useCallback(
     (nueva: Familia) => {
@@ -158,11 +187,7 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
   const valor = useMemo<ContextoFamilia>(
     () => ({
       familia,
-      // Si no se sabe quién lo creó, se asume que no. Más vale esconder
-      // un botón de más que enseñar uno que va a fallar.
-      soyDuena: Boolean(
-        familia?.creadaPor && usuarioId && familia.creadaPor === usuarioId,
-      ),
+      soyDuena,
       todas,
       cargando,
       error,
@@ -170,7 +195,7 @@ export function ProveedorFamilia({ children }: { children: ReactNode }) {
       elegir,
       recargar,
     }),
-    [familia, usuarioId, todas, cargando, error, entrar, elegir, recargar],
+    [familia, soyDuena, todas, cargando, error, entrar, elegir, recargar],
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
