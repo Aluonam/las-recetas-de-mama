@@ -1,49 +1,21 @@
 import { nuevoId } from '../formato'
-import type { Ingrediente, Material, Truco } from '../tipos'
+import type { Material, Truco } from '../tipos'
 
 /**
  * Listas escritas de una tirada, una cosa por línea.
  *
- * Antes cada ingrediente eran cinco casillas —nombre, medida de casa,
- * cantidad, unidad, nota— y una receta con doce ingredientes pedía
- * sesenta. Eso en una tablet no se rellena, se abandona.
+ * Se usa donde cada elemento es una frase suelta —los cacharros, los
+ * trucos—: ahí escribir seguido gana de calle a una fila con su botón de
+ * añadir por cada cosa.
  *
- * Ahora se escribe como se escribe en un papel:
- *
- *     Harina, 250 g
- *     Leche, un vaso de los del vino
- *     Sal
- *
- * Lo de después de la primera coma es la cantidad. Si son un número y
- * una unidad se guardan como tales, y si no, tal cual: «un puñado» dice
- * más que «30 g» cuando la receta la contó tu abuela, y el modelo
- * guarda las dos cosas por separado desde el principio.
+ * Los ingredientes NO van por aquí. Se probó, y se escribían muy a
+ * gusto, pero había que adivinar dónde acaba el nombre y si lo de
+ * después es un número o «un puñado», y eso se equivoca. Tienen sus tres
+ * casillas, con la medida elegida de una lista.
  *
  * Funciones puras a propósito, sin React: son la parte que puede
  * equivocarse, y así se prueban solas.
  */
-
-/** «250 g», «1,5 l», «2 cucharadas». Null si no es una medida contable. */
-function comoMedida(texto: string): { cantidad: number; unidad: string | null } | null {
-  const partes = texto.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/)
-  if (!partes) return null
-
-  const cantidad = Number(partes[1].replace(',', '.'))
-  if (!Number.isFinite(cantidad)) return null
-
-  const unidad = partes[2].trim()
-
-  /**
-   * «12 huevos» no es una medida, es la cantidad de un ingrediente que
-   * ya se llama así. Se admite unidad vacía —«Huevos, 12»— y palabras
-   * cortas, que es lo que son las unidades de verdad; lo demás se toma
-   * por medida de casa: «2 vasos de los del vino» no cabe en una
-   * columna de unidad.
-   */
-  if (unidad.split(/\s+/).filter(Boolean).length > 1) return null
-
-  return { cantidad, unidad: unidad || null }
-}
 
 /** Parte una línea en «lo que es» y «cuánto», por la primera coma. */
 function partir(linea: string): { nombre: string; resto: string } {
@@ -58,37 +30,6 @@ function partir(linea: string): { nombre: string; resto: string } {
 
 const enLineas = (texto: string) =>
   texto.split('\n').map((linea) => linea.trim()).filter(Boolean)
-
-export function textoAIngredientes(texto: string): Ingrediente[] {
-  return enLineas(texto).map((linea) => {
-    const { nombre, resto } = partir(linea)
-    const medida = resto ? comoMedida(resto) : null
-
-    if (medida) {
-      return {
-        id: nuevoId(),
-        nombre,
-        cantidad: medida.cantidad,
-        unidad: medida.unidad,
-      }
-    }
-
-    return { id: nuevoId(), nombre, cantidadCasera: resto || null }
-  })
-}
-
-export function ingredientesATexto(ingredientes: Ingrediente[]): string {
-  return ingredientes
-    .map((ingrediente) => {
-      const exacta = [ingrediente.cantidad, ingrediente.unidad]
-        .filter((parte) => parte !== null && parte !== undefined && parte !== '')
-        .join(' ')
-
-      const cuanto = ingrediente.cantidadCasera?.trim() || exacta
-      return cuanto ? `${ingrediente.nombre}, ${cuanto}` : ingrediente.nombre
-    })
-    .join('\n')
-}
 
 export function textoAMateriales(texto: string): Material[] {
   return enLineas(texto).map((linea) => {

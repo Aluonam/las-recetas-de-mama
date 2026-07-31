@@ -67,17 +67,60 @@ export function useGrabadora(alTerminar: (audio: Blob) => void) {
       nueva.ondataavailable = (evento) => {
         if (evento.data.size > 0) trozos.current.push(evento.data)
       }
+
+      nueva.onerror = () => {
+        setError(
+          new Error(
+            'El micrófono ha dejado de grabar a media grabación. Vuelve a ' +
+              'intentarlo, y si sigue pasando prueba a subir una nota de voz.',
+          ),
+        )
+      }
+
       nueva.onstop = () => {
         const audio = new Blob(trozos.current, {
           type: nueva.mimeType || 'audio/webm',
         })
         soltarMicrofono()
         setGrabando(false)
-        if (!descartar.current && audio.size > 0) alTerminarRef.current(audio)
+
+        if (descartar.current) return
+
+        /**
+         * Una grabación vacía no puede pasar en silencio.
+         *
+         * Antes, si no había datos, no se guardaba nada y tampoco se
+         * decía nada: pulsabas «Parar y guardar» y la pantalla volvía al
+         * principio como si no hubiera ocurrido. Pasa cuando el
+         * micrófono está mudo, o cuando se para tan rápido que no da
+         * tiempo a un solo trozo.
+         */
+        if (audio.size === 0) {
+          setError(
+            new Error(
+              'No se ha grabado nada. Comprueba que el micrófono está ' +
+                'conectado y que no está silenciado, y habla un par de ' +
+                'segundos antes de parar.',
+            ),
+          )
+          return
+        }
+
+        alTerminarRef.current(audio)
       }
 
       grabadora.current = nueva
-      nueva.start()
+
+      /**
+       * Un trozo por segundo, en vez de uno solo al final.
+       *
+       * Sin este número, el navegador guarda toda la grabación en un
+       * único bloque que solo entrega al parar, y si algo se tuerce por
+       * el camino —la pestaña pasa a segundo plano, el micrófono se
+       * reengancha, el sistema pide memoria— se pierde entera. Pidiendo
+       * trozos, lo grabado hasta ese momento ya está a salvo.
+       */
+      nueva.start(1000)
       setGrabando(true)
       setSegundos(0)
       reloj.current = window.setInterval(
@@ -106,8 +149,23 @@ export function useGrabadora(alTerminar: (audio: Blob) => void) {
     grabadora.current?.stop()
   }, [])
 
-  // Si la persona se va de la página a media grabación, se suelta el micro.
-  useEffect(() => soltarMicrofono, [soltarMicrofono])
+  /**
+   * Si esto desaparece a media grabación, se para bien.
+   *
+   * Antes solo se soltaba el micrófono, y el grabador se quedaba sin
+   * parar: nunca llegaba a montar el archivo, así que lo grabado se
+   * perdía sin más. Pararlo dispara el mismo camino de siempre —montar
+   * el audio y guardarlo—, y eso salva la grabación de quien se cambia
+   * de paso en mitad de una frase.
+   */
+  useEffect(
+    () => () => {
+      const activa = grabadora.current
+      if (activa && activa.state !== 'inactive') activa.stop()
+      else soltarMicrofono()
+    },
+    [soltarMicrofono],
+  )
 
   return { grabando, segundos, error, empezar, parar, cancelar }
 }

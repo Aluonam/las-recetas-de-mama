@@ -153,6 +153,36 @@ export function normalizarOcasiones(ocasiones: string[]): string[] {
 }
 
 /**
+ * Las medidas del desplegable de ingredientes.
+ *
+ * Primero lo que se pesa y se mide, que es lo que trae un paquete
+ * escrito; después lo que se cuenta; y al final lo que se dice en casa.
+ * Las tres últimas van sin número: «sal, al gusto» está completo, y
+ * obligar a poner una cantidad ahí sería inventársela.
+ */
+export const MEDIDAS_SUGERIDAS = [
+  'g',
+  'kg',
+  'ml',
+  'l',
+  'cucharada',
+  'cucharadita',
+  'taza',
+  'vaso',
+  'unidad',
+  'diente',
+  'rama',
+  'hoja',
+  'lata',
+  'sobre',
+  'puñado',
+  'pizca',
+  'chorro',
+  'al gusto',
+  'la que admita',
+] as const
+
+/**
  * Quita los datos que pone la base (id, autoría, fechas) y deja lo
  * editable. Vive aquí y no en el formulario: qué campos son metadatos es
  * asunto del modelo, no de la pantalla.

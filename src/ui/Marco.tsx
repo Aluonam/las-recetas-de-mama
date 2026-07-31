@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { HAY_SUPABASE } from '../nucleo/entorno'
 
@@ -31,22 +31,7 @@ export function Marco({ children, navegacion = true }: Props) {
         {/* Solo el engranaje. Cerrar sesión se fue al final de Ajustes:
             se usa una vez al año, cuesta deshacerlo, y aquí estaba a un
             dedo de lo que se toca a diario. */}
-        {navegacion && (
-          <NavLink
-            to="/ajustes"
-            aria-label="Ajustes"
-            title="Ajustes"
-            className={({ isActive }) =>
-              // 44px de lado: el mínimo para acertar con el dedo.
-              'absolute right-3 top-3 flex size-11 items-center justify-center rounded-full border transition-colors sm:right-4 sm:top-4 ' +
-              (isActive
-                ? 'border-verde-texto bg-verde-texto text-papel'
-                : 'border-verde-texto bg-superficie text-verde-texto hover:bg-superficie-2')
-            }
-          >
-            <Engranaje />
-          </NavLink>
-        )}
+        {navegacion && <BotonAjustes />}
 
         <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
           <Link
@@ -111,21 +96,57 @@ export function Marco({ children, navegacion = true }: Props) {
   )
 }
 
-/** Engranaje de trazo grueso, para que no desentone con el resto. */
+/**
+ * El botón de Ajustes, que también sirve para salir de Ajustes.
+ *
+ * Estando dentro, vuelve al recetario. Es lo que hace el mismo botón en
+ * cualquier aplicación del móvil y lo que se intenta por instinto: se
+ * pulsa lo mismo que te trajo para deshacerlo. Antes, dentro de Ajustes,
+ * pulsarlo no hacía nada y había que buscar el «Volver al recetario» del
+ * final de la página.
+ */
+function BotonAjustes() {
+  const donde = useLocation()
+  const dentro = donde.pathname.startsWith('/ajustes')
+
+  return (
+    <Link
+      to={dentro ? '/' : '/ajustes'}
+      aria-label={dentro ? 'Volver al recetario' : 'Ajustes'}
+      title={dentro ? 'Volver al recetario' : 'Ajustes'}
+      // 44px de lado: el mínimo para acertar con el dedo.
+      className={
+        'absolute right-3 top-3 flex size-11 items-center justify-center rounded-full border transition-colors sm:right-4 sm:top-4 ' +
+        (dentro
+          ? 'border-verde-texto bg-verde-texto text-papel'
+          : 'border-verde-texto bg-superficie text-verde-texto hover:bg-superficie-2')
+      }
+    >
+      <Engranaje />
+    </Link>
+  )
+}
+
+/**
+ * La rueda dentada de siempre.
+ *
+ * La de antes era la de trazo fino que se lleva ahora: un círculo con
+ * ocho palitos alrededor. Se lee como un sol antes que como un
+ * engranaje, sobre todo pequeña. Esta tiene dientes de verdad —cuadrados
+ * y pegados al aro— y el agujero del centro, que es como se ha dibujado
+ * un ajuste toda la vida.
+ */
 function Engranaje() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="size-5"
-    >
-      <circle cx="12" cy="12" r="3.4" />
-      <path d="M12 2.2v2.6M12 19.2v2.6M4.1 4.1l1.9 1.9M18 18l1.9 1.9M2.2 12h2.6M19.2 12h2.6M4.1 19.9 6 18M18 6l1.9-1.9" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-6">
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        // Corona de doce dientes: el aro exterior menos doce muescas,
+        // dibujadas como un solo trazo para que no se vean juntas.
+        d="M13.3 1.5h-2.6l-.35 2.24a8.6 8.6 0 0 0-1.86.77L6.66 3.14 4.82 4.98l1.37 1.83a8.6 8.6 0 0 0-.77 1.86L3.18 8.9v2.6l2.24.35c.17.66.43 1.28.77 1.86l-1.37 1.83 1.84 1.84 1.83-1.37c.58.34 1.2.6 1.86.77l.35 2.24h2.6l.35-2.24a8.6 8.6 0 0 0 1.86-.77l1.83 1.37 1.84-1.84-1.37-1.83c.34-.58.6-1.2.77-1.86l2.24-.35V8.9l-2.24-.35a8.6 8.6 0 0 0-.77-1.86l1.37-1.83-1.84-1.84-1.83 1.37a8.6 8.6 0 0 0-1.86-.77L13.3 1.5Zm-1.3 5.1a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2Z"
+        transform="translate(0 1.8)"
+      />
     </svg>
   )
 }
