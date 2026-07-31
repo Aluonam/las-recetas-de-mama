@@ -11,6 +11,7 @@ import { ListaTrucos } from '../componentes/ListaTrucos'
 import { GaleriaFotos } from '../componentes/GaleriaFotos'
 import { SeccionVariantes } from '../../variantes/SeccionVariantes'
 import { ReproductorAudio } from '../audio/ReproductorAudio'
+import { useAbrirEnGrande } from '../../ui/useAbrirEnGrande'
 
 /**
  * Ficha completa de una receta. Esta página solo carga datos y coloca
@@ -23,6 +24,10 @@ export function PaginaVerReceta() {
 
   const [receta, setReceta] = useState<Receta | null>(null)
   const [error, setError] = useState<unknown>(null)
+
+  /* La receta se abre a pantalla completa, con la cabecera justo encima:
+     deslizando hacia abajo vuelve. */
+  const zona = useAbrirEnGrande(receta != null)
 
   useEffect(() => {
     if (!id) return
@@ -50,7 +55,7 @@ export function PaginaVerReceta() {
   if (!receta) return <Cargando que="Buscando la receta" />
 
   return (
-    <article>
+    <article ref={zona} className="min-h-svh">
       <CabeceraReceta
         receta={receta}
         // Borrar es de quien creó el recetario, no de quien escribió la

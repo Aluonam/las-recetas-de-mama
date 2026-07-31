@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Agrupacion } from './agrupar'
 
-export type Vista = 'todos' | 'fichas' | 'indice' | 'libro'
+export type Vista = 'fichas' | 'indice' | 'libro'
 
 const CLAVE = 'vista-recetario'
 
@@ -10,7 +10,20 @@ interface Preferencia {
   agrupacion: Agrupacion
 }
 
-const POR_DEFECTO: Preferencia = { vista: 'todos', agrupacion: 'plato' }
+const POR_DEFECTO: Preferencia = { vista: 'fichas', agrupacion: 'plato' }
+
+/**
+ * Vistas que ya no existen, y por cuál se cambian.
+ *
+ * «Todas» y «Fichas» pintaban exactamente la misma rejilla: la única
+ * diferencia era que en Fichas salían los filtros de celebración. Eran
+ * dos botones para lo mismo, así que se quedan en uno.
+ *
+ * Hace falta traducirlo al leer porque la preferencia está guardada en
+ * el navegador de cada uno: sin esto, quien tuviera «Todas» elegida se
+ * encontraría el recetario en blanco.
+ */
+const RENOMBRADAS: Record<string, Vista> = { todos: 'fichas' }
 
 /**
  * Recuerda cómo prefieres ver el recetario.
@@ -24,7 +37,10 @@ export function usePreferenciaVista() {
   const [preferencia, setPreferencia] = useState<Preferencia>(() => {
     try {
       const bruto = localStorage.getItem(CLAVE)
-      return bruto ? { ...POR_DEFECTO, ...JSON.parse(bruto) } : POR_DEFECTO
+      if (!bruto) return POR_DEFECTO
+
+      const guardada = { ...POR_DEFECTO, ...JSON.parse(bruto) } as Preferencia
+      return { ...guardada, vista: RENOMBRADAS[guardada.vista] ?? guardada.vista }
     } catch {
       return POR_DEFECTO
     }

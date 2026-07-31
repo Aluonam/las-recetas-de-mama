@@ -11,6 +11,7 @@ import { useFamilia } from '../../familias/contexto'
 import { AvisoInstalar } from '../../pwa/AvisoInstalar'
 import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
+import { useAbrirEnGrande } from '../../ui/useAbrirEnGrande'
 
 /** Portada: todas las recetas, con buscador y filtro por ocasión. */
 export function PaginaRecetario() {
@@ -69,6 +70,16 @@ export function PaginaRecetario() {
     })
   }, [recetas, busqueda, ocasion])
 
+  /**
+   * El libro se abre a pantalla completa.
+   *
+   * Es lo que se viene a ver, así que se lleva la pantalla entera y la
+   * cabecera se queda justo encima: deslizando hacia abajo vuelve, con
+   * el buscador y las solapas. En Fichas y en Índice no se hace, porque
+   * ahí lo que se busca es la vista general.
+   */
+  const zonaLibro = useAbrirEnGrande(vista === 'libro' && visibles.length > 0)
+
   if (error != null) return <Aviso error={error} />
   if (!recetas) return <Cargando que="Sacando el recetario" />
   if (recetas.length === 0) return <RecetarioVacio />
@@ -114,7 +125,9 @@ export function PaginaRecetario() {
           Ninguna receta encaja con esa búsqueda.
         </p>
       ) : vista === 'libro' ? (
-        <PanelLibro recetas={visibles} todas={recetas} />
+        <div ref={zonaLibro} className="flex min-h-svh flex-col justify-center">
+          <PanelLibro recetas={visibles} todas={recetas} />
+        </div>
       ) : vista === 'indice' ? (
         <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (

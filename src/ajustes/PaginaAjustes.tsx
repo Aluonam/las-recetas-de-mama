@@ -4,6 +4,7 @@ import { BotonCopia } from '../copias/BotonCopia'
 import { EscribirAlAdministrador } from './EscribirAlAdministrador'
 import { PanelJefe } from './PanelJefe'
 import { PanelRecetarios } from '../familias/PanelRecetarios'
+import { CerrarSesion } from './CerrarSesion'
 import { useFamilia } from '../familias/contexto'
 
 /**
@@ -30,6 +31,9 @@ export function PaginaAjustes() {
         <PanelCodigo />
         <EscribirAlAdministrador />
         <BotonCopia />
+
+        {/* Lo último de todo: es lo único de aquí que cuesta deshacer. */}
+        <CerrarSesion />
       </div>
 
       <div className="mt-10 text-center">

@@ -1,6 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { useSesion } from '../nucleo/sesion'
 import { HAY_SUPABASE } from '../nucleo/entorno'
 
 /**
@@ -24,49 +23,29 @@ interface Props {
 }
 
 export function Marco({ children, navegacion = true }: Props) {
-  const { salir } = useSesion()
-
   return (
     <div className="flex min-h-svh flex-col">
       {!HAY_SUPABASE && <AvisoDemostracion />}
 
       <header className="relative bg-verde-claro">
+        {/* Solo el engranaje. Cerrar sesión se fue al final de Ajustes:
+            se usa una vez al año, cuesta deshacerlo, y aquí estaba a un
+            dedo de lo que se toca a diario. */}
         {navegacion && (
-          <>
-            <NavLink
-              to="/ajustes"
-              aria-label="Ajustes"
-              title="Ajustes"
-              className={({ isActive }) =>
-                // 44px de lado: el mínimo para acertar con el dedo.
-                'absolute right-3 top-3 flex size-11 items-center justify-center rounded-full border transition-colors sm:right-4 sm:top-4 ' +
-                (isActive
-                  ? 'border-verde-texto bg-verde-texto text-papel'
-                  : 'border-verde-texto bg-superficie text-verde-texto hover:bg-superficie-2')
-              }
-            >
-              <Engranaje />
-            </NavLink>
-
-            {/* Salir va abajo del todo y apartado del engranaje: se usa
-                poco y no conviene tenerlo pegado a lo que sí se toca. */}
-            {HAY_SUPABASE && (
-              <button
-                type="button"
-                onClick={() => {
-                  const seguro = window.confirm(
-                    '¿Estás seguro de que deseas salir?\n\n' +
-                      'Para volver a entrar tendrás que escribir de nuevo el ' +
-                      'código de tu familia.',
-                  )
-                  if (seguro) salir()
-                }}
-                className="absolute bottom-3 right-3 rounded-md border border-borde bg-superficie px-3 py-1.5 text-xs font-semibold text-tinta-suave transition-colors hover:bg-superficie-2 sm:right-4"
-              >
-                Salir
-              </button>
-            )}
-          </>
+          <NavLink
+            to="/ajustes"
+            aria-label="Ajustes"
+            title="Ajustes"
+            className={({ isActive }) =>
+              // 44px de lado: el mínimo para acertar con el dedo.
+              'absolute right-3 top-3 flex size-11 items-center justify-center rounded-full border transition-colors sm:right-4 sm:top-4 ' +
+              (isActive
+                ? 'border-verde-texto bg-verde-texto text-papel'
+                : 'border-verde-texto bg-superficie text-verde-texto hover:bg-superficie-2')
+            }
+          >
+            <Engranaje />
+          </NavLink>
         )}
 
         <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">

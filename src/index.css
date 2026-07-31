@@ -154,6 +154,18 @@
     /* 18px de base: la app la usan abuelas, no diseñadores. */
     font-size: 18px;
     background-color: var(--fondo);
+    /**
+     * Ni rebote arriba ni abajo.
+     *
+     * El papel pintado es una capa fija del tamaño de la pantalla, así
+     * que al tirar más allá del final el navegador enseñaba el color de
+     * debajo y aparecía una franja lisa donde debería seguir el
+     * estampado. Cortando el rebote no hay nada que enseñar.
+     *
+     * De paso quita el «tirar para recargar» de Android, que en una app
+     * instalada solo sirve para perder lo que estabas escribiendo.
+     */
+    overscroll-behavior: none;
   }
 
   @media (max-width: 640px) {
