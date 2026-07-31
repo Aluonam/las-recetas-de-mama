@@ -472,22 +472,34 @@
    máquina de estados ni temporizadores: cada receta reinicia su
    propia animación.
    --------------------------------------------------------------- */
-.pasando {
-  perspective: 1600px;
-  /* El punto de fuga en el lomo: la hoja gira sobre la costura, no
-     sobre el centro de la pantalla. */
-  perspective-origin: 50% 45%;
+/**
+ * La doble página, y de dónde se mira.
+ *
+ * La perspectiva tiene que estar en el padre directo de la hoja que
+ * gira: en CSS solo alcanza a los hijos inmediatos, y ponerla más arriba
+ * —en el envoltorio del libro— no llega. Sin ella la hoja no se aleja al
+ * levantarse: da un volteo plano, como una carta que se le da la vuelta
+ * sobre la mesa, y ahí se pierde todo el papel.
+ *
+ * El punto de fuga va en la costura y un poco por encima del centro,
+ * que es desde donde miras un libro abierto sobre la mesa.
+ */
+.doble-pagina {
+  perspective: 1800px;
+  perspective-origin: 50% 42%;
 }
 
 /**
  * El contenido nuevo, ya colocado debajo.
  *
- * Aparece sin más: quien gira es la hoja de encima. Antes giraba el
- * pliego entero, y eso no es lo que hace un libro —lo que gira es una
- * hoja sola, dejando ver lo que había debajo.
+ * Con el libro abierto no se mueve: quien gira es la hoja de encima, y
+ * lo de debajo solo se destapa. Animarlo además era el error de antes,
+ * porque este envoltorio lleva las dos páginas y hacía parpadear también
+ * el índice, que no cambia nunca.
  *
- * Solo un desplazamiento mínimo, para que no parezca un cambio de
- * diapositiva si alguien pasa hojas muy rápido.
+ * Se queda para móvil, donde no hay hoja girando —solo cabe una página—
+ * y sin nada de movimiento pasar receta parecería un cambio de
+ * diapositiva.
  */
 @keyframes hoja-adelante {
   from {
@@ -511,12 +523,16 @@
   }
 }
 
-.pasa-adelante {
-  animation: hoja-adelante 0.34s ease-out;
-}
+/* 48rem es el corte `md` de Tailwind: justo donde aparece la segunda
+   página y, con ella, la hoja que gira. */
+@media (width < 48rem) {
+  .pasa-adelante {
+    animation: hoja-adelante 0.34s ease-out;
+  }
 
-.pasa-atras {
-  animation: hoja-atras 0.34s ease-out;
+  .pasa-atras {
+    animation: hoja-atras 0.34s ease-out;
+  }
 }
 
 /**
@@ -567,6 +583,36 @@
   transform: rotateY(180deg);
 }
 
+/**
+ * La sombra del canillo.
+ *
+ * En un libro encuadernado el papel se hunde hacia la costura y esa
+ * franja queda siempre más oscura. Es un detalle pequeño que hace mucho:
+ * sin él la hoja parece una lámina plana, no una página cosida.
+ *
+ * En el dorso va al otro lado, porque al darse la vuelta la costura
+ * queda enfrente.
+ */
+.cara::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--tinta) 16%, transparent),
+    transparent 14%
+  );
+}
+
+.cara-dorso::after {
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--tinta) 16%, transparent),
+    transparent 14%
+  );
+}
+
 @keyframes girar-adelante {
   0% {
     transform: rotateY(0);
@@ -583,83 +629,83 @@
   }
 }
 
+/**
+ * Atrás es el mismo movimiento del revés: la hoja vuelve.
+ *
+ * Empieza tumbada sobre la izquierda —como quedó al pasarla— y se
+ * levanta hasta caer otra vez a la derecha. Es exactamente desandar el
+ * gesto, y por eso gira siempre la misma hoja: la derecha.
+ *
+ * Aquí la izquierda es el índice y no cambia nunca. Levantarla para ir
+ * hacia atrás era el error: se veía desaparecer y volver algo que
+ * siempre está.
+ */
 @keyframes girar-atras {
   0% {
-    transform: rotateY(0);
-    box-shadow: 10px 0 26px -8px rgba(0, 0, 0, 0.28);
+    transform: rotateY(-180deg);
+    box-shadow: 10px 0 26px -8px rgba(0, 0, 0, 0.34);
     filter: brightness(1);
   }
   50% {
     filter: brightness(0.86);
   }
   100% {
-    transform: rotateY(180deg);
-    box-shadow: -10px 0 26px -8px rgba(0, 0, 0, 0.34);
+    transform: rotateY(0);
+    box-shadow: -10px 0 26px -8px rgba(0, 0, 0, 0.28);
     filter: brightness(1);
   }
 }
 
-/* Adelante: se levanta la página derecha y cae hacia la izquierda. */
-.gira-adelante {
+/* Las dos giran la hoja derecha, sobre el lomo. Solo cambia el sentido. */
+.gira-adelante,
+.gira-atras {
   left: 50%;
   transform-origin: left center;
+}
+
+.gira-adelante {
+  /* Arranca despacio, coge velocidad y se posa. El papel tiene peso. */
   animation: girar-adelante 0.62s cubic-bezier(0.42, 0.02, 0.35, 1) forwards;
 }
 
-/* Atrás: al revés, se levanta la izquierda. */
 .gira-atras {
-  left: 0;
-  transform-origin: right center;
   animation: girar-atras 0.62s cubic-bezier(0.42, 0.02, 0.35, 1) forwards;
 }
 
 /**
- * La sombra que deja la hoja al pasar por encima de la de abajo.
+ * LA SOMBRA DEL LOMO
  *
- * Es lo que más ayuda a leerlo como papel: sin ella el giro parece un
- * efecto de presentación.
+ * A mitad de giro la hoja queda de canto, de pie sobre la costura, y
+ * ensombrece las dos páginas a la vez. Es lo que delata que hay un papel
+ * de verdad moviéndose y no una imagen que se cambia.
+ *
+ * Nace y muere dentro del propio giro: al empezar y al acabar la hoja
+ * está plana contra la de abajo y no hay nada que proyecte. Por eso no
+ * necesita saber en qué sentido vas —de canto es de canto— y sirve igual
+ * para ir hacia delante que para volver.
  */
-@keyframes barrido-adelante {
-  0% {
-    opacity: 0.5;
-    transform: translateX(-45%) skewX(-6deg);
-  }
+@keyframes sombra-lomo {
+  0%,
   100% {
     opacity: 0;
-    transform: translateX(115%) skewX(-6deg);
+  }
+  50% {
+    opacity: 1;
   }
 }
 
-@keyframes barrido-atras {
-  0% {
-    opacity: 0.5;
-    transform: translateX(115%) skewX(6deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-45%) skewX(6deg);
-  }
-}
-
-.barrido {
+.sombra-lomo {
   position: absolute;
   inset: 0;
   z-index: 5;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--tinta) 34%, transparent) 45%,
-    transparent
+  opacity: 0;
+  background: radial-gradient(
+    ellipse 20% 92% at 50% 50%,
+    color-mix(in srgb, var(--tinta) 32%, transparent),
+    transparent 72%
   );
-}
-
-.barrido-adelante {
-  animation: barrido-adelante 0.55s ease-out forwards;
-}
-
-.barrido-atras {
-  animation: barrido-atras 0.55s ease-out forwards;
+  animation: sombra-lomo 0.62s ease-in-out forwards;
 }
 
 /* Quien pide menos movimiento no debería marearse pasando páginas. */
@@ -669,7 +715,7 @@
     animation: none;
   }
 
-  .barrido,
+  .sombra-lomo,
   .hoja-girando {
     display: none;
   }

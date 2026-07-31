@@ -69,7 +69,7 @@ export function PanelLibro({
   if (!resumen) return null
 
   return (
-    <div className="pasando" {...gestos}>
+    <div {...gestos}>
       <div className="libro">
         <div className="paginas overflow-hidden">
           <div
@@ -78,7 +78,7 @@ export function PanelLibro({
             key={resumen.id}
             className={sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras'}
           >
-            <div className="relative grid md:grid-cols-2">
+            <div className="doble-pagina relative grid md:grid-cols-2">
               <HojaIndice
                 recetas={enOrden}
                 abierta={resumen.id}
@@ -102,13 +102,14 @@ export function PanelLibro({
               {/**
                * La hoja que gira, con sus dos caras.
                *
-               * Hacia delante: se levanta la página derecha —la que
-               * estabas leyendo— y cae hacia la izquierda. Por detrás
-               * lleva el índice, que es lo que queda a ese lado.
+               * Gira siempre la hoja derecha, porque es la única que
+               * cambia: la izquierda es el índice y se queda.
                *
-               * Hacia atrás, al revés: se levanta la izquierda, que es
-               * el índice, y al caer hacia la derecha enseña por detrás
-               * la receta a la que vuelves.
+               * Hacia delante se levanta —con la receta que estabas
+               * leyendo puesta— y cae sobre el índice. Hacia atrás
+               * desanda ese mismo gesto: viene tumbada desde la
+               * izquierda y se posa a la derecha enseñando la receta a la
+               * que vuelves.
                *
                * Solo con dos páginas a la vista: en móvil hay una sola y
                * una hoja girando sobre sí misma no significaría nada.
@@ -121,6 +122,14 @@ export function PanelLibro({
                     (sentido === 'adelante' ? 'gira-adelante' : 'gira-atras')
                   }
                 >
+                  {/**
+                   * La cara de la receta es la que se ve cuando la hoja
+                   * está en su sitio, a la derecha.
+                   *
+                   * Yendo hacia delante es la que estabas leyendo, que se
+                   * levanta. Yendo hacia atrás es la que vuelve, y por eso
+                   * es la actual: la hoja llega a su sitio enseñándola.
+                   */}
                   <div className="cara">
                     {sentido === 'adelante' ? (
                       <HojaReceta
@@ -129,14 +138,6 @@ export function PanelLibro({
                         numero={paginaDe.get(girando.resumen.id) ?? 0}
                       />
                     ) : (
-                      <HojaIndice recetas={enOrden} abierta={resumen.id} />
-                    )}
-                  </div>
-
-                  <div className="cara cara-dorso">
-                    {sentido === 'adelante' ? (
-                      <HojaIndice recetas={enOrden} abierta={resumen.id} />
-                    ) : (
                       <HojaReceta
                         receta={receta}
                         resumen={resumen}
@@ -144,17 +145,22 @@ export function PanelLibro({
                       />
                     )}
                   </div>
+
+                  {/* El dorso siempre es el índice: es lo que queda al
+                      otro lado cuando la hoja está tumbada. */}
+                  <div className="cara cara-dorso">
+                    <HojaIndice recetas={enOrden} abierta={resumen.id} />
+                  </div>
                 </div>
               )}
 
-              {/* La sombra que deja al caer sobre la de abajo. */}
-              <div
-                aria-hidden="true"
-                className={
-                  'barrido ' +
-                  (sentido === 'adelante' ? 'barrido-adelante' : 'barrido-atras')
-                }
-              />
+              {/* La sombra que proyecta la hoja al quedarse de canto. */}
+              {girando && (
+                <div
+                  aria-hidden="true"
+                  className="sombra-lomo hidden md:block"
+                />
+              )}
             </div>
           </div>
         </div>
