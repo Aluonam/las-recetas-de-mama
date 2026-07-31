@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import type { RecetaResumen } from '../tipos'
 import { PanelLibro } from './PanelLibro'
 
@@ -16,6 +17,12 @@ import { PanelLibro } from './PanelLibro'
  * Mientras está abierto se bloquea el desplazamiento de detrás: sin eso,
  * arrastrar en el libro movía la página de debajo y al cerrar aparecías
  * en otro sitio.
+ *
+ * Se cuelga del `body` y no de donde se escribe. Un `position: fixed`
+ * deja de medirse contra la pantalla en cuanto cualquier padre, por
+ * arriba que esté, tiene un `transform`, un `filter` o una
+ * `perspective` —y este libro usa las tres para girar la hoja—. Colgando
+ * de la raíz no hay padre que valga: siempre es la pantalla.
  */
 export function LibroPantallaCompleta({
   recetas,
@@ -47,7 +54,7 @@ export function LibroPantallaCompleta({
     }
   }, [alCerrar])
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -60,8 +67,9 @@ export function LibroPantallaCompleta({
         onClick={alCerrar}
         aria-label="Salir de pantalla completa"
         title="Salir de pantalla completa (Esc)"
-        // 44px de lado: el mínimo para acertar con el dedo.
-        className="absolute right-3 top-3 z-10 flex size-11 items-center justify-center rounded-full border border-verde-texto bg-superficie text-verde-texto shadow-md transition-colors hover:bg-superficie-2 sm:right-5 sm:top-5"
+        // 48px de lado, por encima de todo y con sombra: es la única
+        // salida que hay, así que tiene que verse antes que nada.
+        className="absolute right-3 top-3 z-20 flex size-12 items-center justify-center rounded-full border-2 border-verde-texto bg-superficie text-verde-texto shadow-lg transition-colors hover:bg-superficie-2 sm:right-5 sm:top-5"
       >
         <Aspa />
       </button>
@@ -69,7 +77,8 @@ export function LibroPantallaCompleta({
       <div className="min-h-0 flex-1">
         <PanelLibro recetas={recetas} todas={todas} lleno />
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -79,10 +88,10 @@ function Aspa() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2.1"
+      strokeWidth="2.4"
       strokeLinecap="round"
       aria-hidden="true"
-      className="size-5"
+      className="size-6"
     >
       <path d="M6 6l12 12M18 6L6 18" />
     </svg>

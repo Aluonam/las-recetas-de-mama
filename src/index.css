@@ -874,10 +874,14 @@
  * mismo, o el libro pega un salto cada vez que pasas hoja y la hoja que
  * gira se queda a media altura. Lo que sobra se desplaza dentro de la
  * página; lo que falta se queda en blanco, como en el papel.
+ *
+ * `height` y no `min-height`: un mínimo lo respeta la receta corta pero
+ * lo revienta la larga, que era justo el salto que se quería evitar. Un
+ * libro encuadernado no crece de grosor por la página que abras.
  */
 @media (width >= 48rem) {
   .doble-pagina {
-    min-height: 36rem;
+    height: 36rem;
   }
 }
 
