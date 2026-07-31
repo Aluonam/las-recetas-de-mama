@@ -17,8 +17,8 @@ import { useEffect, useRef } from 'react'
  * te enseña que sigue ahí arriba: si apareciera ya colocado, parecería
  * que ha desaparecido y nadie iría a buscarla.
  */
-export function useAbrirEnGrande(activo: boolean) {
-  const zona = useRef<HTMLElement>(null)
+export function useAbrirEnGrande<T extends HTMLElement>(activo: boolean) {
+  const zona = useRef<T>(null)
 
   useEffect(() => {
     if (!activo) return
