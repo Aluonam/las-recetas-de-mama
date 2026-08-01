@@ -21,9 +21,10 @@ interface Props {
  * cualquier libro: es lo que hace que se lea como un índice y no como
  * una lista de botones.
  *
- * Se reparte entre las dos caras cuando hay muchas, empezando por la
- * izquierda: es como se lee, y así la derecha se queda en blanco solo
- * cuando de verdad sobra sitio.
+ * Se llena la cara izquierda y solo se pasa a la derecha cuando de
+ * verdad no cabe, como en cualquier índice. Antes se repartía a medias
+ * siempre, y con dos recetas quedaba una a cada lado de la costura, que
+ * es justo lo que no hace un libro.
  */
 export function HojaIndiceLetra({
   letra,
@@ -50,7 +51,7 @@ export function HojaIndiceLetra({
         paginaDe={paginaDe}
         alElegir={alElegir}
         desde={0}
-        hasta={mitad(recetas.length)}
+        hasta={CABEN_EN_UNA_CARA}
       />
 
       <p
@@ -63,7 +64,7 @@ export function HojaIndiceLetra({
   )
 }
 
-/** La cara derecha: lo que no cabía en la izquierda. */
+/** La cara derecha: lo que no cabía en la izquierda, si es que no cabía. */
 export function HojaIndiceLetraDerecha({
   letra,
   recetas,
@@ -71,7 +72,7 @@ export function HojaIndiceLetraDerecha({
   alElegir,
   numero,
 }: Props) {
-  const desde = mitad(recetas.length)
+  const desde = CABEN_EN_UNA_CARA
   const quedan = recetas.length - desde
 
   return (
@@ -108,8 +109,21 @@ export function HojaIndiceLetraDerecha({
   )
 }
 
-/** Con siete, cuatro a la izquierda y tres a la derecha. */
-const mitad = (cuantas: number) => Math.ceil(cuantas / 2)
+/**
+ * Cuántas entradas caben en una cara.
+ *
+ * Es un número a ojo y a propósito: la cara izquierda gasta un tercio en
+ * la letra grande y la guirnalda, y en lo que queda entran unas catorce
+ * líneas. Se dejan doce para no apurar, porque un título largo ocupa
+ * más.
+ *
+ * Podría medirse de verdad con el tamaño real de la caja, pero eso
+ * significa pintar, medir y volver a pintar en cada hoja que se pasa,
+ * para acertar en un caso —una letra con más de doce recetas— que en un
+ * recetario de casa no se da casi nunca. Y si se pasa, la lista se
+ * desplaza dentro de su cara y no se pierde nada.
+ */
+const CABEN_EN_UNA_CARA = 12
 
 function Entradas({
   recetas,
