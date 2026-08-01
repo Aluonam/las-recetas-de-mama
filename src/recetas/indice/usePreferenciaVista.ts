@@ -13,12 +13,33 @@ export type Vista = 'fichas' | 'indice'
 
 const CLAVE = 'vista-recetario'
 
+/**
+ * Cuántas tarjetas por fila, como en las tiendas de ropa.
+ *
+ * Es lo mismo que hacen ahí: pocas y grandes para mirar la foto con
+ * calma, muchas y pequeñas para abarcar el catálogo de un vistazo. En un
+ * recetario vale igual —unas veces se busca una receta concreta y otras
+ * se pasea a ver qué apetece— y no hay un número que sirva para las dos
+ * cosas.
+ *
+ * Es un tope, no una orden: en una pantalla estrecha caben las que
+ * caben, y de eso se encarga el CSS.
+ */
+export type Columnas = 1 | 2 | 3 | 4
+
+export const COLUMNAS: Columnas[] = [1, 2, 3, 4]
+
 interface Preferencia {
   vista: Vista
   agrupacion: Agrupacion
+  columnas: Columnas
 }
 
-const POR_DEFECTO: Preferencia = { vista: 'fichas', agrupacion: 'plato' }
+const POR_DEFECTO: Preferencia = {
+  vista: 'fichas',
+  agrupacion: 'plato',
+  columnas: 3,
+}
 
 /**
  * Vistas que ya no existen, y por cuál se cambian.

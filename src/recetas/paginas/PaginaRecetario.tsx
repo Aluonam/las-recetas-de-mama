@@ -17,7 +17,7 @@ export function PaginaRecetario() {
   const [error, setError] = useState<unknown>(null)
   const [busqueda, setBusqueda] = useState('')
   const [ocasion, setOcasion] = useState<string | null>(null)
-  const { vista, agrupacion, cambiar } = usePreferenciaVista()
+  const { vista, agrupacion, columnas, cambiar } = usePreferenciaVista()
   const { familia } = useFamilia()
 
   /**
@@ -113,6 +113,8 @@ export function PaginaRecetario() {
         alFiltrar={setOcasion}
         agrupacion={agrupacion}
         alAgrupar={(nueva) => cambiar({ agrupacion: nueva })}
+        columnas={columnas}
+        alCambiarColumnas={(cuantas) => cambiar({ columnas: cuantas })}
         alAbrirLibro={() => setLibroAbierto(true)}
       />
 
@@ -123,7 +125,7 @@ export function PaginaRecetario() {
       ) : vista === 'indice' ? (
         <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (
-        <ul className="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="rejilla m-0 list-none p-0" data-columnas={columnas}>
           {visibles.map((receta) => (
             <li key={receta.id}>
               <TarjetaReceta receta={receta} />

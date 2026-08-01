@@ -1,6 +1,7 @@
 import { BuscadorLupa } from './BuscadorLupa'
 import type { Agrupacion } from '../indice/agrupar'
-import type { Vista } from '../indice/usePreferenciaVista'
+import { COLUMNAS } from '../indice/usePreferenciaVista'
+import type { Columnas, Vista } from '../indice/usePreferenciaVista'
 
 /**
  * Los mandos del recetario, en una sola fila.
@@ -33,6 +34,8 @@ export function BarraRecetario({
   alFiltrar,
   agrupacion,
   alAgrupar,
+  columnas,
+  alCambiarColumnas,
   alAbrirLibro,
 }: {
   busqueda: string
@@ -44,6 +47,8 @@ export function BarraRecetario({
   alFiltrar: (ocasion: string | null) => void
   agrupacion: Agrupacion
   alAgrupar: (agrupacion: Agrupacion) => void
+  columnas: Columnas
+  alCambiarColumnas: (columnas: Columnas) => void
   alAbrirLibro: () => void
 }) {
   return (
@@ -82,6 +87,42 @@ export function BarraRecetario({
           )}
 
       <div className="flex-1" />
+
+      {/**
+       * Cuántas tarjetas por fila, como en las tiendas de ropa.
+       *
+       * Solo en tarjetas: en la lista no hay columnas que elegir. Las de
+       * tres y cuatro se esconden en pantalla estrecha, porque allí no
+       * llegan a caber y un botón que no hace lo que dice es peor que no
+       * tenerlo.
+       */}
+      {vista === 'fichas' && (
+        <div
+          role="group"
+          aria-label="Cuántas recetas por fila"
+          className="flex overflow-hidden rounded-lg border border-verde-texto"
+        >
+          {COLUMNAS.map((cuantas) => (
+            <button
+              key={cuantas}
+              type="button"
+              onClick={() => alCambiarColumnas(cuantas)}
+              aria-pressed={columnas === cuantas}
+              aria-label={`Ver ${cuantas} por fila`}
+              title={`Ver ${cuantas} por fila`}
+              className={
+                'flex h-9 w-9 items-center justify-center transition-colors ' +
+                (cuantas > 2 ? 'hidden md:flex ' : '') +
+                (columnas === cuantas
+                  ? 'bg-verde-texto text-papel'
+                  : 'bg-superficie text-verde-texto hover:bg-superficie-2')
+              }
+            >
+              <Barras cuantas={cuantas} />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Tarjetas o lista, en un interruptor de dos: son dos maneras de
           mirar lo mismo, no dos sitios distintos. */}
@@ -146,6 +187,30 @@ function Modo({
     >
       {children}
     </button>
+  )
+}
+
+/**
+ * Tantas barras como columnas, que es como se dibuja esto en las
+ * tiendas: se entiende sin leer nada.
+ */
+function Barras({ cuantas }: { cuantas: number }) {
+  const hueco = 2
+  const ancho = (18 - hueco * (cuantas - 1)) / cuantas
+
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-4">
+      {Array.from({ length: cuantas }, (_, n) => (
+        <rect
+          key={n}
+          x={3 + n * (ancho + hueco)}
+          y={4}
+          width={ancho}
+          height={16}
+          rx={Math.min(1.5, ancho / 2)}
+        />
+      ))}
+    </svg>
   )
 }
 
