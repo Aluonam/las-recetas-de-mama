@@ -35,16 +35,14 @@ export function HojaIndiceLetra({
 }: Props) {
   return (
     <article className="hoja hoja-izq relative flex h-full flex-col p-6 pb-14 pl-14 sm:p-8 sm:pb-16 sm:pl-16">
-      <p className="versalitas mb-1 text-center text-rosa-texto">En la letra</p>
-
-      <p
-        aria-hidden="true"
-        className="text-center font-titulo text-6xl font-bold leading-none text-verde-texto"
-      >
-        {letra}
-      </p>
-
-      <div className="guirnalda my-4" aria-hidden="true" />
+      <Cabecera rotulo="En la letra">
+        <p
+          aria-hidden="true"
+          className="text-center font-titulo text-6xl font-bold leading-none text-verde-texto"
+        >
+          {letra}
+        </p>
+      </Cabecera>
 
       <Entradas
         recetas={recetas}
@@ -79,10 +77,11 @@ export function HojaIndiceLetraDerecha({
     <article className="hoja hoja-der relative flex h-full flex-col p-6 pb-14 sm:p-8 sm:pb-16">
       {quedan > 0 ? (
         <>
-          <p className="versalitas mb-1 text-center text-rosa-texto">
-            Sigue la {letra}
-          </p>
-          <div className="guirnalda mb-4" aria-hidden="true" />
+          {/* La cabecera mide lo mismo que la de enfrente aunque no
+              lleve la letra grande, así que las dos guirnaldas caen a la
+              misma altura y el libro se lee como un pliego y no como dos
+              hojas sueltas. */}
+          <Cabecera rotulo={`Sigue la ${letra}`} />
           <Entradas
             recetas={recetas}
             paginaDe={paginaDe}
@@ -93,10 +92,10 @@ export function HojaIndiceLetraDerecha({
         </>
       ) : (
         /* Papel en blanco, como la hoja de cortesía de cualquier libro.
-           Un adorno pequeño evita que parezca que falta algo. */
-        <div className="flex h-full items-center justify-center">
-          <div className="guirnalda w-2/3 opacity-60" aria-hidden="true" />
-        </div>
+           El adorno va a la altura del de enfrente, no en mitad de la
+           página: puestos a dejar la cara vacía, que al menos las dos
+           guirnaldas hagan una sola línea de lado a lado. */
+        <Cabecera rotulo="" />
       )}
 
       <p
@@ -106,6 +105,40 @@ export function HojaIndiceLetraDerecha({
         {numero}
       </p>
     </article>
+  )
+}
+
+/**
+ * La cabecera de una cara del índice, de alto fijo.
+ *
+ * El alto es lo importante. La cara izquierda lleva la letra grande y la
+ * derecha no, así que dejadas a su aire la guirnalda de una caía a media
+ * página de la otra y el pliegue partía el libro en dos hojas sueltas.
+ * Con el alto clavado, las dos guirnaldas hacen una sola línea que cruza
+ * de lado a lado.
+ *
+ * Lo de dentro se apoya abajo, contra la guirnalda, para que crezca
+ * hacia arriba y no la mueva.
+ */
+function Cabecera({
+  rotulo,
+  children,
+}: {
+  rotulo: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div className="mb-4 flex h-24 flex-col justify-end sm:h-28">
+      {rotulo ? (
+        <p className="versalitas mb-1 text-center text-rosa-texto">{rotulo}</p>
+      ) : (
+        <span className="sr-only">Esta cara se queda en blanco.</span>
+      )}
+
+      {children}
+
+      <div className="guirnalda mt-2" aria-hidden="true" />
+    </div>
   )
 }
 
