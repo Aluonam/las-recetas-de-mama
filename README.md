@@ -39,9 +39,16 @@ WhatsApp. Quien lo escribe entra: sin cuentas, sin contraseñas, sin
 esperar ningún correo. Un recetario ajeno no existe para quien no es
 miembro — no se ve ni su nombre.
 
-**Cuatro formas de mirarlo:** todas, fichas con filtro por ocasión, un
-libro de hojas que se pasan con el índice a la izquierda, y un índice
-alfabético.
+**Dos formas de mirarlo y una de leerlo:** tarjetas con filtro por
+ocasión —de una a cuatro por fila, como en una tienda de ropa— o lista
+agrupada por plato, por quién la hacía o por ocasión. Y el **libro**, que
+se abre a pantalla completa: cada receta en su pliego, el índice
+troquelado en el canto y las hojas girando sobre la costura.
+
+**Con su voz.** La receta entera contada de viva voz, notas sueltas
+pegadas a cada apartado —«las manzanas tienen que quedar rectas por la
+base»— y una grabación por paso. Y dictado, para quien prefiere hablar a
+escribir.
 
 **Modo cocina:** texto grande, ingredientes fijos arriba, pasos que se
 tachan al tocarlos y la pantalla que no se apaga.

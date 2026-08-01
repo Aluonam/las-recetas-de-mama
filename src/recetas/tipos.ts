@@ -184,7 +184,7 @@ export const OCASIONES_SUGERIDAS = [
  * de una lista fija, así que cambiar las sugerencias no basta: hay que
  * arreglar lo ya escrito. `null` significa que la ocasión desaparece.
  */
-export const OCASIONES_RENOMBRADAS: Record<string, string | null> = {
+const OCASIONES_RENOMBRADAS: Record<string, string | null> = {
   // Nochebuena ya cubre estas fechas y tenerlas las dos duplicaba el filtro.
   Navidad: null,
   'Del diario': 'De diario',

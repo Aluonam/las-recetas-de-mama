@@ -306,7 +306,6 @@
    * que se quería seleccionar su texto y lo pintaba de azul. Un botón no
    * es un párrafo: no hay nada que copiar de él.
    */
-  .boton,
   .boton-principal,
   .boton-secundario,
   .boton-peligro {

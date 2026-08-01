@@ -38,6 +38,7 @@ qué.
 | 8 | `010-escribir-a-quien-administra.sql` | Poder avisar a quien administra |
 | 9 | `011-usuario-jefe.sql` | Consultar y traspasar el mando |
 | 10 | `012-solo-el-jefe-cambia-el-codigo.sql` | Cambiar el código, solo quien manda |
+| 11 | `014-audios-por-apartado.sql` | Notas de voz pegadas a cada apartado de la receta |
 
 **Sueltos, solo si hacen falta:**
 

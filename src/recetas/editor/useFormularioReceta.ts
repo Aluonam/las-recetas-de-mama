@@ -102,7 +102,6 @@ export function useFormularioReceta(id?: string) {
     cargando,
     guardando,
     error,
-    setError,
     hayCambios,
   }
 }
