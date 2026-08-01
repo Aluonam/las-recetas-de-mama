@@ -94,6 +94,24 @@ export function BotonDictar({
         {dictado.escuchando ? 'Escuchando… pulsa para parar' : 'Dictar'}
       </button>
 
+      {/**
+       * Lo que va oyendo, mientras lo oye.
+       *
+       * Como el teclado del móvil. Sirve para dos cosas: se ve que
+       * funciona sin esperar a que acabe la frase —antes había que
+       * fiarse de que «parece que graba»— y se ve cuándo está
+       * entendiendo mal, que con los nombres de una receta de la abuela
+       * pasa más de lo que parece.
+       */}
+      {dictado.escuchando && (
+        <p
+          role="status"
+          className="mt-2 min-h-6 text-sm italic text-tinta-suave"
+        >
+          {dictado.aMedias || 'Te escucho…'}
+        </p>
+      )}
+
       {dictado.error && (
         <p role="status" className="mt-2 text-sm text-rosa-texto">
           {dictado.error}

@@ -98,6 +98,16 @@ function mensaje(fallo: string): string {
 export function useDictado(alDictar: (texto: string) => void) {
   const [escuchando, setEscuchando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  /**
+   * Lo que va oyendo, antes de darlo por bueno.
+   *
+   * No se guarda en la receta: se enseña mientras se habla, como el
+   * teclado del móvil. Sirve para dos cosas y las dos importan: se ve
+   * que la cosa funciona sin esperar a que termine la frase, y se ve
+   * cuándo está entendiendo mal, que con una receta de la abuela pasa.
+   */
+  const [aMedias, setAMedias] = useState('')
   const motor = useRef<MotorDictado | null>(null)
 
   // En una ref para que arrancar no dependa de la última versión de la
@@ -161,12 +171,19 @@ export function useDictado(alDictar: (texto: string) => void) {
 
     nuevo.onresult = (evento) => {
       let dicho = ''
+      let tanteando = ''
+
       for (let i = evento.resultIndex; i < evento.results.length; i++) {
         const resultado = evento.results[i]
         if (resultado.isFinal) dicho += resultado[0].transcript
+        else tanteando += resultado[0].transcript
       }
+
+      setAMedias(tanteando)
+
       if (!dicho.trim()) return
       algoDicho = true
+      setAMedias('')
       alDictarRef.current(dicho.trim())
     }
 
@@ -188,6 +205,7 @@ export function useDictado(alDictar: (texto: string) => void) {
      */
     nuevo.onend = () => {
       setEscuchando(false)
+      setAMedias('')
       motor.current = null
 
       if (algoDicho || paradoAMano.current) return
@@ -266,5 +284,5 @@ export function useDictado(alDictar: (texto: string) => void) {
     [],
   )
 
-  return { escuchando, error, empezar, parar }
+  return { escuchando, aMedias, error, empezar, parar }
 }
