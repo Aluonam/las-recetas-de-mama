@@ -46,17 +46,18 @@ export function PaginaRecetario() {
   }, [familia])
 
   /**
-   * Al salir de Fichas se limpia el filtro de celebración, y al entrar en
-   * el Libro se limpia también la búsqueda.
+   * Al salir de Fichas se limpia el filtro de celebración.
    *
-   * Un filtro puesto que no se ve escondería recetas sin nada en pantalla
-   * que explicara por qué faltan.
+   * Las píldoras de ocasión solo se ven ahí, así que dejarlas puestas
+   * escondería recetas en el libro o en el índice sin nada en pantalla
+   * que explicara por qué faltan. La búsqueda no se toca: esa sí se ve
+   * siempre, con su caja y su cruz, así que nunca esconde nada a
+   * escondidas.
    */
   const cambiarVista = (parche: Parameters<typeof cambiar>[0]) => {
     if (!parche.vista) return cambiar(parche)
 
     if (parche.vista !== 'fichas') setOcasion(null)
-    if (parche.vista === 'libro') setBusqueda('')
     // Elegir «Libro» es pedir el libro, así que se abre como se mira.
     setPantallaCompleta(parche.vista === 'libro')
     cambiar(parche)
@@ -82,17 +83,6 @@ export function PaginaRecetario() {
         .some((campo) => campo!.toLowerCase().includes(texto))
     })
   }, [recetas, busqueda, ocasion])
-
-  /**
-   * El libro va siempre entero.
-   *
-   * Es el recetario ordenado por letras, y un libro no se hojea a
-   * trozos: si buscar dejara fuera la mitad, el índice del canto tendría
-   * letras que no llevan a ninguna parte y el «3 de 7» de abajo estaría
-   * contando otra cosa. Para rebuscar están las Fichas, que es la vista
-   * hecha para eso.
-   */
-  const enLaVista = vista === 'libro' ? (recetas ?? []) : visibles
 
   if (error != null) return <Aviso error={error} />
   if (!recetas) return <Cargando que="Sacando el recetario" />
@@ -123,12 +113,11 @@ export function PaginaRecetario() {
         {/* `items-end`: la lupa se apoya en la misma raya en la que se
             apoyan las solapas, que es lo que las alinea. */}
         <div className="flex flex-wrap items-end gap-3">
-          {/* En el libro no hay lupa: no se busca en un libro abierto, se
-              va por las letras del canto. Enseñarla y que no filtrara
-              sería peor que no tenerla. */}
-          {vista !== 'libro' && (
-            <BuscadorLupa busqueda={busqueda} alBuscar={setBusqueda} />
-          )}
+          {/* Fijo, como las solapas. Sale en las tres vistas, el libro
+              incluido: buscar antes de abrirlo a pantalla completa es
+              justo la manera de llegar a la receta que quieres sin
+              hojear el abecedario entero. */}
+          <BuscadorLupa busqueda={busqueda} alBuscar={setBusqueda} />
 
           <SelectorVista
             vista={vista}
@@ -148,7 +137,7 @@ export function PaginaRecetario() {
         )}
       </div>
 
-      {enLaVista.length === 0 ? (
+      {visibles.length === 0 ? (
         <p className="py-12 text-center text-tinta-suave">
           Ninguna receta encaja con esa búsqueda.
         </p>
@@ -163,13 +152,13 @@ export function PaginaRecetario() {
               Ver a pantalla completa
             </button>
           </div>
-          <PanelLibro recetas={enLaVista} todas={recetas} />
+          <PanelLibro recetas={visibles} todas={recetas} />
         </div>
       ) : vista === 'indice' ? (
-        <PanelIndice recetas={enLaVista} modo={agrupacion} />
+        <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (
         <ul className="grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
-          {enLaVista.map((receta) => (
+          {visibles.map((receta) => (
             <li key={receta.id}>
               <TarjetaReceta receta={receta} />
             </li>
@@ -178,9 +167,9 @@ export function PaginaRecetario() {
       )}
 
       {/* Va al final y por encima de todo: tapa la página entera. */}
-      {vista === 'libro' && pantallaCompleta && enLaVista.length > 0 && (
+      {vista === 'libro' && pantallaCompleta && visibles.length > 0 && (
         <LibroPantallaCompleta
-          recetas={enLaVista}
+          recetas={visibles}
           todas={recetas}
           alCerrar={() => setPantallaCompleta(false)}
         />
