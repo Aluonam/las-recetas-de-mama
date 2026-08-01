@@ -222,6 +222,13 @@
            text-tinta placeholder:text-tinta-suave/70;
   }
 
+  /* La cruz que el navegador pone en los campos de buscar: el buscador
+     lleva la suya, colocada donde toca, y dos cruces seguidas sobran. */
+  input[type='search']::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
   .etiqueta {
     @apply mb-1 block text-sm font-semibold text-tinta-suave;
   }

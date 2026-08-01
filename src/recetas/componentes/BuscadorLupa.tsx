@@ -1,15 +1,17 @@
-import { useState } from 'react'
-
 /**
- * El buscador, guardado detrás de una lupa.
+ * El buscador, en una caja estrecha con la lupa dentro.
  *
- * Ocupaba una barra entera arriba del recetario, y se usa poco: con
- * veinte recetas se busca con los ojos. Lo que sí se usa a diario son
- * las solapas de Fichas, Libro e Índice, así que ellas se quedan a la
- * vista y el buscador espera a que lo llamen.
+ * Estuvo escondido detrás de un botón y no compensaba: abrirlo y
+ * cerrarlo movía las solapas de sitio, y un buscador que hay que sacar
+ * es un buscador que nadie usa. Ahora está siempre, pero pequeño.
  *
- * Al cerrarlo se borra lo escrito a propósito. Un filtro puesto que no
- * se ve es la mejor manera de que alguien crea que le faltan recetas.
+ * El ancho es corto a propósito. Los nombres de plato son cortos —
+ * «torrijas», «croquetas»— y una caja que ocupara más que las solapas
+ * enteras diría que buscar es lo principal, cuando lo principal es
+ * elegir cómo mirar el recetario.
+ *
+ * La cruz solo sale cuando hay algo escrito, así que no ocupa sitio el
+ * resto del tiempo. Escape hace lo mismo.
  */
 export function BuscadorLupa({
   busqueda,
@@ -18,60 +20,44 @@ export function BuscadorLupa({
   busqueda: string
   alBuscar: (texto: string) => void
 }) {
-  const [abierto, setAbierto] = useState(false)
-
-  if (!abierto) {
-    return (
-      <button
-        type="button"
-        onClick={() => setAbierto(true)}
-        aria-label="Buscar receta"
-        title="Buscar receta"
-        aria-expanded="false"
-        // 44px de lado: el mínimo para acertar con el dedo.
-        className="boton-secundario flex size-11 shrink-0 items-center justify-center p-0"
-      >
-        <Lupa />
-      </button>
-    )
-  }
-
   return (
-    <div className="flex items-center gap-2">
+    <div className="relative">
       <label htmlFor="buscar" className="sr-only">
         Buscar receta
       </label>
-      {/* Ancho fijo y corto. Estirándose se comía la fila entera y
-          empujaba las solapas al renglón de abajo cada vez que se abría;
-          además, para buscar «torrijas» no hace falta media pantalla. */}
+
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-tinta-suave"
+      >
+        <Lupa />
+      </span>
+
       <input
         id="buscar"
         type="search"
-        autoFocus
-        // Los 44px de los botones, clavados: si el campo midiera un poco
-        // más, abrir la búsqueda bajaría las solapas tres píxeles.
-        className="campo h-11 w-52"
-        placeholder="Buscar receta…"
+        // Los 44px de alto de los botones, clavados: con un par de
+        // píxeles de más, esto bajaría las solapas al ponerse al lado.
+        className="campo h-11 w-40 pl-9 pr-9"
+        placeholder="Buscar…"
         value={busqueda}
         onChange={(evento) => alBuscar(evento.target.value)}
         onKeyDown={(evento) => {
-          if (evento.key !== 'Escape') return
-          alBuscar('')
-          setAbierto(false)
+          if (evento.key === 'Escape') alBuscar('')
         }}
       />
-      <button
-        type="button"
-        onClick={() => {
-          alBuscar('')
-          setAbierto(false)
-        }}
-        aria-label="Cerrar la búsqueda"
-        title="Cerrar la búsqueda"
-        className="boton-secundario flex size-11 shrink-0 items-center justify-center p-0"
-      >
-        <Aspa />
-      </button>
+
+      {busqueda && (
+        <button
+          type="button"
+          onClick={() => alBuscar('')}
+          aria-label="Borrar la búsqueda"
+          title="Borrar la búsqueda"
+          className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-tinta-suave transition-colors hover:bg-superficie-2 hover:text-tinta"
+        >
+          <Aspa />
+        </button>
+      )}
     </div>
   )
 }
@@ -85,7 +71,7 @@ function Lupa() {
       strokeWidth="2.1"
       strokeLinecap="round"
       aria-hidden="true"
-      className="size-5"
+      className="size-4"
     >
       <circle cx="10.5" cy="10.5" r="6.5" />
       <path d="m15.4 15.4 4.6 4.6" />
@@ -99,10 +85,10 @@ function Aspa() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2.1"
+      strokeWidth="2.2"
       strokeLinecap="round"
       aria-hidden="true"
-      className="size-5"
+      className="size-4"
     >
       <path d="M6 6l12 12M18 6L6 18" />
     </svg>
