@@ -43,11 +43,18 @@ function comoNombre(texto: string): string {
     .toLowerCase()
 }
 
-/** Todo lo que una receta guarda como archivo. */
+/**
+ * Todo lo que una receta guarda como archivo.
+ *
+ * Si aquí se olvida uno, la copia sale con el JSON apuntando a un
+ * archivo que no está: parece completa y no lo está, que es la peor
+ * manera de fallar que tiene una copia de seguridad.
+ */
 function archivosDe(receta: Receta): string[] {
   return [
     receta.fotoPortadaUrl,
     receta.audioUrl,
+    ...receta.audios.map((audio) => audio.url),
     ...receta.pasos.map((paso) => paso.fotoUrl),
     ...receta.fotos.map((foto) => foto.url),
   ].filter((valor): valor is string => Boolean(valor))

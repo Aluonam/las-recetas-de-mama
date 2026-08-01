@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { RecetaEditable } from '../tipos'
+import type { Apartado, RecetaEditable } from '../tipos'
+import { AudiosApartado } from '../audio/AudiosApartado'
 import { Aviso } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
 import { useAvisoAlSalir } from './useAvisoAlSalir'
@@ -21,6 +22,25 @@ import { EditorTrucos } from './EditorTrucos'
 interface Cambio {
   receta: RecetaEditable
   cambiar: (parche: Partial<RecetaEditable>) => void
+}
+
+/**
+ * Las notas de voz de un apartado, enganchadas al mismo estado que todo
+ * lo demás. Va en su propio envoltorio para no repetir el `cambiar` en
+ * los cinco sitios donde aparece.
+ */
+function Voz({
+  apartado,
+  receta,
+  cambiar,
+}: Cambio & { apartado: Apartado }) {
+  return (
+    <AudiosApartado
+      apartado={apartado}
+      audios={receta.audios}
+      alCambiar={(audios) => cambiar({ audios })}
+    />
+  )
 }
 
 /**
@@ -54,10 +74,13 @@ const PASOS: Array<{
     titulo: 'Qué lleva',
     pintar: ({ receta, cambiar }) => (
       <div className="space-y-8">
-        <EditorIngredientes
-          ingredientes={receta.ingredientes}
-          alCambiar={(ingredientes) => cambiar({ ingredientes })}
-        />
+        <div>
+          <EditorIngredientes
+            ingredientes={receta.ingredientes}
+            alCambiar={(ingredientes) => cambiar({ ingredientes })}
+          />
+          <Voz apartado="ingredientes" receta={receta} cambiar={cambiar} />
+        </div>
         <EditorMateriales
           materiales={receta.materiales}
           alCambiar={(materiales) => cambiar({ materiales })}
@@ -74,14 +97,20 @@ const PASOS: Array<{
     // otro se lee para saber de quién era.
     pintar: ({ receta, cambiar }) => (
       <div className="space-y-8">
-        <EditorPasos
-          pasos={receta.pasos}
-          alCambiar={(pasos) => cambiar({ pasos })}
-        />
-        <EditorTrucos
-          trucos={receta.trucos}
-          alCambiar={(trucos) => cambiar({ trucos })}
-        />
+        <div>
+          <EditorPasos
+            pasos={receta.pasos}
+            alCambiar={(pasos) => cambiar({ pasos })}
+          />
+          <Voz apartado="pasos" receta={receta} cambiar={cambiar} />
+        </div>
+        <div>
+          <EditorTrucos
+            trucos={receta.trucos}
+            alCambiar={(trucos) => cambiar({ trucos })}
+          />
+          <Voz apartado="trucos" receta={receta} cambiar={cambiar} />
+        </div>
       </div>
     ),
   },
@@ -90,11 +119,17 @@ const PASOS: Array<{
     titulo: 'Por qué es especial',
     pintar: ({ receta, cambiar }) => (
       <div className="space-y-8">
-        <SeccionEspecial receta={receta} cambiar={cambiar} />
-        <CamposProcedencia
-          procedencia={receta.procedencia}
-          alCambiar={(procedencia) => cambiar({ procedencia })}
-        />
+        <div>
+          <SeccionEspecial receta={receta} cambiar={cambiar} />
+          <Voz apartado="especial" receta={receta} cambiar={cambiar} />
+        </div>
+        <div>
+          <CamposProcedencia
+            procedencia={receta.procedencia}
+            alCambiar={(procedencia) => cambiar({ procedencia })}
+          />
+          <Voz apartado="procedencia" receta={receta} cambiar={cambiar} />
+        </div>
       </div>
     ),
   },

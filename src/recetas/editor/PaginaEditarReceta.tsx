@@ -4,6 +4,27 @@ import { Aviso, Cargando } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
 import { useAvisoAlSalir } from './useAvisoAlSalir'
 import { Confirmar } from '../../ui/Confirmar'
+import { AudiosApartado } from '../audio/AudiosApartado'
+import type { Apartado, RecetaEditable } from '../tipos'
+
+/** Las notas de voz de un apartado, enganchadas al estado del formulario. */
+function Voz({
+  apartado,
+  receta,
+  cambiar,
+}: {
+  apartado: Apartado
+  receta: RecetaEditable
+  cambiar: (parche: Partial<RecetaEditable>) => void
+}) {
+  return (
+    <AudiosApartado
+      apartado={apartado}
+      audios={receta.audios}
+      alCambiar={(audios) => cambiar({ audios })}
+    />
+  )
+}
 import { AsistenteReceta } from './AsistenteReceta'
 import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
@@ -85,34 +106,49 @@ function Edicion({ id }: { id: string }) {
 
       <SeccionPlato receta={receta} cambiar={cambiar} />
 
-      <CamposProcedencia
-        procedencia={receta.procedencia}
-        alCambiar={(procedencia) => cambiar({ procedencia })}
-      />
+      <div>
+        <CamposProcedencia
+          procedencia={receta.procedencia}
+          alCambiar={(procedencia) => cambiar({ procedencia })}
+        />
+        <Voz apartado="procedencia" receta={receta} cambiar={cambiar} />
+      </div>
 
       <SeccionVoz receta={receta} cambiar={cambiar} />
 
-      <SeccionEspecial receta={receta} cambiar={cambiar} />
+      <div>
+        <SeccionEspecial receta={receta} cambiar={cambiar} />
+        <Voz apartado="especial" receta={receta} cambiar={cambiar} />
+      </div>
 
-      <EditorIngredientes
-        ingredientes={receta.ingredientes}
-        alCambiar={(ingredientes) => cambiar({ ingredientes })}
-      />
+      <div>
+        <EditorIngredientes
+          ingredientes={receta.ingredientes}
+          alCambiar={(ingredientes) => cambiar({ ingredientes })}
+        />
+        <Voz apartado="ingredientes" receta={receta} cambiar={cambiar} />
+      </div>
 
       <EditorMateriales
         materiales={receta.materiales}
         alCambiar={(materiales) => cambiar({ materiales })}
       />
 
-      <EditorPasos
-        pasos={receta.pasos}
-        alCambiar={(pasos) => cambiar({ pasos })}
-      />
+      <div>
+        <EditorPasos
+          pasos={receta.pasos}
+          alCambiar={(pasos) => cambiar({ pasos })}
+        />
+        <Voz apartado="pasos" receta={receta} cambiar={cambiar} />
+      </div>
 
-      <EditorTrucos
-        trucos={receta.trucos}
-        alCambiar={(trucos) => cambiar({ trucos })}
-      />
+      <div>
+        <EditorTrucos
+          trucos={receta.trucos}
+          alCambiar={(trucos) => cambiar({ trucos })}
+        />
+        <Voz apartado="trucos" receta={receta} cambiar={cambiar} />
+      </div>
 
       {error != null && <Aviso error={error} />}
 

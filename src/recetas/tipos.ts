@@ -55,6 +55,48 @@ export interface Foto {
   pie?: string | null
 }
 
+/**
+ * Los apartados de la receta que admiten voz propia.
+ *
+ * No es una lista cualquiera: son los sitios donde alguien que cocina de
+ * memoria tiene algo que decir que no cabe escrito.
+ */
+export type Apartado =
+  | 'ingredientes'
+  | 'pasos'
+  | 'trucos'
+  | 'especial'
+  | 'procedencia'
+
+export const NOMBRE_APARTADO: Record<Apartado, string> = {
+  ingredientes: 'los ingredientes',
+  pasos: 'la elaboración',
+  trucos: 'los trucos',
+  especial: 'por qué es especial',
+  procedencia: 'de quién viene',
+}
+
+/**
+ * Una nota de voz pegada a un apartado.
+ *
+ * La grabación de la receta entera está bien para quien se sienta a
+ * contarla de principio a fin, pero no es así como se cuenta una receta
+ * en una cocina: lo que sale son avisos sueltos —«las manzanas tienen
+ * que quedar rectas por la base para que se asienten en el plato»— dicho
+ * justo cuando toca y en dos frases.
+ *
+ * Eso escrito se pierde, porque nadie se para a escribirlo. Dicho, dura
+ * diez segundos. Por eso cada apartado admite las suyas y no hay un
+ * único audio para toda la receta.
+ */
+export interface AudioApartado {
+  id: string
+  apartado: Apartado
+  url: string
+  /** De qué va, en tres palabras. «Lo de la base plana.» */
+  nota?: string | null
+}
+
 /** De quién viene la receta y por dónde ha pasado. El alma del archivo. */
 export interface Procedencia {
   /** "La abuela Carmen" */
@@ -93,11 +135,11 @@ export interface Receta {
   fotoPortadaUrl?: string | null
   fotos: Foto[]
 
-  /**
-   * Grabación de quien cuenta la receta con su voz. Todavía sin interfaz,
-   * pero la columna existe para no migrar después.
-   */
+  /** Grabación de quien cuenta la receta entera con su voz. */
   audioUrl?: string | null
+
+  /** Notas de voz sueltas, cada una pegada a su apartado. */
+  audios: AudioApartado[]
 
   creadaPor: string
   creadaEn: string
@@ -205,6 +247,7 @@ export function aEditable(receta: Receta): RecetaEditable {
     fotoPortadaUrl: receta.fotoPortadaUrl,
     fotos: receta.fotos,
     audioUrl: receta.audioUrl,
+    audios: receta.audios,
   }
 }
 
@@ -225,5 +268,6 @@ export function recetaVacia(): RecetaEditable {
     fotoPortadaUrl: null,
     fotos: [],
     audioUrl: null,
+    audios: [],
   }
 }

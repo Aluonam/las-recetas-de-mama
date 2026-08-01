@@ -1,6 +1,7 @@
 import { supabase, usuarioActual } from '../nucleo/supabase'
 import { exigirFamilia } from '../familias/actual'
 import type {
+  AudioApartado,
   Foto,
   Ingrediente,
   Material,
@@ -36,6 +37,7 @@ interface FilaReceta {
   fotos: Foto[] | null
   foto_portada_url: string | null
   audio_url: string | null
+  audios: AudioApartado[] | null
   creada_por: string
   creada_en: string
   actualizada_en: string
@@ -63,6 +65,7 @@ function aReceta(fila: FilaReceta): Receta {
     fotos: fila.fotos ?? [],
     fotoPortadaUrl: fila.foto_portada_url,
     audioUrl: fila.audio_url,
+    audios: fila.audios ?? [],
     creadaPor: fila.creada_por,
     creadaEn: fila.creada_en,
     actualizadaEn: fila.actualizada_en,
@@ -91,6 +94,7 @@ function aFila(receta: RecetaEditable) {
     fotos: receta.fotos,
     foto_portada_url: oNulo(receta.fotoPortadaUrl),
     audio_url: oNulo(receta.audioUrl),
+    audios: receta.audios,
   }
 }
 

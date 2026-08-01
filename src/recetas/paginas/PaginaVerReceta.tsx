@@ -11,6 +11,11 @@ import { ListaTrucos } from '../componentes/ListaTrucos'
 import { GaleriaFotos } from '../componentes/GaleriaFotos'
 import { SeccionVariantes } from '../../variantes/SeccionVariantes'
 import { ReproductorAudio } from '../audio/ReproductorAudio'
+import { VocesDelApartado } from '../audio/VocesDelApartado'
+import type { Apartado, AudioApartado } from '../tipos'
+
+const tieneVoz = (audios: AudioApartado[], apartado: Apartado) =>
+  audios.some((audio) => audio.apartado === apartado)
 import { useAbrirEnGrande } from '../../ui/useAbrirEnGrande'
 import { Confirmar } from '../../ui/Confirmar'
 
@@ -88,17 +93,27 @@ export function PaginaVerReceta() {
         </section>
       )}
 
-      {receta.porQueEspecial && (
+      {/* Las notas de voz van pegadas a lo que explican, no todas juntas
+          al final: un aviso sobre las manzanas puesto entre los
+          ingredientes se oye cuando hace falta, y el mismo aviso al pie
+          de la página no lo oye nadie. */}
+      {(receta.porQueEspecial || tieneVoz(receta.audios, 'especial')) && (
         <section className="bloque-especial mb-12 p-5 sm:p-7">
           <h2 className="mb-2 text-xl">Por qué esta receta es especial</h2>
-          <p className="whitespace-pre-line">{receta.porQueEspecial}</p>
+          {receta.porQueEspecial && (
+            <p className="whitespace-pre-line">{receta.porQueEspecial}</p>
+          )}
+          <VocesDelApartado apartado="especial" audios={receta.audios} />
         </section>
       )}
 
       {/* En móvil, una columna. Desde md, ingredientes al lado de los pasos. */}
       <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_1.4fr] md:gap-14">
         <div className="space-y-12">
-          <ListaIngredientes ingredientes={receta.ingredientes} />
+          <div>
+            <ListaIngredientes ingredientes={receta.ingredientes} />
+            <VocesDelApartado apartado="ingredientes" audios={receta.audios} />
+          </div>
 
           {receta.materiales.length > 0 && (
             <section>
@@ -120,8 +135,14 @@ export function PaginaVerReceta() {
         </div>
 
         <div className="space-y-12">
-          <ListaPasos pasos={receta.pasos} />
-          <ListaTrucos trucos={receta.trucos} />
+          <div>
+            <ListaPasos pasos={receta.pasos} />
+            <VocesDelApartado apartado="pasos" audios={receta.audios} />
+          </div>
+          <div>
+            <ListaTrucos trucos={receta.trucos} />
+            <VocesDelApartado apartado="trucos" audios={receta.audios} />
+          </div>
         </div>
       </div>
 
