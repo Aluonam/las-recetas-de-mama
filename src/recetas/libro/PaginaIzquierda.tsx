@@ -76,8 +76,9 @@ export function PaginaIzquierda({
       <div className="guirnalda my-5" aria-hidden="true" />
 
       {/* Con muchos ingredientes la lista crece; que se desplace ella y no
-          estire el libro entero. */}
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          estire el libro entero. Con una sola hoja no: allí se lee de
+          arriba abajo y quien se mueve es el papel. Lo decide el CSS. */}
+      <div className="cuerpo-hoja min-h-0 flex-1 overflow-y-auto pr-1">
         <h3 className="versalitas mb-2 text-center text-tinta-suave">
           Ingredientes
         </h3>

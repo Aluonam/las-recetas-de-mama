@@ -126,6 +126,20 @@
     font-size: 18px;
     background-color: var(--fondo);
     /**
+     * Que la letra no se agrande sola al girar la tablet.
+     *
+     * Al pasar a apaisado, Safari y Chrome en móvil deciden por su
+     * cuenta que la letra de las columnas anchas debe crecer. Es una
+     * ayuda pensada para webs viejas de escritorio, y aquí lo único que
+     * hacía era descuadrar lo que estaba cuadrado: se volteaba la tablet
+     * y parecía que se hubiera hecho zoom.
+     *
+     * Esto no impide separar dos dedos para agrandar a mano; solo quita
+     * la decisión automática.
+     */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /**
      * Ni rebote arriba ni abajo.
      *
      * El papel pintado es una capa fija del tamaño de la pantalla, así
@@ -156,11 +170,19 @@
      * que es una capa del tamaño de la pantalla. Aparecía una franja
      * lisa donde debería seguir el estampado.
      *
-     * `clip` y no `hidden` a propósito: los dos cortan lo que sobra,
-     * pero `hidden` convierte esto en una caja con desplazamiento propio
-     * y eso rompe los botones que se quedan pegados abajo mientras
-     * escribes una receta. `clip` corta y ya está.
+     * Los dos valores, en este orden, a propósito.
+     *
+     * `clip` es el bueno: corta lo que sobra y ya está. `hidden` corta
+     * igual, pero además convierte esto en una caja con desplazamiento
+     * propio, y eso puede romper los botones que se quedan pegados abajo
+     * mientras escribes una receta.
+     *
+     * Pasa que `clip` es reciente —Safari no lo entiende hasta la 16—, y
+     * el navegador que no lo entiende se salta esa línea y se queda con
+     * la anterior. Con una sola, en una tablet con iOS de hace unos años
+     * no cortaba nada y la página se seguía pudiendo arrastrar de lado.
      */
+    overflow-x: hidden;
     overflow-x: clip;
     background: transparent;
     color: var(--color-tinta);
@@ -951,16 +973,39 @@
 }
 
 /**
- * Con una sola hoja, la receta se desplaza dentro del libro.
+ * Con una sola hoja, el libro se lee de arriba abajo.
  *
- * Ahí la hoja lleva las dos mitades una debajo de otra —foto e
- * ingredientes, y luego la elaboración—, así que a pantalla completa no
- * cabe casi nunca. Sin esto se quedaba cortada por abajo, porque el
- * bloque de papel recorta lo que se sale.
+ * Ahí la hoja lleva las dos mitades seguidas —foto e ingredientes, y
+ * debajo la elaboración—, así que a pantalla completa no cabe casi
+ * nunca.
+ *
+ * No basta con dejar que se desplace: hay que quitar antes los topes de
+ * alto y los recuadros que se desplazan por su cuenta. Con la hoja
+ * clavada a la altura de la pantalla, el dedo movía la lista de
+ * ingredientes dentro de su cajita y el papel no se movía nunca, así que
+ * parecía que la receta se acababa ahí.
+ *
+ * Con dos páginas se queda como estaba: allí el alto fijo es lo que hace
+ * que el libro no pegue un salto al pasar hoja, y cada página se
+ * desplaza por dentro como en un libro de verdad.
  */
 @media (width < 64rem), (orientation: portrait) {
-  .libro-lleno .doble-pagina {
+  /* Lo que se mueve es el bloque de papel entero. */
+  .libro-lleno .paginas {
     overflow-y: auto;
+  }
+
+  .libro-lleno .doble-pagina,
+  .libro-lleno .doble-pagina > div,
+  .libro-lleno .hoja {
+    height: auto;
+  }
+
+  /* Los recuadros de dentro, abiertos: si siguieran desplazándose por su
+     cuenta se comerían el gesto antes de que llegara al papel. */
+  .libro-lleno .cuerpo-hoja {
+    flex: none;
+    overflow: visible;
   }
 }
 

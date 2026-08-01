@@ -65,18 +65,28 @@ export function Marco({ children, navegacion = true }: Props) {
 
       {/* Sin greca en el pie: la cenefa de arriba ya cierra el contenido y
           dos adornos seguidos se estorbaban. */}
-      <footer className="bg-verde-claro px-4 py-6 text-center">
+      {/**
+       * El pie, del alto justo.
+       *
+       * Ocupaba más de lo que le toca a una cita: es lo último de la
+       * página y no debería comerse media pantalla de tablet. Se recorta
+       * el relleno y la cita se pone al lado de la firma en cuanto hay
+       * sitio, en vez de una encima de otra.
+       */}
+      <footer className="bg-verde-claro px-4 py-4 text-center sm:py-5">
         {/* Una cita larga no cabe en versalitas: va en cursiva, como se
-            citaría en un libro, y la firma debajo. */}
-        <blockquote className="mx-auto max-w-md">
-          {/* El corte va en la última coma: la enumeración entera arriba y
-              la conclusión debajo, que es como se lee la frase. */}
-          <p className="font-titulo text-lg italic leading-snug text-verde-texto">
+            citaría en un libro. */}
+        <blockquote className="mx-auto flex max-w-3xl flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
+          <p className="m-0 font-titulo italic leading-snug text-verde-texto sm:text-lg">
+            {/* El corte solo donde la frase no cabe de una tirada. En
+                pantalla ancha va entera en un renglón, que es como se
+                lee una cita; donde no cabe, parte por la última coma:
+                la enumeración arriba y la conclusión debajo. */}
             «Uno no puede pensar bien, amar bien, dormir bien,
-            <br />
-            si no ha comido bien.»
+            <br className="lg:hidden" />
+            {' '}si no ha comido bien.»
           </p>
-          <cite className="versalitas mt-2 block not-italic text-rosa-texto">
+          <cite className="versalitas not-italic text-rosa-texto">
             Virginia Woolf
           </cite>
         </blockquote>

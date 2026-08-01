@@ -29,7 +29,7 @@ export function PaginaDerecha({
       </p>
       <div className="guirnalda mb-4" aria-hidden="true" />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+      <div className="cuerpo-hoja min-h-0 flex-1 overflow-y-auto pr-1">
         {receta ? (
           <>
             {receta.porQueEspecial && (
