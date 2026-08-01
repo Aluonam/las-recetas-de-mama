@@ -244,6 +244,47 @@
            text-tinta placeholder:text-tinta-suave/70;
   }
 
+  /**
+   * El papel desvaneciéndose por donde sigue habiendo texto.
+   *
+   * Es el aviso que se entiende sin pensar: el texto que se corta seco
+   * en el canto parece el final de la receta, y el que se apaga poco a
+   * poco parece lo que es, un renglón que sigue más abajo.
+   */
+  .velo-abajo {
+    background: linear-gradient(to top, var(--hoja-papel) 20%, transparent);
+  }
+
+  .velo-arriba {
+    background: linear-gradient(to bottom, var(--hoja-papel) 20%, transparent);
+  }
+
+  /**
+   * La barra de desplazamiento de las hojas, a la vista.
+   *
+   * La de serie es un hilo gris que solo aparece al mover el ratón, y en
+   * una tablet no aparece nunca. Aquí es la única señal de que la receta
+   * sigue, así que se pinta siempre y del color de la cinta de marcar.
+   */
+  .cuerpo-hoja {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rosa-medio) transparent;
+  }
+
+  .cuerpo-hoja::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .cuerpo-hoja::-webkit-scrollbar-thumb {
+    background: var(--rosa-medio);
+    border-radius: 4px;
+  }
+
+  .cuerpo-hoja::-webkit-scrollbar-track {
+    background: var(--canto-1);
+    border-radius: 4px;
+  }
+
   /* La cruz que el navegador pone en los campos de buscar: el buscador
      lleva la suya, colocada donde toca, y dos cruces seguidas sobran. */
   input[type='search']::-webkit-search-cancel-button {
@@ -1036,10 +1077,13 @@
   }
 
   /* Los recuadros de dentro, abiertos: si siguieran desplazándose por su
-     cuenta se comerían el gesto antes de que llegara al papel. */
+     cuenta se comerían el gesto antes de que llegara al papel. Y con el
+     alto suelto no sobra nada por debajo, así que tampoco sale el aviso
+     de que sigue: aquí sigue el papel entero. */
   .libro-lleno .cuerpo-hoja {
     flex: none;
     overflow: visible;
+    height: auto;
   }
 }
 

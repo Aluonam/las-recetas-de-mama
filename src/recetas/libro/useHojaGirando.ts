@@ -10,14 +10,6 @@ export interface Pagina {
   hoja: Hoja
   /** Solo las hojas de receta la traen, y solo cuando ha llegado. */
   receta: Receta | null
-  /**
-   * Por qué pliego de la receta va.
-   *
-   * Hace falta congelarlo con lo demás: una receta larga ocupa varios
-   * pliegos, así que la hoja que gira tiene que enseñar el trozo que
-   * dejas, no el trozo al que vas.
-   */
-  pliego: number
 }
 
 

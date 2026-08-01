@@ -1,6 +1,7 @@
 import type { Receta, RecetaResumen } from '../tipos'
 import { textoCantidad, textoTiempo } from '../formato'
 import { Imagen } from '../archivos/Imagen'
+import { CuerpoDesplazable } from './CuerpoDesplazable'
 
 /**
  * La cara izquierda de la receta: quién es y qué hace falta.
@@ -78,7 +79,7 @@ export function PaginaIzquierda({
       {/* Con muchos ingredientes la lista crece; que se desplace ella y no
           estire el libro entero. Con una sola hoja no: allí se lee de
           arriba abajo y quien se mueve es el papel. Lo decide el CSS. */}
-      <div className="cuerpo-hoja min-h-0 flex-1 overflow-y-auto pr-1">
+      <CuerpoDesplazable>
         <h3 className="versalitas mb-2 text-center text-tinta-suave">
           Ingredientes
         </h3>
@@ -119,7 +120,7 @@ export function PaginaIzquierda({
             Abriendo la hoja…
           </p>
         )}
-      </div>
+      </CuerpoDesplazable>
 
       <p
         aria-hidden="true"
