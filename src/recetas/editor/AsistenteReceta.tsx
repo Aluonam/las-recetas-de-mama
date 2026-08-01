@@ -269,66 +269,81 @@ export function AsistenteReceta() {
       {/* Pegada abajo: en una tablet los pasos largos se van de pantalla
           y los botones tienen que seguir donde estaban. */}
       <div className="sticky bottom-0 mt-6 border-t border-borde bg-papel py-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="boton-secundario"
-            onClick={() => (primero ? salir() : ir(donde - 1))}
-          >
-            {primero ? 'Cancelar' : '‹ Atrás'}
-          </button>
-
-          {/* Saltar solo donde hay algo que saltarse. El primero pide el
-              nombre, y sin nombre no hay receta. */}
-          {!paso.obligatorio && !ultimo && (
-            <button
-              type="button"
-              className="rounded-md px-3 py-2 text-sm font-semibold text-tinta-suave underline transition-colors hover:text-tinta"
-              onClick={() => ir(donde + 1)}
-            >
-              Saltar este paso
-            </button>
-          )}
-
-          <div className="flex-1" />
-
-          {/**
-           * Terminar sin llegar al final, al lado de «Siguiente» y con
-           * el mismo peso.
-           *
-           * Estaba de enlace subrayado y en letra pequeña, debajo, y es
-           * justo la salida que necesita quien se cansa a la mitad o le
-           * suena el teléfono. Escondida no la encuentra, y entonces la
-           * receta se queda sin guardar por no saber que se podía.
-           */}
-          {hayNombre && !ultimo && (
+        {/**
+         * Dos grupos, no una fila suelta de botones.
+         *
+         * Antes iban todos al mismo nivel con un hueco elástico en
+         * medio, y al escribir el nombre aparecía «Guardar y terminar»:
+         * la fila ya no cabía, se partía en dos renglones, y como esta
+         * barra está pegada al borde de abajo, el segundo renglón se
+         * salía de la pantalla y solo se veía su mitad de arriba.
+         *
+         * Agrupados, cuando no caben bajan los dos juntos y se ven
+         * enteros.
+         */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               className="boton-secundario"
-              onClick={terminar}
-              disabled={guardando}
+              onClick={() => (primero ? salir() : ir(donde - 1))}
             >
-              {guardando ? 'Guardando…' : 'Guardar y terminar'}
+              {primero ? 'Cancelar' : '‹ Atrás'}
             </button>
-          )}
 
-          {ultimo ? (
-            <button
-              type="submit"
-              className="boton-principal"
-              disabled={!hayNombre || guardando}
-            >
-              {guardando ? 'Guardando…' : 'Guardar receta'}
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="boton-principal"
-              disabled={primero && !hayNombre}
-            >
-              Siguiente ›
-            </button>
-          )}
+            {/* Saltar solo donde hay algo que saltarse. El primero pide el
+                nombre, y sin nombre no hay receta. */}
+            {!paso.obligatorio && !ultimo && (
+              <button
+                type="button"
+                className="rounded-md px-3 py-2 text-sm font-semibold text-tinta-suave underline transition-colors hover:text-tinta"
+                onClick={() => ir(donde + 1)}
+              >
+                Saltar este paso
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/**
+             * Terminar sin llegar al final, al lado de «Siguiente» y con
+             * el mismo peso.
+             *
+             * Estaba de enlace subrayado y en letra pequeña, debajo, y
+             * es justo la salida que necesita quien se cansa a la mitad
+             * o le suena el teléfono. Escondida no la encuentra, y
+             * entonces la receta se queda sin guardar por no saber que
+             * se podía.
+             */}
+            {hayNombre && !ultimo && (
+              <button
+                type="button"
+                className="boton-secundario whitespace-nowrap"
+                onClick={terminar}
+                disabled={guardando}
+              >
+                {guardando ? 'Guardando…' : 'Guardar y terminar'}
+              </button>
+            )}
+
+            {ultimo ? (
+              <button
+                type="submit"
+                className="boton-principal whitespace-nowrap"
+                disabled={!hayNombre || guardando}
+              >
+                {guardando ? 'Guardando…' : 'Guardar receta'}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="boton-principal whitespace-nowrap"
+                disabled={primero && !hayNombre}
+              >
+                Siguiente ›
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </form>
