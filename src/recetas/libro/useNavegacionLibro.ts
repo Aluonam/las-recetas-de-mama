@@ -8,11 +8,24 @@ const ARRASTRE_MINIMO = 55
 /**
  * Pasar hojas: con los botones, con las flechas del teclado y deslizando
  * el dedo. Las tres cosas hacen lo mismo, así que viven juntas.
+ *
+ * `alPasar` existe porque una receta larga ocupa varios pliegos, y pasar
+ * página dentro de ella no es cambiar de hoja. Quien usa esto sabe si el
+ * gesto se queda dentro de la receta o salta a la siguiente; aquí solo
+ * se recogen los gestos y se le pasan.
  */
-export function useNavegacionLibro(total: number) {
+export function useNavegacionLibro(
+  total: number,
+  alPasar?: (haciaDonde: Sentido) => void,
+) {
   const [indice, setIndice] = useState(0)
   const [sentido, setSentido] = useState<Sentido>('adelante')
   const inicioX = useRef<number | null>(null)
+
+  // En una ref para que los manejadores no haya que recrearlos —y
+  // volver a colgarlos del teclado— en cada render.
+  const alPasarRef = useRef(alPasar)
+  alPasarRef.current = alPasar
 
   const pasar = useCallback(
     (haciaDonde: Sentido) => {
@@ -55,8 +68,9 @@ export function useNavegacionLibro(total: number) {
         return
       }
 
-      if (evento.key === 'ArrowRight') pasar('adelante')
-      if (evento.key === 'ArrowLeft') pasar('atras')
+      const mover = alPasarRef.current ?? pasar
+      if (evento.key === 'ArrowRight') mover('adelante')
+      if (evento.key === 'ArrowLeft') mover('atras')
     }
 
     window.addEventListener('keydown', alPulsar)
@@ -73,7 +87,8 @@ export function useNavegacionLibro(total: number) {
       inicioX.current = null
 
       if (Math.abs(recorrido) < ARRASTRE_MINIMO) return
-      pasar(recorrido < 0 ? 'adelante' : 'atras')
+      const mover = alPasarRef.current ?? pasar
+      mover(recorrido < 0 ? 'adelante' : 'atras')
     },
   }
 
