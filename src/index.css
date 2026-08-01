@@ -237,7 +237,8 @@
      componente, así que la base se comparte por lista de selectores. */
   .boton,
   .boton-principal,
-  .boton-secundario {
+  .boton-secundario,
+  .boton-peligro {
     @apply inline-flex cursor-pointer items-center justify-center gap-2
            rounded-lg px-5 py-2.5 font-semibold transition-colors
            disabled:cursor-not-allowed disabled:opacity-50;
@@ -250,6 +251,13 @@
   .boton-secundario {
     @apply border border-verde-texto bg-superficie text-verde-texto
            hover:bg-superficie-2;
+  }
+
+  /* Para lo que no se puede deshacer. Rojo el justo: alarma, no asusta. */
+  .boton-peligro {
+    background: var(--rosa-medio);
+    color: var(--superficie);
+    @apply hover:opacity-90;
   }
 
   .tarjeta {
@@ -904,6 +912,111 @@
 @media (width >= 48rem) {
   .doble-pagina {
     height: 36rem;
+  }
+}
+
+/* ---------------------------------------------------------------
+   EN PAPEL
+
+   Una receta impresa se pega en la puerta del frigorífico, se lleva a
+   casa de la hermana o se mete en la carpeta de la abuela, que es medio
+   motivo de que exista todo esto. Sin esto salían el papel pintado, la
+   tela verde de la tapa, las cenefas y los botones —tinta gastada en
+   adorno, y la letra encima sobre un fondo de color.
+
+   La regla es simple: se imprime lo que se lee. Todo lo que solo sirve
+   para moverse por la web se queda fuera.
+   --------------------------------------------------------------- */
+@media print {
+  /* El papel ya es blanco: pintarlo es gastar tinta en el fondo. */
+  html {
+    background: none;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  body {
+    background: none;
+    color: #000;
+  }
+
+  /* Negro sobre blanco. El crema y el verde damasco quedan preciosos en
+     pantalla y grises en una impresora de casa. */
+  h1,
+  h2,
+  h3,
+  .versalitas,
+  .text-rosa-texto,
+  .text-verde-texto,
+  .text-tinta-suave {
+    color: #000 !important;
+  }
+
+  /* Lo que solo sirve para moverse por la web. */
+  header,
+  footer,
+  nav,
+  .cenefa,
+  .guirnalda,
+  .pestanas,
+  .sombra-lomo,
+  .hoja-girando,
+  .boton,
+  .boton-principal,
+  .boton-secundario,
+  .boton-peligro,
+  .solapas,
+  [role='dialog'],
+  [role='alertdialog'] {
+    display: none !important;
+  }
+
+  /* Sin tapa ni relieve: es una hoja, no un libro encuadernado. */
+  .libro,
+  .paginas,
+  .tarjeta,
+  .hoja,
+  .hoja-izq,
+  .hoja-der,
+  .lomo,
+  .marco-doble,
+  .arco {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Los recuadros con desplazamiento propio, abiertos: en pantalla se
+     desplazan, en papel esconderían media lista. */
+  .hoja,
+  .doble-pagina {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Que no se parta un ingrediente entre dos hojas. */
+  li,
+  h2,
+  h3 {
+    break-inside: avoid;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  img {
+    max-width: 40% !important;
+  }
+
+  @page {
+    margin: 1.5cm;
   }
 }
 

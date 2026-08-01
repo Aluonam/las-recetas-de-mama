@@ -4,6 +4,7 @@ import type { RecetaEditable } from '../tipos'
 import { Aviso } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
 import { useAvisoAlSalir } from './useAvisoAlSalir'
+import { Confirmar } from '../../ui/Confirmar'
 import {
   borrarBorrador,
   guardarBorrador,
@@ -138,6 +139,7 @@ export function AsistenteReceta() {
 
   const hayAlgo = receta != null && tieneAlgo(receta)
   const [terminado, setTerminado] = useState(false)
+  const [saliendo, setSaliendo] = useState(false)
 
   /** Se guarda solo, un poco después de dejar de escribir. */
   useEffect(() => {
@@ -168,21 +170,11 @@ export function AsistenteReceta() {
   }
 
   /**
-   * Al salir con algo escrito se avisa, pero no se borra nada: queda de
-   * borrador y al volver se ofrece. «Cancelar» no debería significar
+   * Al salir con algo escrito se pregunta, pero no se borra nada: queda
+   * de borrador y al volver se ofrece. «Cancelar» no debería significar
    * «tira lo que llevas» cuando se puede significar «déjalo para luego».
    */
-  const salir = () => {
-    if (hayAlgo) {
-      const seguro = window.confirm(
-        'Vas a dejar la receta a medias.\n\n' +
-          'Se guarda como borrador en este aparato, así que podrás seguir ' +
-          'con ella cuando vuelvas. ¿Salir?',
-      )
-      if (!seguro) return
-    }
-    navegar(-1)
-  }
+  const salir = () => (hayAlgo ? setSaliendo(true) : navegar(-1))
 
   const ir = (destino: number) =>
     setDonde(Math.min(Math.max(destino, 0), PASOS.length - 1))
@@ -212,6 +204,17 @@ export function AsistenteReceta() {
             borrarBorrador()
             setPendiente(null)
           }}
+        />
+      )}
+
+      {saliendo && (
+        <Confirmar
+          titulo="¿Dejar la receta a medias?"
+          detalle="Se guarda como borrador en este aparato, así que podrás seguir con ella cuando vuelvas."
+          textoSi="Sí, dejarla para luego"
+          textoNo="No, seguir escribiendo"
+          alSi={() => navegar(-1)}
+          alNo={() => setSaliendo(false)}
         />
       )}
 
@@ -251,6 +254,26 @@ export function AsistenteReceta() {
 
           <div className="flex-1" />
 
+          {/**
+           * Terminar sin llegar al final, al lado de «Siguiente» y con
+           * el mismo peso.
+           *
+           * Estaba de enlace subrayado y en letra pequeña, debajo, y es
+           * justo la salida que necesita quien se cansa a la mitad o le
+           * suena el teléfono. Escondida no la encuentra, y entonces la
+           * receta se queda sin guardar por no saber que se podía.
+           */}
+          {hayNombre && !ultimo && (
+            <button
+              type="button"
+              className="boton-secundario"
+              onClick={terminar}
+              disabled={guardando}
+            >
+              {guardando ? 'Guardando…' : 'Guardar y terminar'}
+            </button>
+          )}
+
           {ultimo ? (
             <button
               type="submit"
@@ -269,25 +292,6 @@ export function AsistenteReceta() {
             </button>
           )}
         </div>
-
-        {/* Guardar sin llegar al final. Aparece en cuanto hay nombre,
-            que es lo único que la receta necesita para existir. */}
-        {hayNombre && !ultimo && (
-          <button
-            type="button"
-            onClick={terminar}
-            disabled={guardando}
-            className="mt-3 text-sm font-semibold text-verde-texto underline transition-colors hover:text-tinta"
-          >
-            {guardando ? 'Guardando…' : 'Guardar y terminar ahora'}
-          </button>
-        )}
-
-        {primero && !hayNombre && (
-          <p className="mt-3 text-sm text-tinta-suave">
-            Escribe el nombre del plato para continuar.
-          </p>
-        )}
       </div>
     </form>
   )
@@ -383,7 +387,11 @@ function Guia({
                     ? 'border-verde-texto bg-verde-texto font-semibold text-papel'
                     : alcanzable
                       ? 'border-borde bg-superficie text-tinta-suave hover:bg-superficie-2'
-                      : 'cursor-not-allowed border-borde bg-superficie text-borde')
+                      : // Apagado, no borrado. Antes iba en el color del
+                        // borde, que sobre el papel de la web da 1,4 de
+                        // contraste: eso no es texto gris, es texto que no
+                        // está, y quedaba una fila de botones vacíos.
+                        'cursor-not-allowed border-borde bg-superficie text-tinta-suave opacity-60')
                 }
               >
                 <span aria-hidden="true">{posicion + 1}. </span>
@@ -393,6 +401,15 @@ function Guia({
           )
         })}
       </ol>
+
+      {/* El aviso, aquí y no al final de la página: explica por qué esos
+          botones no se pueden pulsar, y esa explicación tiene que estar
+          donde están ellos. Abajo del todo no la leía nadie. */}
+      {!hayNombre && (
+        <p role="status" className="mt-2 text-sm text-tinta-suave">
+          Escribe el nombre del plato para poder ir a los demás pasos.
+        </p>
+      )}
     </div>
   )
 }

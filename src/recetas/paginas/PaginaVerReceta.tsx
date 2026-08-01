@@ -12,6 +12,7 @@ import { GaleriaFotos } from '../componentes/GaleriaFotos'
 import { SeccionVariantes } from '../../variantes/SeccionVariantes'
 import { ReproductorAudio } from '../audio/ReproductorAudio'
 import { useAbrirEnGrande } from '../../ui/useAbrirEnGrande'
+import { Confirmar } from '../../ui/Confirmar'
 
 /**
  * Ficha completa de una receta. Esta página solo carga datos y coloca
@@ -35,13 +36,11 @@ export function PaginaVerReceta() {
     obtenerReceta(id).then(setReceta).catch(setError)
   }, [id])
 
+  const [preguntando, setPreguntando] = useState(false)
+
   const eliminar = async () => {
     if (!receta) return
-
-    const seguro = window.confirm(
-      `¿Borrar «${receta.titulo}»? Esto no se puede deshacer.`,
-    )
-    if (!seguro) return
+    setPreguntando(false)
 
     try {
       await borrarReceta(receta.id)
@@ -61,8 +60,19 @@ export function PaginaVerReceta() {
         // Borrar es de quien creó el recetario, no de quien escribió la
         // receta: una receta borrada por error no vuelve.
         puedeBorrar={soyDuena}
-        alBorrar={eliminar}
+        alBorrar={() => setPreguntando(true)}
       />
+
+      {preguntando && (
+        <Confirmar
+          peligroso
+          titulo={`¿Borrar «${receta.titulo}»?`}
+          detalle="No se puede deshacer: se van también sus fotos, su audio y las variantes que haya escrito la familia."
+          textoSi={`Sí, borrar «${receta.titulo}»`}
+          alSi={eliminar}
+          alNo={() => setPreguntando(false)}
+        />
+      )}
 
       {receta.audioUrl && (
         <section className="tarjeta mb-12 p-4 sm:p-5">

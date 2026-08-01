@@ -3,6 +3,7 @@ import { cambiarCodigo, establecerCodigo } from './api'
 import { useFamilia } from './contexto'
 import { Aviso } from '../ui/Estado'
 import { CampoTexto } from '../ui/Campo'
+import { Confirmar } from '../ui/Confirmar'
 
 /**
  * El código del recetario, para compartirlo y para cambiarlo.
@@ -15,6 +16,7 @@ export function PanelCodigo() {
   const { familia, soyDuena, entrar } = useFamilia()
   const [copiado, setCopiado] = useState(false)
   const [cambiando, setCambiando] = useState(false)
+  const [preguntando, setPreguntando] = useState(false)
   const [editando, setEditando] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
@@ -39,13 +41,7 @@ export function PanelCodigo() {
   }
 
   const regenerar = async () => {
-    const seguro = window.confirm(
-      'Se generará un código nuevo y el actual dejará de funcionar.\n\n' +
-        'Quien ya entró sigue dentro. Hazlo solo si el código se ha ' +
-        'difundido más de la cuenta.',
-    )
-    if (!seguro) return
-
+    setPreguntando(false)
     setCambiando(true)
     setError(null)
     try {
@@ -89,7 +85,7 @@ export function PanelCodigo() {
             <button
               type="button"
               className="boton-secundario"
-              onClick={regenerar}
+              onClick={() => setPreguntando(true)}
               disabled={cambiando}
             >
               {cambiando ? 'Generando…' : 'Generar uno al azar'}
@@ -97,6 +93,23 @@ export function PanelCodigo() {
           </>
         )}
       </div>
+
+      {preguntando && (
+        <Confirmar
+          peligroso
+          titulo="¿Generar un código nuevo?"
+          detalle={
+            <>
+              El código <strong>{familia.codigo}</strong> dejará de funcionar y
+              habrá que pasar el nuevo a quien todavía no haya entrado. Quien
+              ya está dentro sigue dentro.
+            </>
+          }
+          textoSi="Sí, generar uno nuevo"
+          alSi={regenerar}
+          alNo={() => setPreguntando(false)}
+        />
+      )}
 
       {editando && soyDuena && (
         <FormularioCodigo

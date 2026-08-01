@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useSesion } from '../nucleo/sesion'
 import { HAY_SUPABASE } from '../nucleo/entorno'
+import { Confirmar } from '../ui/Confirmar'
 
 /**
  * Cerrar sesión.
@@ -15,6 +17,7 @@ import { HAY_SUPABASE } from '../nucleo/entorno'
  */
 export function CerrarSesion() {
   const { salir } = useSesion()
+  const [preguntando, setPreguntando] = useState(false)
 
   // En modo demostración no hay sesión que cerrar: las recetas viven en
   // este navegador y no hay código con el que volver a entrar.
@@ -22,16 +25,21 @@ export function CerrarSesion() {
 
   return (
     <section className="border-t border-borde pt-8">
+      {preguntando && (
+        <Confirmar
+          peligroso
+          titulo="¿Cerrar la sesión?"
+          detalle="Para volver a entrar tendrás que escribir de nuevo el código de tu familia. Si no lo tienes a mano, pídeselo a quien te lo pasó."
+          textoSi="Sí, cerrar sesión"
+          textoNo="No, quedarme"
+          alSi={salir}
+          alNo={() => setPreguntando(false)}
+        />
+      )}
+
       <button
         type="button"
-        onClick={() => {
-          const seguro = window.confirm(
-            '¿Estás seguro de que deseas cerrar la sesión?\n\n' +
-              'Para volver a entrar tendrás que escribir de nuevo el ' +
-              'código de tu familia.',
-          )
-          if (seguro) salir()
-        }}
+        onClick={() => setPreguntando(true)}
         className="mx-auto block rounded-md border border-borde bg-superficie px-4 py-2 text-sm font-semibold text-tinta-suave transition-colors hover:bg-superficie-2"
       >
         Cerrar sesión

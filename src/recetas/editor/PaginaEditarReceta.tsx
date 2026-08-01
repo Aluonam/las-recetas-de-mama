@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
 import { useAvisoAlSalir } from './useAvisoAlSalir'
+import { Confirmar } from '../../ui/Confirmar'
 import { AsistenteReceta } from './AsistenteReceta'
 import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
@@ -38,6 +39,7 @@ function Edicion({ id }: { id: string }) {
     useFormularioReceta(id)
 
   const [guardado, setGuardado] = useState(false)
+  const [saliendo, setSaliendo] = useState(false)
 
   /**
    * Aquí no hay borrador.
@@ -62,21 +64,24 @@ function Edicion({ id }: { id: string }) {
     navegar(`/receta/${guardadaId}`)
   }
 
-  const salir = () => {
-    if (hayCambios) {
-      const seguro = window.confirm(
-        'Has cambiado cosas y no están guardadas.\n\n' +
-          'Si sales ahora, la receta se queda como estaba. ¿Salir?',
-      )
-      if (!seguro) return
-    }
-    navegar(-1)
-  }
+  const salir = () => (hayCambios ? setSaliendo(true) : navegar(-1))
 
   return (
     <form onSubmit={enviar} className="space-y-10">
 
       <h1 className="text-3xl sm:text-4xl">Editar receta</h1>
+
+      {saliendo && (
+        <Confirmar
+          peligroso
+          titulo="¿Salir sin guardar?"
+          detalle="Has cambiado cosas y no están guardadas. Si sales ahora, la receta se queda como estaba."
+          textoSi="Sí, salir sin guardar"
+          textoNo="No, seguir editando"
+          alSi={() => navegar(-1)}
+          alNo={() => setSaliendo(false)}
+        />
+      )}
 
       <SeccionPlato receta={receta} cambiar={cambiar} />
 
