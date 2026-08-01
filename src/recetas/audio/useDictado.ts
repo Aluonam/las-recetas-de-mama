@@ -90,9 +90,6 @@ function mensaje(fallo: string): string {
     )
   }
 
-  // Se para a propósito, o se pulsa otra vez. No hay nada que contar.
-  if (fallo === 'aborted') return ''
-
   // El nombre del fallo va delante: es feo, pero es lo único que
   // permite averiguar qué pasa cuando pasa algo que no está previsto.
   return `El navegador ha cortado el dictado (${fallo}). Vuelve a pulsar.`
@@ -108,21 +105,35 @@ export function useDictado(alDictar: (texto: string) => void) {
   const alDictarRef = useRef(alDictar)
   alDictarRef.current = alDictar
 
+  /** Quien para es quien pulsa, no el navegador. Cambia el mensaje. */
+  const paradoAMano = useRef(false)
+  /** Para no encadenar reintentos si el segundo también se corta. */
+  const yaReintentado = useRef(false)
+
   const parar = useCallback(() => {
+    paradoAMano.current = true
     motor.current?.stop()
   }, [])
 
-  const empezar = useCallback(() => {
+  /**
+   * `seguido` es el modo de escucha continuada.
+   *
+   * Es el bueno —contar una receta lleva pausas, y cortar en el primer
+   * silencio obligaría a pulsar cada dos por tres—, pero hay
+   * navegadores donde arranca y se corta al instante sin decir por qué.
+   * Cuando pasa eso se vuelve a intentar sin él: una frase de cada vez
+   * es peor que seguido, pero infinitamente mejor que nada.
+   */
+  const arrancar = useCallback((seguido: boolean) => {
     const Motor = fabrica()
     if (!Motor) return
 
     setError(null)
+    paradoAMano.current = false
+
     const nuevo = new Motor()
     nuevo.lang = 'es-ES'
-    // Sigue escuchando entre frase y frase: contar una receta lleva sus
-    // pausas, y cortar en el primer silencio obligaría a volver a
-    // pulsar cada dos por tres.
-    nuevo.continuous = true
+    nuevo.continuous = seguido
     nuevo.interimResults = false
 
     /**
@@ -150,6 +161,9 @@ export function useDictado(alDictar: (texto: string) => void) {
     }
 
     nuevo.onerror = (evento) => {
+      // Pararlo con el botón también llega aquí como fallo, y no lo es.
+      if (evento.error === 'aborted' && paradoAMano.current) return
+
       huboFallo = true
       setError(mensaje(evento.error))
     }
@@ -166,19 +180,29 @@ export function useDictado(alDictar: (texto: string) => void) {
       setEscuchando(false)
       motor.current = null
 
-      // Si el navegador ya ha dicho qué pasaba, manda su mensaje.
-      if (huboFallo || algoDicho) return
+      if (algoDicho || paradoAMano.current) return
+
+      const alInstante = !arranco || Date.now() - desde < 1200
 
       /**
-       * Apagarse al momento no es silencio, es que no ha llegado a
-       * escuchar. Casi siempre es el permiso del micrófono, que en
-       * algunos navegadores se deniega sin dar ningún aviso.
+       * Se cortó solo y nada más empezar. Antes de dar la culpa a nadie,
+       * se prueba una vez sin escucha continuada: hay navegadores donde
+       * ese modo arranca y muere al momento, y sin él funcionan.
        */
-      if (!arranco || Date.now() - desde < 700) {
+      if (alInstante && seguido && !yaReintentado.current) {
+        yaReintentado.current = true
+        arrancarRef.current?.(false)
+        return
+      }
+
+      // Si el navegador ya ha dicho qué pasaba, manda su mensaje.
+      if (huboFallo) return
+
+      if (alInstante) {
         setError(
-          'El navegador ha cortado el dictado nada más empezar. Suele ser ' +
-            'el permiso del micrófono: búscalo en el candado de la barra de ' +
-            'direcciones y déjalo puesto para esta página.',
+          'El navegador corta el dictado nada más empezar y no dice por ' +
+            'qué. Suele pasar cuando el micrófono lo está usando otro ' +
+            'programa: ciérralo y vuelve a probar.',
         )
         return
       }
@@ -211,8 +235,26 @@ export function useDictado(alDictar: (texto: string) => void) {
     }
   }, [])
 
+  /**
+   * `arrancar` se llama a sí misma para reintentar, y no puede
+   * nombrarse dentro de su propia definición. Se guarda aquí.
+   */
+  const arrancarRef = useRef(arrancar)
+  arrancarRef.current = arrancar
+
+  const empezar = useCallback(() => {
+    yaReintentado.current = false
+    arrancar(true)
+  }, [arrancar])
+
   // Si esto desaparece mientras escucha, se suelta el micrófono.
-  useEffect(() => () => motor.current?.stop(), [])
+  useEffect(
+    () => () => {
+      paradoAMano.current = true
+      motor.current?.stop()
+    },
+    [],
+  )
 
   return { escuchando, error, empezar, parar }
 }
