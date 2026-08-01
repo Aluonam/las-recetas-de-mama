@@ -268,7 +268,7 @@ export function AsistenteReceta() {
 
       {/* Pegada abajo: en una tablet los pasos largos se van de pantalla
           y los botones tienen que seguir donde estaban. */}
-      <div className="sticky bottom-0 mt-6 border-t border-borde bg-papel py-4">
+      <div className="sticky bottom-0 z-10 mt-6 border-t border-borde bg-papel py-4">
         {/**
          * Dos grupos, no una fila suelta de botones.
          *
@@ -315,12 +315,18 @@ export function AsistenteReceta() {
              * entonces la receta se queda sin guardar por no saber que
              * se podía.
              */}
-            {hayNombre && !ultimo && (
+            {!ultimo && (
               <button
                 type="button"
                 className="boton-secundario whitespace-nowrap"
                 onClick={terminar}
-                disabled={guardando}
+                // Apagado hasta que hay nombre, pero puesto desde el
+                // principio: apareciendo de golpe le cambiaba el alto a
+                // esta barra, que va pegada al borde de abajo, y el
+                // navegador no la volvía a pintar entera —se quedaba
+                // media mitad del botón sin dibujar—. Además así se sabe
+                // desde el primer momento que se puede salir guardando.
+                disabled={!hayNombre || guardando}
               >
                 {guardando ? 'Guardando…' : 'Guardar y terminar'}
               </button>

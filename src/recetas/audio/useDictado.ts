@@ -134,7 +134,17 @@ export function useDictado(alDictar: (texto: string) => void) {
     const nuevo = new Motor()
     nuevo.lang = 'es-ES'
     nuevo.continuous = seguido
-    nuevo.interimResults = false
+
+    /**
+     * Se piden también los resultados a medias, aunque no se usen.
+     *
+     * Parece que sobra —al campo solo va lo definitivo— pero no: con
+     * esto apagado hay navegadores que arrancan el reconocimiento y lo
+     * cortan al momento sin decir nada. Encendido, se comportan. Es la
+     * única diferencia entre esto y una página suelta donde sí
+     * funcionaba, así que se copia tal cual.
+     */
+    nuevo.interimResults = true
 
     /**
      * Lo que hay que saber cuando esto se apaga, para saber por qué.

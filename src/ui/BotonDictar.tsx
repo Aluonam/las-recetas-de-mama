@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { SE_PUEDE_DICTAR, useDictado } from '../recetas/audio/useDictado'
 
 /**
@@ -10,6 +11,14 @@ import { SE_PUEDE_DICTAR, useDictado } from '../recetas/audio/useDictado'
  *
  * Si el navegador no sabe hacerlo, el botón no está. Nadie ve un botón
  * que no funciona.
+ */
+/**
+ * Se acuerda de lo que había escrito sin depender de que se lo digan.
+ *
+ * Al dictar, el texto que llega se añade a lo que ya hubiera. Pero el
+ * campo se actualiza y vuelve a pintar este botón, y con el dictado
+ * seguido pueden llegar dos frases antes de que eso ocurra: la segunda
+ * se sumaba al texto de antes de la primera y se la comía.
  */
 export function BotonDictar({
   valor,
@@ -24,10 +33,17 @@ export function BotonDictar({
   /** Cada trozo dictado empieza una línea nueva, para las listas. */
   enLineaAparte?: boolean
 }) {
+  const ultimo = useRef(valor)
+  ultimo.current = valor
+
   const dictado = useDictado((dicho) => {
-    const hay = valor.trimEnd()
-    if (!hay) return alCambiar(dicho)
-    alCambiar(hay + (enLineaAparte ? '\n' : ' ') + dicho)
+    const hay = ultimo.current.trimEnd()
+    const junto = hay ? hay + (enLineaAparte ? '\n' : ' ') + dicho : dicho
+
+    // Se anota ya, sin esperar a que vuelva por las props: si llega otra
+    // frase antes de eso, tiene que sumarse a esta y no a la anterior.
+    ultimo.current = junto
+    alCambiar(junto)
   })
 
   /**
