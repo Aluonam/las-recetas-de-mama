@@ -65,10 +65,23 @@ export function CuerpoDesplazable({
 
   return (
     <div className="relative min-h-0 flex-1">
+      {/**
+       * `absolute inset-0` y no `h-full`.
+       *
+       * Un alto en porcentaje tiene que ir preguntando hacia arriba
+       * —hoja, columna, pliego, papel, libro— y basta con que un eslabón
+       * de esa cadena no tenga alto propio para que salga «auto»: el
+       * cuadro crece con el texto en vez de recortarlo, no sobra nada, y
+       * por tanto no hay nada que desplazar. El texto se salía y lo
+       * recortaba el bloque de papel, sin barra y sin aviso.
+       *
+       * Colocándolo contra los cuatro lados de su caja no hay cadena que
+       * preguntar: mide lo que mida la caja, y punto.
+       */}
       <div
         ref={caja}
         onScroll={mirar}
-        className={'cuerpo-hoja h-full overflow-y-auto pr-2 ' + className}
+        className={'cuerpo-hoja absolute inset-0 overflow-y-auto pr-2 ' + className}
       >
         {children}
       </div>

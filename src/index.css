@@ -1081,6 +1081,7 @@
      alto suelto no sobra nada por debajo, así que tampoco sale el aviso
      de que sigue: aquí sigue el papel entero. */
   .libro-lleno .cuerpo-hoja {
+    position: static;
     flex: none;
     overflow: visible;
     height: auto;
