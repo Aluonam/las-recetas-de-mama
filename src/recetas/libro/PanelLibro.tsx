@@ -6,6 +6,7 @@ import type { Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
 import { useHojaGirando } from './useHojaGirando'
 import type { Pagina } from './useHojaGirando'
+import { useDosPaginas } from './useDosPaginas'
 import {
   claveDe,
   comienzoDeCadaLetra,
@@ -21,6 +22,8 @@ import { HojaGirando } from './HojaGirando'
 
 /** Margen para distinguir un clic suelto de los dos de abrir, en ms. */
 const ESPERA_DOBLE_CLIC = 260
+
+type Lado = 'izquierda' | 'derecha'
 
 /**
  * El recetario como libro.
@@ -75,10 +78,48 @@ export function PanelLibro({
 
   const comienzos = useMemo(() => comienzoDeCadaLetra(hojas), [hojas])
 
-  const { indice, sentido, pasar, irA, gestos } = useNavegacionLibro(
-    hojas.length,
-  )
-  const hoja = hojas[indice]
+  /**
+   * De par en par o de una en una.
+   *
+   * En apaisado el libro se abre entero y una hoja son dos caras a la
+   * vez. En vertical no cabe: apretar las dos ahí daba dos columnas
+   * altísimas e ilegibles, así que se pasa cara a cara, que es como se
+   * lee un libro sujetándolo con una mano.
+   *
+   * Cambia lo que cuenta la navegación: con dos caras, las hojas; con
+   * una, las caras, que son el doble.
+   */
+  const dos = useDosPaginas()
+  const total = dos ? hojas.length : hojas.length * 2
+
+  const { indice, sentido, pasar, irA, gestos } = useNavegacionLibro(total)
+
+  const posicionHoja = dos ? indice : Math.floor(indice / 2)
+  const hoja = hojas[posicionHoja]
+  const caraActual: Lado = dos || indice % 2 === 0 ? 'izquierda' : 'derecha'
+
+  /**
+   * Al girar la tablet no se pierde por dónde ibas.
+   *
+   * Las dos maneras cuentan distinto, así que hay que traducir: de una
+   * cara a dos, la mitad; de dos a una, el doble. Sin esto, voltear la
+   * tablet en la página 30 te dejaba en la 15 o en la 60.
+   */
+  const dondeEstaba = useRef(0)
+  const eraDos = useRef(dos)
+
+  useEffect(() => {
+    dondeEstaba.current = posicionHoja
+  })
+
+  useEffect(() => {
+    if (eraDos.current === dos) return
+    eraDos.current = dos
+    irA(dos ? dondeEstaba.current : dondeEstaba.current * 2)
+  }, [dos, irA])
+
+  /** Las pestañas y el índice hablan de hojas; aquí se traduce a caras. */
+  const irAHoja = (destino: number) => irA(dos ? destino : destino * 2)
 
   // Solo las hojas de receta necesitan traerse el cuerpo entero.
   const { receta } = useRecetaCompleta(
@@ -138,7 +179,7 @@ export function PanelLibro({
     const destino = hojas.findIndex(
       (una) => una.tipo === 'receta' && una.resumen.id === resumen.id,
     )
-    if (destino >= 0) irA(destino)
+    if (destino >= 0) irAHoja(destino)
   }
 
   if (!hoja) return null
@@ -162,7 +203,7 @@ export function PanelLibro({
    * así que la izquierda es la que queda a la vista y no debe cambiar
    * hasta que la hoja caiga encima. Yendo hacia atrás, al revés.
    */
-  const congelada = (lado: 'izquierda' | 'derecha'): Pagina => {
+  const congelada = (lado: Lado): Pagina => {
     if (!girando) return abierta
     const laQueEspera = sentido === 'adelante' ? 'izquierda' : 'derecha'
     return lado === laQueEspera ? girando : abierta
@@ -236,19 +277,23 @@ export function PanelLibro({
                 {caraIzquierda(congelada('izquierda'))}
               </div>
 
-              {/* Con una sola hoja es esta, así que lleva las dos
-                  mitades una debajo de otra. */}
+              {/**
+               * La columna que hay siempre.
+               *
+               * Con dos caras es la derecha. Con una es la que toque:
+               * primero el anverso de la hoja y luego el reverso, que es
+               * lo que se ve al pasar páginas de una en una.
+               */}
               <div
                 onClick={alPulsarHoja('adelante')}
                 className={
                   'h-full ' +
-                  (indice < hojas.length - 1
-                    ? 'cursor-pointer'
-                    : 'cursor-default')
+                  (indice < total - 1 ? 'cursor-pointer' : 'cursor-default')
                 }
               >
-                <div className="solo-con-una">{caraIzquierda(abierta)}</div>
-                {caraDerecha(abierta)}
+                {dos || caraActual === 'derecha'
+                  ? caraDerecha(abierta)
+                  : caraIzquierda(abierta)}
               </div>
 
               {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
@@ -284,42 +329,79 @@ export function PanelLibro({
               <PestanasIndice
                 comienzos={comienzos}
                 letraAbierta={hoja.letra}
-                alElegir={irA}
+                alElegir={irAHoja}
               />
             </div>
           </div>
         </div>
       </div>
 
-      <Contador indice={indice} total={hojas.length} hoja={hoja} lleno={lleno} />
+      <Pie
+        indice={indice}
+        total={total}
+        hoja={hoja}
+        lleno={lleno}
+        alPasar={pasar}
+      />
     </div>
   )
 }
 
-function Contador({
+/**
+ * Por dónde vas y, con una sola cara, cómo volver.
+ *
+ * Con dos caras se pasa tocando la izquierda o la derecha, así que no
+ * hacen falta botones. Con una sola no hay lado que tocar para volver:
+ * el dedo sirve para deslizar, pero eso hay que saberlo. Dos flechas lo
+ * dicen sin que nadie lo tenga que descubrir.
+ */
+function Pie({
   indice,
   total,
   hoja,
   lleno,
+  alPasar,
 }: {
   indice: number
   total: number
   hoja: Hoja
   lleno: boolean
+  alPasar: (haciaDonde: Sentido) => void
 }) {
   return (
-    <p
-      role="status"
+    <div
       className={
-        'text-center text-sm text-tinta-suave ' + (lleno ? 'mt-3' : 'mt-6')
+        'flex items-center justify-center gap-4 ' + (lleno ? 'mt-3' : 'mt-6')
       }
     >
-      <span className="sr-only">
-        {hoja.tipo === 'receta'
-          ? `Hoja abierta: ${hoja.resumen.titulo}. `
-          : `Índice de la letra ${hoja.letra}. `}
-      </span>
-      {indice + 1} de {total}
-    </p>
+      <button
+        type="button"
+        onClick={() => alPasar('atras')}
+        disabled={indice === 0}
+        aria-label="Hoja anterior"
+        className="boton-secundario solo-con-una size-11 p-0 text-lg"
+      >
+        ‹
+      </button>
+
+      <p role="status" className="m-0 text-sm text-tinta-suave">
+        <span className="sr-only">
+          {hoja.tipo === 'receta'
+            ? `Hoja abierta: ${hoja.resumen.titulo}. `
+            : `Índice de la letra ${hoja.letra}. `}
+        </span>
+        {indice + 1} de {total}
+      </p>
+
+      <button
+        type="button"
+        onClick={() => alPasar('adelante')}
+        disabled={indice === total - 1}
+        aria-label="Hoja siguiente"
+        className="boton-secundario solo-con-una size-11 p-0 text-lg"
+      >
+        ›
+      </button>
+    </div>
   )
 }

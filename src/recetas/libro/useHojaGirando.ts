@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Receta } from '../tipos'
 import type { Hoja } from './hojas'
+import { DOS_PAGINAS } from './useDosPaginas'
 
 /** Lo que tarda la hoja en caer. Debe coincidir con el CSS. */
 const DURACION = 620
@@ -11,14 +12,6 @@ export interface Pagina {
   receta: Receta | null
 }
 
-/**
- * Cuándo hay dos páginas y, por tanto, hoja que girar.
- *
- * Tiene que decir exactamente lo mismo que `.doble-pagina` en el CSS: si
- * los dos se separan, o se congela una página que nadie va a tapar, o se
- * gira una hoja sobre un libro que solo tiene una.
- */
-const HAY_DOS_PAGINAS = '(width >= 64rem) and (orientation: landscape)'
 
 /**
  * La hoja que gira, con la página que estabas leyendo puesta encima.
@@ -55,7 +48,7 @@ export function useHojaGirando(actual: Pagina | null, clave: string | null) {
      * taparía nada: solo retrasaría medio segundo la receta nueva, sin
      * motivo visible.
      */
-    if (!window.matchMedia(HAY_DOS_PAGINAS).matches) return
+    if (!window.matchMedia(DOS_PAGINAS).matches) return
 
     // `anterior` todavía tiene la página del render pasado: la que hay
     // que enseñar girando.

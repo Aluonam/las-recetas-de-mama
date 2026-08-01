@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { BuscadorLupa } from './BuscadorLupa'
 import type { Agrupacion } from '../indice/agrupar'
 import { COLUMNAS } from '../indice/usePreferenciaVista'
@@ -12,13 +13,14 @@ import type { Columnas, Vista } from '../indice/usePreferenciaVista'
  *
  * Ahora:
  *
- *   [ Buscar ]  [ Ocasión ▾ ]  [ ▦ ☰ ]  [ 📖 ]
+ *   [☰] [Buscar] [Ocasión ▾] ··· [1 2 3 4] [libro] [+ Receta]
+ *
+ * A la izquierda, lo que decide la forma de lo que hay debajo. A la
+ * derecha, lo que se hace con ello. Y separadas, porque no son lo mismo.
  *
  * El libro deja de ser una tercera manera de mirar y pasa a ser un
  * botón: no es una vista más, es abrir el recetario entero y ponerse a
- * hojear, y eso ocurre a pantalla completa. Así lo que queda a elegir
- * son dos cosas —tarjetas o lista—, que es lo que cabe en un
- * interruptor.
+ * hojear, y eso ocurre a pantalla completa.
  *
  * El desplegable cambia según lo que se esté mirando: en tarjetas filtra
  * por ocasión, en lista ordena. Nunca hay dos, y la fila mide siempre lo
@@ -53,6 +55,29 @@ export function BarraRecetario({
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-center gap-2">
+      {/**
+       * Tarjetas o lista, en un solo botón que alterna.
+       *
+       * Eran dos, uno al lado del otro, y siempre había uno encendido
+       * que no hacía nada: pulsar el que ya estás viendo no lleva a
+       * ninguna parte. Con uno solo, el dibujo enseña a dónde vas y
+       * pulsarlo siempre cambia algo.
+       *
+       * Va el primero de la fila porque es lo que decide la forma de
+       * todo lo que hay debajo.
+       */}
+      <button
+        type="button"
+        onClick={() => alCambiarVista(vista === 'fichas' ? 'indice' : 'fichas')}
+        aria-label={
+          vista === 'fichas' ? 'Ver en lista' : 'Ver en tarjetas'
+        }
+        title={vista === 'fichas' ? 'Ver en lista' : 'Ver en tarjetas'}
+        className="boton-secundario flex h-9 w-10 items-center justify-center p-0"
+      >
+        {vista === 'fichas' ? <Renglones /> : <Rejilla />}
+      </button>
+
       <BuscadorLupa busqueda={busqueda} alBuscar={alBuscar} />
 
       {vista === 'fichas'
@@ -124,69 +149,37 @@ export function BarraRecetario({
         </div>
       )}
 
-      {/* Tarjetas o lista, en un interruptor de dos: son dos maneras de
-          mirar lo mismo, no dos sitios distintos. */}
-      <div
-        role="group"
-        aria-label="Cómo ver las recetas"
-        className="flex overflow-hidden rounded-lg border border-verde-texto"
-      >
-        <Modo
-          activo={vista === 'fichas'}
-          etiqueta="Ver en tarjetas"
-          onClick={() => alCambiarVista('fichas')}
-        >
-          <Rejilla />
-        </Modo>
-        <Modo
-          activo={vista === 'indice'}
-          etiqueta="Ver en lista"
-          onClick={() => alCambiarVista('indice')}
-        >
-          <Renglones />
-        </Modo>
-      </div>
-
       <button
         type="button"
         onClick={alAbrirLibro}
         aria-label="Abrir el libro"
         title="Abrir el libro"
-        className="boton-principal h-9 px-3"
+        className="boton-secundario h-9 px-3"
       >
         <Libro />
       </button>
-    </div>
-  )
-}
 
-function Modo({
-  activo,
-  etiqueta,
-  onClick,
-  children,
-}: {
-  activo: boolean
-  etiqueta: string
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={activo}
-      aria-label={etiqueta}
-      title={etiqueta}
-      className={
-        'flex h-9 w-10 items-center justify-center transition-colors ' +
-        (activo
-          ? 'bg-verde-texto text-papel'
-          : 'bg-superficie text-verde-texto hover:bg-superficie-2')
-      }
-    >
-      {children}
-    </button>
+      {/**
+       * Escribir una receta, en esta fila y más grande que el resto.
+       *
+       * Estaba arriba, en la esquina, compitiendo con el título de la
+       * página. Aquí está con lo demás que se toca, y siendo lo único
+       * que crea algo, es lo único que va más alto y en verde lleno: en
+       * una fila de mandos del mismo tamaño no se distinguiría de mirar
+       * las recetas de otra manera.
+       */}
+      <Link
+        to="/nueva"
+        aria-label="Escribir una receta"
+        title="Escribir una receta"
+        className="boton-principal h-11 gap-1 px-4 no-underline"
+      >
+        <span aria-hidden="true" className="text-2xl leading-none">
+          +
+        </span>
+        <span className="hidden sm:inline">Receta</span>
+      </Link>
+    </div>
   )
 }
 

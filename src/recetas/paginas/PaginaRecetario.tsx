@@ -84,22 +84,10 @@ export function PaginaRecetario() {
 
   return (
     <div>
-      {/* El «+» va aquí y no en la cabecera: escribir una receta es una
-          acción sobre el recetario, y en su esquina está donde se está
-          mirando en vez de arriba del todo. */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <h1 className="m-0 text-3xl sm:text-4xl">El recetario</h1>
-
-        <Link
-          to="/nueva"
-          aria-label="Escribir una receta"
-          title="Escribir una receta"
-          // 44px de lado: el mínimo para acertar con el dedo.
-          className="boton-principal flex size-11 shrink-0 items-center justify-center p-0 text-2xl leading-none no-underline"
-        >
-          <span aria-hidden="true">+</span>
-        </Link>
-      </div>
+      {/* Sin «El recetario» de título: la cabecera ya dice a qué web has
+          entrado, y debajo hay recetas. Un renglón grande para nombrar
+          lo que se está viendo es un renglón de menos para verlo. */}
+      <h1 className="sr-only">El recetario</h1>
 
       <AvisoInstalar />
 
