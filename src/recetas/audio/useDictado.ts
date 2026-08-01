@@ -169,14 +169,36 @@ export function useDictado(alDictar: (texto: string) => void) {
     let arranco = false
     const desde = Date.now()
 
+    /**
+     * Hasta dónde se ha entregado ya, para no entregarlo dos veces.
+     *
+     * El navegador avisa de los resultados nuevos diciendo por dónde
+     * empiezan, pero en Android vuelve a mandar los que ya había dado
+     * por definitivos: la frase entraba en el campo, y a la siguiente
+     * volvía a entrar detrás. Escrito dos veces.
+     *
+     * Se lleva la cuenta por la posición de cada resultado, que no
+     * cambia en toda la sesión, y no por lo que diga el aviso.
+     */
+    let entregadosHasta = 0
+
     nuevo.onresult = (evento) => {
       let dicho = ''
       let tanteando = ''
 
       for (let i = evento.resultIndex; i < evento.results.length; i++) {
         const resultado = evento.results[i]
-        if (resultado.isFinal) dicho += resultado[0].transcript
-        else tanteando += resultado[0].transcript
+
+        if (!resultado.isFinal) {
+          tanteando += resultado[0].transcript
+          continue
+        }
+
+        // Ya se entregó en un aviso anterior: se ignora.
+        if (i < entregadosHasta) continue
+
+        entregadosHasta = i + 1
+        dicho += resultado[0].transcript
       }
 
       setAMedias(tanteando)
