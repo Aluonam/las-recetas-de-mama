@@ -33,7 +33,7 @@ export function Marco({ children, navegacion = true }: Props) {
             dedo de lo que se toca a diario. */}
         {navegacion && <BotonAjustes />}
 
-        <div className="mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
+        <div className="cabecera mx-auto max-w-5xl px-4 py-5 text-center sm:py-6">
           <Link
             to="/"
             className="marco-doble inline-block rounded-full bg-superficie px-6 py-2 no-underline sm:px-10"
@@ -41,7 +41,9 @@ export function Marco({ children, navegacion = true }: Props) {
             <span className="block font-titulo text-lg font-bold text-verde-texto sm:text-2xl">
               Las Recetas de Mamá
             </span>
-            <span className="versalitas mt-0.5 block text-rosa-texto">
+            {/* El subtítulo se apaga en pantallas bajas: es lo único de
+                aquí que no hace falta para saber dónde estás. */}
+            <span className="subtitulo versalitas mt-0.5 block text-rosa-texto">
               Recetario de familia
             </span>
           </Link>

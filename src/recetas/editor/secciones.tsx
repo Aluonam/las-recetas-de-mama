@@ -73,71 +73,91 @@ export function SeccionPlato({ receta, cambiar }: Props) {
 
   return (
     <Bloque titulo="La receta">
-      <CampoTexto
-        etiqueta="¿Cómo se llama?"
-        required
-        placeholder="Croquetas de la abuela"
-        value={receta.titulo}
-        onChange={(e) => cambiar({ titulo: e.target.value })}
-      />
+      {/**
+       * Nombre y descripción a la izquierda; cuántos y cuánto, a la
+       * derecha, en esas mismas dos filas.
+       *
+       * Antes iban debajo y se llevaban una tercera fila entera para dos
+       * desplegables cortos. Puestos al lado ocupan lo que ya estaba
+       * ocupado: el mismo formulario, una fila menos de alto.
+       *
+       * El orden de escritura sigue siendo el natural —nombre,
+       * descripción, cuántos, cuánto—: lo que cambia de sitio es dónde
+       * se pintan, no por dónde va pasando el teclado.
+       */}
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem]">
+        <div className="md:col-start-1 md:row-start-1">
+          <CampoTexto
+            etiqueta="¿Cómo se llama?"
+            required
+            placeholder="Croquetas de la abuela"
+            value={receta.titulo}
+            onChange={(e) => cambiar({ titulo: e.target.value })}
+          />
+        </div>
 
-      <CampoTexto
-        etiqueta="Una línea para reconocerla"
-        placeholder="Las de siempre, las de los domingos."
-        value={receta.descripcion ?? ''}
-        onChange={(e) => cambiar({ descripcion: e.target.value })}
-      />
+        <div className="md:col-start-1 md:row-start-2">
+          <CampoTexto
+            etiqueta="Una línea para reconocerla"
+            placeholder="Las de siempre, las de los domingos."
+            value={receta.descripcion ?? ''}
+            onChange={(e) => cambiar({ descripcion: e.target.value })}
+          />
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
         {/* Antes era texto libre —«para 4 si viene el tío»— y sonaba muy
             de casa, pero obligaba a escribir a mano lo que en el 99% de
             las recetas es un número. Una lista se elige de un toque. */}
-        <Campo etiqueta="¿Para cuántos?">
-          {(id) => (
-            <select
-              id={id}
-              className="campo"
-              value={raciones}
-              onChange={(e) => cambiar({ raciones: e.target.value })}
-            >
-              <option value="">Sin indicar</option>
-              {aMano && <option value={raciones}>{raciones}</option>}
-              {COMENSALES.map((cuantos) => (
-                <option key={cuantos} value={String(cuantos)}>
-                  {cuantos}
-                </option>
-              ))}
-            </select>
-          )}
-        </Campo>
+        <div className="md:col-start-2 md:row-start-1">
+          <Campo etiqueta="¿Para cuántos?">
+            {(id) => (
+              <select
+                id={id}
+                className="campo"
+                value={raciones}
+                onChange={(e) => cambiar({ raciones: e.target.value })}
+              >
+                <option value="">Sin indicar</option>
+                {aMano && <option value={raciones}>{raciones}</option>}
+                {COMENSALES.map((cuantos) => (
+                  <option key={cuantos} value={String(cuantos)}>
+                    {cuantos}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Campo>
+        </div>
 
-        <Campo etiqueta="¿Cuánto lleva?">
-          {(id) => (
-            <select
-              id={id}
-              className="campo"
-              value={receta.tiempoMinutos ?? ''}
-              onChange={(e) =>
-                cambiar({
-                  tiempoMinutos:
-                    e.target.value === '' ? null : Number(e.target.value),
-                })
-              }
-            >
-              <option value="">Sin indicar</option>
-              {tiempoAMano && (
-                <option value={receta.tiempoMinutos!}>
-                  {textoTiempo(receta.tiempoMinutos)}
-                </option>
-              )}
-              {TIEMPOS.map((minutos) => (
-                <option key={minutos} value={minutos}>
-                  {textoTiempo(minutos)}
-                </option>
-              ))}
-            </select>
-          )}
-        </Campo>
+        <div className="md:col-start-2 md:row-start-2">
+          <Campo etiqueta="¿Cuánto lleva?">
+            {(id) => (
+              <select
+                id={id}
+                className="campo"
+                value={receta.tiempoMinutos ?? ''}
+                onChange={(e) =>
+                  cambiar({
+                    tiempoMinutos:
+                      e.target.value === '' ? null : Number(e.target.value),
+                  })
+                }
+              >
+                <option value="">Sin indicar</option>
+                {tiempoAMano && (
+                  <option value={receta.tiempoMinutos!}>
+                    {textoTiempo(receta.tiempoMinutos)}
+                  </option>
+                )}
+                {TIEMPOS.map((minutos) => (
+                  <option key={minutos} value={minutos}>
+                    {textoTiempo(minutos)}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Campo>
+        </div>
       </div>
 
       <SelectorOcasiones

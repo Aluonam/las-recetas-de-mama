@@ -188,7 +188,10 @@ export function AsistenteReceta() {
         if (ultimo) terminar()
         else ir(donde + 1)
       }}
-      className="mx-auto max-w-2xl"
+      // Más ancho que antes: con la tarjeta estrecha, las ocasiones
+      // —ocho botones— se partían en dos filas y las hacían parecer dos
+      // grupos distintos. Cabiendo de una tirada se leen de un vistazo.
+      className="mx-auto max-w-4xl"
     >
 
       <h1 className="mb-2 text-3xl sm:text-4xl">Escribir una receta</h1>

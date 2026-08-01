@@ -1158,6 +1158,46 @@
   }
 }
 
+/**
+ * LA CABECERA, ENCOGIDA DONDE FALTA ALTO
+ *
+ * Una tablet apaisada tiene 820 puntos de alto, y entre la cabecera, la
+ * cenefa, el título del recetario y la barra de mandos se iban casi
+ * cuatrocientos: la mitad de la pantalla antes de la primera receta.
+ *
+ * Así que donde la pantalla es baja, la cabecera se recoge: la mitad de
+ * relleno, el nombre en pequeño y sin el «Recetario de familia» debajo.
+ * De unos 160 puntos a unos 65, y sin esconder nada ni programar ningún
+ * comportamiento que pueda equivocarse.
+ *
+ * Se mantiene el marco doble con el nombre, que es la cara del
+ * recetario: encogerlo sigue pareciendo un recetario, y quitarlo lo
+ * dejaría en una hoja de cálculo.
+ *
+ * El corte va por alto y no por ancho a propósito: lo que falta es alto,
+ * y un móvil de pie tiene sitio de sobra para la cabecera entera aunque
+ * sea estrecho.
+ */
+@media (height < 46rem) {
+  .cabecera {
+    padding-block: 0.6rem;
+  }
+
+  .cabecera .subtitulo {
+    display: none;
+  }
+
+  .cabecera .marco-doble {
+    padding-block: 0.25rem;
+    font-size: 0.9em;
+  }
+
+  /* La cenefa también: son 32 puntos de dibujo repetidos dos veces. */
+  .cenefa {
+    height: 20px;
+  }
+}
+
 /* Quien pide menos movimiento no debería marearse pasando páginas. */
 @media (prefers-reduced-motion: reduce) {
   .pasa-adelante,

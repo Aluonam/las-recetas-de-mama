@@ -33,10 +33,10 @@ export function SelectorOcasiones({ seleccionadas, alCambiar }: Props) {
 
   return (
     <fieldset className="m-0 border-0 p-0">
+      {/* Sin explicación debajo: las ocasiones que hay puestas —
+          Nochebuena, Verano, Enfermitos— ya dicen ellas solas de qué va
+          esto, y el renglón se lo llevaba por delante. */}
       <legend className="etiqueta">¿Cuándo se hace?</legend>
-      <p className="mb-2 text-sm text-tinta-suave">
-        Sirve para buscarla por recuerdo, no por ingrediente.
-      </p>
 
       <div className="mb-3 flex flex-wrap gap-2">
         {todas.map((ocasion) => {
