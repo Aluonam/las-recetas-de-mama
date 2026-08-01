@@ -1,23 +1,23 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { RecetaResumen } from '../tipos'
-import { tituloParaOrdenar } from '../indice/agrupar'
 import { useNavegacionLibro } from './useNavegacionLibro'
 import type { Sentido } from './useNavegacionLibro'
 import { useRecetaCompleta } from './useRecetaCompleta'
 import { useHojaGirando } from './useHojaGirando'
 import type { Pagina } from './useHojaGirando'
+import {
+  claveDe,
+  comienzoDeCadaLetra,
+  construirHojas,
+  ordenarComoLibro,
+} from './hojas'
+import type { Hoja } from './hojas'
 import { PaginaIzquierda } from './PaginaIzquierda'
 import { PaginaDerecha } from './PaginaDerecha'
+import { HojaIndiceLetra, HojaIndiceLetraDerecha } from './HojaIndiceLetra'
 import { PestanasIndice } from './PestanasIndice'
 import { HojaGirando } from './HojaGirando'
-
-/** Un libro va en orden, ignorando el artículo del título. */
-function ordenarComoLibro(recetas: RecetaResumen[]) {
-  return [...recetas].sort((a, b) =>
-    tituloParaOrdenar(a.titulo).localeCompare(tituloParaOrdenar(b.titulo), 'es'),
-  )
-}
 
 /** Margen para distinguir un clic suelto de los dos de abrir, en ms. */
 const ESPERA_DOBLE_CLIC = 260
@@ -27,17 +27,17 @@ const ESPERA_DOBLE_CLIC = 260
  *
  * Cada receta ocupa las dos páginas: a la izquierda la foto y los
  * ingredientes —lo que se mira antes de cocinar—, a la derecha la
- * elaboración. Es el reparto de cualquier libro de cocina, y le da a
- * cada receta el sitio que en media página no tenía.
+ * elaboración.
  *
- * El índice no ocupa ninguna hoja: va troquelado en el canto, que es
- * donde vive en un recetario de casa.
+ * Y no todas las hojas son recetas: donde una letra tiene varias,
+ * delante va la suya, como en los tomos antiguos. Así llegar a las
+ * torrijas en una T con seis recetas es una pestaña y un toque, en vez
+ * de pasar hoja seis veces mirando títulos.
  *
  * Que haya una página o dos no se decide aquí: lo dice `.doble-pagina`
  * en el CSS, mirando el sitio y la forma de la pantalla. Aquí solo se
  * marca qué trozos son de un caso y cuáles del otro —`solo-con-dos`,
- * `solo-con-una`—, para que una tablet de pie no acabe con media hoja
- * izquierda flotando por haber dos criterios que no se hablan.
+ * `solo-con-una`.
  */
 export function PanelLibro({
   recetas,
@@ -54,27 +54,41 @@ export function PanelLibro({
    */
   lleno?: boolean
 }) {
-  const enOrden = useMemo(() => ordenarComoLibro(recetas), [recetas])
   const navegar = useNavigate()
 
+  const hojas = useMemo(
+    () => construirHojas(ordenarComoLibro(recetas)),
+    [recetas],
+  )
+
   /**
-   * La página es la del tomo, no la del montón que tengas delante: buscar
-   * o filtrar enseña unas hojas y esconde otras, pero a nadie se le
-   * renumeran las páginas de un libro por leerlo salteado.
+   * El número de página es el del tomo, no el del montón que tengas
+   * delante: buscar enseña unas hojas y esconde otras, pero a nadie se
+   * le renumeran las páginas de un libro por leerlo salteado.
    *
-   * Cada receta se lleva dos números, porque ocupa las dos caras.
+   * Cada hoja se lleva dos números, porque ocupa las dos caras.
    */
-  const paginaDe = useMemo(() => {
-    const tomo = ordenarComoLibro(todas)
-    return new Map(tomo.map((receta, posicion) => [receta.id, posicion * 2 + 2]))
+  const numeroDe = useMemo(() => {
+    const tomo = construirHojas(ordenarComoLibro(todas))
+    return new Map(tomo.map((hoja, posicion) => [claveDe(hoja), posicion * 2 + 2]))
   }, [todas])
 
+  const comienzos = useMemo(() => comienzoDeCadaLetra(hojas), [hojas])
+
   const { indice, sentido, pasar, irA, gestos } = useNavegacionLibro(
-    enOrden.length,
+    hojas.length,
   )
-  const resumen = enOrden[indice]
-  const { receta } = useRecetaCompleta(resumen?.id)
-  const girando = useHojaGirando(resumen ? { resumen, receta } : null)
+  const hoja = hojas[indice]
+
+  // Solo las hojas de receta necesitan traerse el cuerpo entero.
+  const { receta } = useRecetaCompleta(
+    hoja?.tipo === 'receta' ? hoja.resumen.id : undefined,
+  )
+
+  const girando = useHojaGirando(
+    hoja ? { hoja, receta } : null,
+    hoja ? claveDe(hoja) : null,
+  )
 
   /**
    * Un clic pasa hoja; dos abren la receta.
@@ -113,15 +127,27 @@ export function PanelLibro({
 
   const alPulsarDosVeces = (evento: React.MouseEvent<HTMLElement>) => {
     if ((evento.target as HTMLElement).closest('a, button')) return
+    if (!hoja || hoja.tipo !== 'receta') return
 
     cancelarClic()
-    navegar(`/receta/${resumen.id}`)
+    navegar(`/receta/${hoja.resumen.id}`)
   }
 
-  if (!resumen) return null
+  /** Desde el índice de una letra, saltar a la receta elegida. */
+  const abrirPor = (resumen: RecetaResumen) => {
+    const destino = hojas.findIndex(
+      (una) => una.tipo === 'receta' && una.resumen.id === resumen.id,
+    )
+    if (destino >= 0) irA(destino)
+  }
 
-  const numero = paginaDe.get(resumen.id) ?? indice * 2 + 2
-  const abierta: Pagina = { resumen, receta }
+  if (!hoja) return null
+
+  const numero = (una: Hoja) => numeroDe.get(claveDe(una)) ?? indice * 2 + 2
+  const paginaDeReceta = (resumen: RecetaResumen) =>
+    numeroDe.get(`r:${resumen.id}`) ?? 0
+
+  const abierta: Pagina = { hoja, receta }
 
   /**
    * Mientras la hoja gira, la página que todavía no ha tapado sigue
@@ -135,18 +161,47 @@ export function PanelLibro({
    * la que la hoja levanta. Yendo hacia delante se levanta la derecha,
    * así que la izquierda es la que queda a la vista y no debe cambiar
    * hasta que la hoja caiga encima. Yendo hacia atrás, al revés.
-   *
-   * La otra mitad sí cambia ya, y da igual: al empezar está debajo de la
-   * hoja, y para cuando asoma es justo lo que toca ver.
    */
   const congelada = (lado: 'izquierda' | 'derecha'): Pagina => {
     if (!girando) return abierta
-    const laQueEsper = sentido === 'adelante' ? 'izquierda' : 'derecha'
-    return lado === laQueEsper ? girando : abierta
+    const laQueEspera = sentido === 'adelante' ? 'izquierda' : 'derecha'
+    return lado === laQueEspera ? girando : abierta
   }
 
-  const paginaDeLa = (pagina: Pagina) =>
-    paginaDe.get(pagina.resumen.id) ?? numero
+  /** La cara izquierda de una hoja, sea del tipo que sea. */
+  const caraIzquierda = (pagina: Pagina) =>
+    pagina.hoja.tipo === 'indice' ? (
+      <HojaIndiceLetra
+        letra={pagina.hoja.letra}
+        recetas={pagina.hoja.recetas}
+        paginaDe={paginaDeReceta}
+        alElegir={abrirPor}
+        numero={numero(pagina.hoja)}
+      />
+    ) : (
+      <PaginaIzquierda
+        receta={pagina.receta}
+        resumen={pagina.hoja.resumen}
+        numero={numero(pagina.hoja)}
+      />
+    )
+
+  const caraDerecha = (pagina: Pagina) =>
+    pagina.hoja.tipo === 'indice' ? (
+      <HojaIndiceLetraDerecha
+        letra={pagina.hoja.letra}
+        recetas={pagina.hoja.recetas}
+        paginaDe={paginaDeReceta}
+        alElegir={abrirPor}
+        numero={numero(pagina.hoja) + 1}
+      />
+    ) : (
+      <PaginaDerecha
+        receta={pagina.receta}
+        resumen={pagina.hoja.resumen}
+        numero={numero(pagina.hoja) + 1}
+      />
+    )
 
   return (
     <div {...gestos} className={lleno ? 'libro-lleno flex h-full flex-col' : ''}>
@@ -157,9 +212,9 @@ export function PanelLibro({
           }
         >
           <div
-            // Cambiar la key reinicia las animaciones: cada receta las
+            // Cambiar la key reinicia las animaciones: cada hoja las
             // arranca de cero.
-            key={resumen.id}
+            key={claveDe(hoja)}
             className={
               (sentido === 'adelante' ? 'pasa-adelante' : 'pasa-atras') +
               (lleno ? ' h-full' : '')
@@ -167,10 +222,7 @@ export function PanelLibro({
           >
             <div
               onDoubleClick={alPulsarDosVeces}
-              className={
-                'doble-pagina relative grid' +
-                (lleno ? ' h-full' : '')
-              }
+              className={'doble-pagina relative grid' + (lleno ? ' h-full' : '')}
             >
               {/* Izquierda pasa atrás, derecha adelante: se pasa hoja
                   hacia el lado que se toca, como en el papel. */}
@@ -181,11 +233,7 @@ export function PanelLibro({
                   (indice > 0 ? 'cursor-pointer' : 'cursor-default')
                 }
               >
-                <PaginaIzquierda
-                  receta={congelada('izquierda').receta}
-                  resumen={congelada('izquierda').resumen}
-                  numero={paginaDeLa(congelada('izquierda'))}
-                />
+                {caraIzquierda(congelada('izquierda'))}
               </div>
 
               {/* Con una sola hoja es esta, así que lleva las dos
@@ -194,29 +242,19 @@ export function PanelLibro({
                 onClick={alPulsarHoja('adelante')}
                 className={
                   'h-full ' +
-                  (indice < enOrden.length - 1
+                  (indice < hojas.length - 1
                     ? 'cursor-pointer'
                     : 'cursor-default')
                 }
               >
-                <div className="solo-con-una">
-                  <PaginaIzquierda
-                    receta={receta}
-                    resumen={resumen}
-                    numero={numero}
-                  />
-                </div>
-                <PaginaDerecha
-                  receta={congelada('derecha').receta}
-                  resumen={congelada('derecha').resumen}
-                  numero={paginaDeLa(congelada('derecha')) + 1}
-                />
+                <div className="solo-con-una">{caraIzquierda(abierta)}</div>
+                {caraDerecha(abierta)}
               </div>
 
               {/* El pliegue entre las dos páginas. Solo cuando hay dos. */}
               <div
                 aria-hidden="true"
-                className="lomo pointer-events-none absolute inset-y-0 left-1/2 hidden w-10 -translate-x-1/2 md:block"
+                className="lomo solo-con-dos pointer-events-none absolute inset-y-0 left-1/2 w-10 -translate-x-1/2"
               />
 
               {/**
@@ -225,60 +263,27 @@ export function PanelLibro({
                * Lleva por delante la página derecha y por detrás la
                * izquierda, que es como está hecha una hoja de verdad: lo
                * que dejas de leer y lo que aparece al otro lado.
-               *
-               * Hacia delante se levanta la receta que estabas leyendo y
-               * al caer enseña la portada de la siguiente. Hacia atrás
-               * viene tumbada desde la izquierda con la portada de la que
-               * dejas, y se posa enseñando la elaboración de la que
-               * recuperas.
                */}
               {girando && (
                 <HojaGirando
                   sentido={sentido}
-                  delante={
-                    sentido === 'adelante' ? (
-                      <PaginaDerecha
-                        receta={girando.receta}
-                        resumen={girando.resumen}
-                        numero={(paginaDe.get(girando.resumen.id) ?? 0) + 1}
-                      />
-                    ) : (
-                      <PaginaDerecha
-                        receta={receta}
-                        resumen={resumen}
-                        numero={numero + 1}
-                      />
-                    )
-                  }
-                  detras={
-                    sentido === 'adelante' ? (
-                      <PaginaIzquierda
-                        receta={receta}
-                        resumen={resumen}
-                        numero={numero}
-                      />
-                    ) : (
-                      <PaginaIzquierda
-                        receta={girando.receta}
-                        resumen={girando.resumen}
-                        numero={paginaDe.get(girando.resumen.id) ?? 0}
-                      />
-                    )
-                  }
+                  delante={caraDerecha(
+                    sentido === 'adelante' ? girando : abierta,
+                  )}
+                  detras={caraIzquierda(
+                    sentido === 'adelante' ? abierta : girando,
+                  )}
                 />
               )}
 
               {/* La sombra que proyecta la hoja al quedarse de canto. */}
               {girando && (
-                <div
-                  aria-hidden="true"
-                  className="sombra-lomo solo-con-dos"
-                />
+                <div aria-hidden="true" className="sombra-lomo solo-con-dos" />
               )}
 
               <PestanasIndice
-                recetas={enOrden}
-                abierta={indice}
+                comienzos={comienzos}
+                letraAbierta={hoja.letra}
                 alElegir={irA}
               />
             </div>
@@ -286,12 +291,7 @@ export function PanelLibro({
         </div>
       </div>
 
-      <Contador
-        indice={indice}
-        total={enOrden.length}
-        receta={resumen}
-        lleno={lleno}
-      />
+      <Contador indice={indice} total={hojas.length} hoja={hoja} lleno={lleno} />
     </div>
   )
 }
@@ -299,12 +299,12 @@ export function PanelLibro({
 function Contador({
   indice,
   total,
-  receta,
+  hoja,
   lleno,
 }: {
   indice: number
   total: number
-  receta: RecetaResumen
+  hoja: Hoja
   lleno: boolean
 }) {
   return (
@@ -314,7 +314,11 @@ function Contador({
         'text-center text-sm text-tinta-suave ' + (lleno ? 'mt-3' : 'mt-6')
       }
     >
-      <span className="sr-only">Hoja abierta: {receta.titulo}. </span>
+      <span className="sr-only">
+        {hoja.tipo === 'receta'
+          ? `Hoja abierta: ${hoja.resumen.titulo}. `
+          : `Índice de la letra ${hoja.letra}. `}
+      </span>
       {indice + 1} de {total}
     </p>
   )

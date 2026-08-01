@@ -1,13 +1,8 @@
-import { useMemo } from 'react'
-import type { RecetaResumen } from '../tipos'
-import { letraDe } from '../indice/agrupar'
-
 interface Props {
-  /** Ya en el orden del libro. */
-  recetas: RecetaResumen[]
-  /** Posición de la receta abierta, para marcar su letra. */
-  abierta: number
-  alElegir: (indice: number) => void
+  /** Por qué hoja se abre cada letra, en orden. */
+  comienzos: Map<string, number>
+  letraAbierta: string
+  alElegir: (hoja: number) => void
 }
 
 /**
@@ -15,55 +10,33 @@ interface Props {
  *
  * Como las agendas de teléfonos de toda la vida: unas lengüetas de
  * cartulina asomando por el lateral, con la letra escrita, y metes el
- * dedo por la que buscas. Antes esto ocupaba la página izquierda entera,
- * pero esa página es de la receta —no todas las hojas de un libro son el
- * índice—, así que el índice se va al borde, que es donde vive en el
- * papel.
+ * dedo por la que buscas.
+ *
+ * Cada una lleva al principio de su letra, que no siempre es una receta:
+ * donde hay varias, lleva a la hoja de índice de esa letra, y desde allí
+ * se elige. Así una T con seis recetas es una pestaña y un toque, en vez
+ * de seis hojas mirando títulos.
  *
  * Solo salen las letras que tienen recetas. Un cajón vacío en una agenda
  * es un cajón, pero aquí sería un botón que no lleva a ninguna parte.
  *
- * Se esconde en pantallas pequeñas: ahí el libro es de una sola página y
- * las lengüetas se comerían el texto. Para buscar ya está la vista de
- * Índice.
+ * Se esconde cuando solo cabe una página: allí las lengüetas se comerían
+ * el texto, y para buscar está la lista.
  */
-export function PestanasIndice({ recetas, abierta, alElegir }: Props) {
-  /**
-   * Una entrada por letra, apuntando a la primera receta que le toca.
-   * Las recetas ya vienen ordenadas, así que la primera que aparece de
-   * cada letra es por donde se abre el libro.
-   */
-  const letras = useMemo(() => {
-    const primeras: Array<{ letra: string; indice: number }> = []
-
-    recetas.forEach((receta, indice) => {
-      const letra = letraDe(receta.titulo)
-      if (primeras[primeras.length - 1]?.letra !== letra) {
-        primeras.push({ letra, indice })
-      }
-    })
-
-    return primeras
-  }, [recetas])
-
-  const letraAbierta = recetas[abierta]
-    ? letraDe(recetas[abierta].titulo)
-    : null
+export function PestanasIndice({ comienzos, letraAbierta, alElegir }: Props) {
+  const letras = [...comienzos.entries()]
 
   if (letras.length < 2) return null
 
   return (
-    <nav
-      aria-label="Índice del recetario"
-      className="pestanas solo-con-dos-flex"
-    >
-      {letras.map(({ letra, indice }) => {
+    <nav aria-label="Índice del recetario" className="pestanas solo-con-dos-flex">
+      {letras.map(([letra, hoja]) => {
         const esta = letra === letraAbierta
         return (
           <button
             key={letra}
             type="button"
-            onClick={() => alElegir(indice)}
+            onClick={() => alElegir(hoja)}
             aria-current={esta ? 'true' : undefined}
             title={`Ir a la ${letra}`}
             className={'pestana' + (esta ? ' pestana-abierta' : '')}

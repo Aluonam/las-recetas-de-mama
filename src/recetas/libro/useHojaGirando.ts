@@ -1,13 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Receta, RecetaResumen } from '../tipos'
+import type { Receta } from '../tipos'
+import type { Hoja } from './hojas'
 
 /** Lo que tarda la hoja en caer. Debe coincidir con el CSS. */
 const DURACION = 620
 
 export interface Pagina {
-  resumen: RecetaResumen
+  hoja: Hoja
+  /** Solo las hojas de receta la traen, y solo cuando ha llegado. */
   receta: Receta | null
 }
+
+/**
+ * Cuándo hay dos páginas y, por tanto, hoja que girar.
+ *
+ * Tiene que decir exactamente lo mismo que `.doble-pagina` en el CSS: si
+ * los dos se separan, o se congela una página que nadie va a tapar, o se
+ * gira una hoja sobre un libro que solo tiene una.
+ */
+const HAY_DOS_PAGINAS = '(width >= 64rem) and (orientation: landscape)'
 
 /**
  * La hoja que gira, con la página que estabas leyendo puesta encima.
@@ -24,23 +35,13 @@ export interface Pagina {
  * No gira en la primera carga: entrar en el recetario no es pasar una
  * hoja.
  */
-/**
- * Cuándo hay dos páginas y, por tanto, hoja que girar.
- *
- * Tiene que decir exactamente lo mismo que `.doble-pagina` en el CSS: si
- * los dos se separan, o se congela una página que nadie va a tapar, o se
- * gira una hoja sobre un libro que solo tiene una.
- */
-const HAY_DOS_PAGINAS = '(width >= 64rem) and (orientation: landscape)'
-
-export function useHojaGirando(actual: Pagina | null) {
+export function useHojaGirando(actual: Pagina | null, clave: string | null) {
   const [congelada, setCongelada] = useState<Pagina | null>(null)
   const anterior = useRef<Pagina | null>(null)
   const primera = useRef(true)
-  const id = actual?.resumen.id
 
   useEffect(() => {
-    if (!id) return
+    if (!clave) return
 
     if (primera.current) {
       primera.current = false
@@ -48,11 +49,11 @@ export function useHojaGirando(actual: Pagina | null) {
     }
 
     /**
-     * En móvil no se congela nada.
+     * En una sola página no se congela nada.
      *
-     * Allí hay una sola página y ninguna hoja girando, así que quedarse
-     * con la anterior no taparía nada: solo retrasaría medio segundo la
-     * receta nueva, sin motivo visible.
+     * Allí no hay hoja girando, así que quedarse con la anterior no
+     * taparía nada: solo retrasaría medio segundo la receta nueva, sin
+     * motivo visible.
      */
     if (!window.matchMedia(HAY_DOS_PAGINAS).matches) return
 
@@ -61,7 +62,7 @@ export function useHojaGirando(actual: Pagina | null) {
     setCongelada(anterior.current)
     const reloj = window.setTimeout(() => setCongelada(null), DURACION)
     return () => window.clearTimeout(reloj)
-  }, [id])
+  }, [clave])
 
   // Después de cada render, la actual pasa a ser la anterior.
   useEffect(() => {
