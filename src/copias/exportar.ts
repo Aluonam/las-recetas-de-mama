@@ -56,6 +56,7 @@ function archivosDe(receta: Receta): string[] {
     receta.audioUrl,
     ...receta.audios.map((audio) => audio.url),
     ...receta.pasos.map((paso) => paso.fotoUrl),
+    ...receta.pasos.map((paso) => paso.audioUrl),
     ...receta.fotos.map((foto) => foto.url),
   ].filter((valor): valor is string => Boolean(valor))
 }

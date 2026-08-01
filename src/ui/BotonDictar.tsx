@@ -30,7 +30,21 @@ export function BotonDictar({
     alCambiar(hay + (enLineaAparte ? '\n' : ' ') + dicho)
   })
 
-  if (!SE_PUEDE_DICTAR) return null
+  /**
+   * Donde el navegador no sabe dictar, se dice.
+   *
+   * Antes no salía nada, y quien había visto el botón en otro sitio
+   * pensaba que estaba roto. Se dice además dónde sí está, porque en una
+   * tablet lo está: la tecla del micrófono del teclado hace lo mismo.
+   */
+  if (!SE_PUEDE_DICTAR) {
+    return (
+      <p className="mt-2 text-sm text-tinta-suave">
+        Este navegador no sabe dictar. En el móvil o la tablet, usa la tecla
+        del micrófono del teclado.
+      </p>
+    )
+  }
 
   return (
     <div className="mt-2">

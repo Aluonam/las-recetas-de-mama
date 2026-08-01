@@ -8,6 +8,8 @@ interface Props {
   url?: string | null
   alGuardar: (url: string) => void
   alQuitar: () => void
+  /** Sin la explicación de debajo: para cuando va repetido, paso a paso. */
+  compacto?: boolean
 }
 
 /**
@@ -19,7 +21,7 @@ interface Props {
  *   WhatsApp. Es el caso importante: a veces quien la contaba ya no está y
  *   ese archivo es lo único que queda.
  */
-export function EditorAudio({ url, alGuardar, alQuitar }: Props) {
+export function EditorAudio({ url, alGuardar, alQuitar, compacto = false }: Props) {
   const entrada = useRef<HTMLInputElement>(null)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -114,10 +116,14 @@ export function EditorAudio({ url, alGuardar, alQuitar }: Props) {
         </label>
       </div>
 
-      <p className="text-sm text-tinta-suave">
-        Si tienes una nota de voz de WhatsApp contando la receta, súbela aquí.
-        {!SE_PUEDE_GRABAR && ' Este navegador no permite grabar directamente.'}
-      </p>
+      {/* La explicación estorba donde esto va repetido, un paso detrás de
+          otro: allí ya se sabe de qué va y solo hacen falta los botones. */}
+      {!compacto && (
+        <p className="text-sm text-tinta-suave">
+          Si tienes una nota de voz de WhatsApp contando la receta, súbela aquí.
+          {!SE_PUEDE_GRABAR && ' Este navegador no permite grabar directamente.'}
+        </p>
+      )}
 
       {grabadora.error != null && <Aviso error={grabadora.error} />}
       {error != null && <Aviso error={error} />}

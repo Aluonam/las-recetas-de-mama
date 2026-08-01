@@ -88,7 +88,7 @@ export function PaginaDerecha({
 
       <p
         aria-hidden="true"
-        className="absolute bottom-5 right-6 font-titulo text-sm text-tinta-suave sm:right-8"
+        className="numero-pagina absolute bottom-5 right-6 font-titulo text-sm text-tinta-suave sm:right-8"
       >
         {numero}
       </p>

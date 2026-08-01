@@ -54,7 +54,7 @@ export function HojaIndiceLetra({
 
       <p
         aria-hidden="true"
-        className="absolute bottom-5 left-14 font-titulo text-sm text-tinta-suave sm:left-16"
+        className="numero-pagina absolute bottom-5 left-14 font-titulo text-sm text-tinta-suave sm:left-16"
       >
         {numero}
       </p>
@@ -100,7 +100,7 @@ export function HojaIndiceLetraDerecha({
 
       <p
         aria-hidden="true"
-        className="absolute bottom-5 right-6 font-titulo text-sm text-tinta-suave sm:right-8"
+        className="numero-pagina absolute bottom-5 right-6 font-titulo text-sm text-tinta-suave sm:right-8"
       >
         {numero}
       </p>

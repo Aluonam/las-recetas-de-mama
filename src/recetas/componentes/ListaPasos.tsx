@@ -1,5 +1,6 @@
 import type { Paso } from '../tipos'
 import { Imagen } from '../archivos/Imagen'
+import { ReproductorAudio } from '../audio/ReproductorAudio'
 
 export function ListaPasos({ pasos }: { pasos: Paso[] }) {
   if (pasos.length === 0) return null
@@ -24,6 +25,14 @@ export function ListaPasos({ pasos }: { pasos: Paso[] }) {
                 archivo={paso.fotoUrl}
                 className="mt-2 w-full max-w-sm rounded-lg"
               />
+
+              {/* La voz va debajo del paso que explica: oírla mientras se
+                  lee es el momento en que sirve. */}
+              {paso.audioUrl && (
+                <div className="mt-2 max-w-sm">
+                  <ReproductorAudio url={paso.audioUrl} />
+                </div>
+              )}
             </div>
           </li>
         ))}

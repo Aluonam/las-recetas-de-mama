@@ -1070,10 +1070,23 @@
     overflow-y: auto;
   }
 
+  /**
+   * La hoja llena la pantalla, aunque la receta sea corta.
+   *
+   * Con el alto suelto, una receta de cuatro líneas dejaba la hoja a
+   * media pantalla y por debajo asomaban la tapa y la sombra del bloque
+   * de papel, como si detrás hubiera otra hoja empezada. Con el mínimo
+   * puesto, el papel llega abajo y lo que sobra se queda en blanco, que
+   * es lo que hace el papel de verdad.
+   *
+   * Mínimo y no alto fijo: la receta larga tiene que poder pasarse de
+   * ahí y desplazarse.
+   */
   .libro-lleno .doble-pagina,
   .libro-lleno .doble-pagina > div,
   .libro-lleno .hoja {
     height: auto;
+    min-height: 100%;
   }
 
   /* Los recuadros de dentro, abiertos: si siguieran desplazándose por su
@@ -1082,9 +1095,25 @@
      de que sigue: aquí sigue el papel entero. */
   .libro-lleno .cuerpo-hoja {
     position: static;
-    flex: none;
+    flex: 1 1 auto;
     overflow: visible;
     height: auto;
+  }
+
+  /**
+   * El número de página, siempre en la misma esquina.
+   *
+   * Con una sola hoja no hay izquierda ni derecha: las caras van una
+   * detrás de otra, así que el número unas veces salía a un lado y otras
+   * al otro, y en las cortas quedaba a media página porque estaba
+   * colocado contra el fondo de una caja que no llegaba abajo.
+   *
+   * Aquí va abajo a la derecha y al final del papel, siempre. Un libro
+   * no cambia de sitio el folio cada dos hojas.
+   */
+  .libro-lleno .hoja > .numero-pagina {
+    left: auto;
+    right: 1.5rem;
   }
 }
 

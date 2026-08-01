@@ -46,6 +46,7 @@ interface MotorDictado {
   interimResults: boolean
   onresult: ((evento: EventoDictado) => void) | null
   onerror: ((evento: { readonly error: string }) => void) | null
+  onstart: (() => void) | null
   onend: (() => void) | null
   start(): void
   stop(): void
@@ -61,6 +62,35 @@ function fabrica(): (new () => MotorDictado) | undefined {
 }
 
 export const SE_PUEDE_DICTAR = Boolean(fabrica())
+
+/** Lo que hay detrás de cada nombre de fallo, en cristiano. */
+function mensaje(fallo: string): string {
+  if (fallo === 'not-allowed' || fallo === 'service-not-allowed') {
+    return (
+      'El navegador no ha dejado usar el micrófono. Busca el candado de ' +
+      'la barra de direcciones y permítelo para esta página.'
+    )
+  }
+
+  if (fallo === 'no-speech') {
+    return 'No se ha oído nada. Acércate al micrófono y prueba otra vez.'
+  }
+
+  if (fallo === 'audio-capture') {
+    return 'No se encuentra ningún micrófono conectado.'
+  }
+
+  if (fallo === 'network') {
+    return (
+      'Hace falta internet para dictar: quien entiende lo que dices no es ' +
+      'el aparato, es el navegador por su cuenta.'
+    )
+  }
+
+  if (fallo === 'aborted') return ''
+
+  return `No se ha podido dictar (${fallo}). Prueba otra vez, o escríbelo a mano.`
+}
 
 export function useDictado(alDictar: (texto: string) => void) {
   const [escuchando, setEscuchando] = useState(false)
@@ -89,35 +119,63 @@ export function useDictado(alDictar: (texto: string) => void) {
     nuevo.continuous = true
     nuevo.interimResults = false
 
+    /** Para saber si acabó sin haber entendido nada. */
+    let algoDicho = false
+
     nuevo.onresult = (evento) => {
       let dicho = ''
       for (let i = evento.resultIndex; i < evento.results.length; i++) {
         const resultado = evento.results[i]
         if (resultado.isFinal) dicho += resultado[0].transcript
       }
-      if (dicho.trim()) alDictarRef.current(dicho.trim())
+      if (!dicho.trim()) return
+      algoDicho = true
+      alDictarRef.current(dicho.trim())
     }
 
     nuevo.onerror = (evento) => {
-      setError(
-        evento.error === 'not-allowed'
-          ? 'No se ha dado permiso para usar el micrófono.'
-          : evento.error === 'no-speech'
-            ? 'No se ha oído nada. Acércate al micrófono y prueba otra vez.'
-            : evento.error === 'network'
-              ? 'Hace falta internet para dictar: el reconocimiento no se hace en el aparato.'
-              : 'No se ha podido dictar. Prueba otra vez, o escríbelo a mano.',
-      )
+      setError(mensaje(evento.error))
     }
 
+    /**
+     * Se apaga solo, y hay que enterarse.
+     *
+     * El reconocimiento se corta por su cuenta tras un rato de silencio,
+     * aunque se le pida que siga. Antes eso solo apagaba el botón sin
+     * decir nada: pulsabas, hablabas bajito, y el botón volvía a su sitio
+     * como si no hubieras hecho nada. Parecía roto y no lo estaba.
+     */
     nuevo.onend = () => {
       setEscuchando(false)
       motor.current = null
+      if (!algoDicho) {
+        setError(
+          'No se ha entendido nada. Habla más cerca del micrófono, o ' +
+            'escríbelo a mano.',
+        )
+      }
     }
 
+    /**
+     * Se enciende cuando el navegador dice que está escuchando, no
+     * cuando se le pide.
+     *
+     * Entre pedirlo y estarlo hay un permiso de micrófono de por medio,
+     * que puede tardar o no llegar nunca. Encenderlo antes ponía
+     * «Escuchando…» sobre un micrófono que estaba apagado.
+     */
+    nuevo.onstart = () => setEscuchando(true)
+
     motor.current = nuevo
-    nuevo.start()
-    setEscuchando(true)
+
+    try {
+      nuevo.start()
+    } catch {
+      // Pasa si se pulsa dos veces seguidas: el anterior no ha soltado
+      // el micrófono todavía. No es un fallo, es prisa.
+      motor.current = null
+      setError('Espera un momento y vuelve a intentarlo.')
+    }
   }, [])
 
   // Si esto desaparece mientras escucha, se suelta el micrófono.

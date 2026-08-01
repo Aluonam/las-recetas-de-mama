@@ -3,6 +3,7 @@ import { nuevoId } from '../formato'
 import type { Paso } from '../tipos'
 import { SubirFoto } from './SubirFoto'
 import { BotonDictar } from '../../ui/BotonDictar'
+import { EditorAudio } from '../audio/EditorAudio'
 
 interface Props {
   pasos: Paso[]
@@ -41,6 +42,24 @@ export function EditorPasos({ pasos, alCambiar }: Props) {
             alSubir={(url) => cambiar({ fotoUrl: url })}
             alQuitar={() => cambiar({ fotoUrl: null })}
           />
+
+          {/**
+           * La voz, en este paso concreto.
+           *
+           * Hay pasos que escritos no se entienden —«hasta que la masa
+           * pida más»— y contados en diez segundos sí. Dictar convierte
+           * la voz en letra; esto guarda la voz, que no es lo mismo: el
+           * tono con el que se dice «sin pasarse» no cabe escrito.
+           */}
+          <div>
+            <p className="etiqueta">Contarlo en voz alta (opcional)</p>
+            <EditorAudio
+              compacto
+              url={paso.audioUrl}
+              alGuardar={(audioUrl) => cambiar({ audioUrl })}
+              alQuitar={() => cambiar({ audioUrl: null })}
+            />
+          </div>
         </div>
       )}
     />

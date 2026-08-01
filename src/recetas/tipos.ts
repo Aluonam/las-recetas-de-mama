@@ -40,6 +40,14 @@ export interface Paso {
   id: string
   texto: string
   fotoUrl?: string | null
+  /**
+   * La voz de quien lo explica, en este paso concreto.
+   *
+   * Hay pasos que escritos no se entienden —«hasta que la masa pida
+   * más»— y contados en diez segundos sí. Es el mismo motivo que las
+   * notas de voz por apartado, pero pegado al paso al que pertenecen.
+   */
+  audioUrl?: string | null
 }
 
 export interface Truco {
