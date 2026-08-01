@@ -28,7 +28,7 @@ export function BuscadorLupa({
 
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-tinta-suave"
+        className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-tinta-suave"
       >
         <Lupa />
       </span>
@@ -36,9 +36,15 @@ export function BuscadorLupa({
       <input
         id="buscar"
         type="search"
-        // Los 44px de alto de los botones, clavados: con un par de
-        // píxeles de más, esto bajaría las solapas al ponerse al lado.
-        className="campo h-11 w-40 pl-9 pr-9"
+        /**
+         * Del alto y la letra de una solapa.
+         *
+         * La medida de los botones grandes venía de los campos que se
+         * rellenan con el dedo, y aquí queda enorme al lado de Fichas,
+         * Libro e Índice: esto no es un formulario, es un mando más de
+         * la misma fila y tiene que medir lo que miden sus compañeros.
+         */
+        className="campo h-9 w-36 pl-8 pr-8 text-sm"
         placeholder="Buscar…"
         value={busqueda}
         onChange={(evento) => alBuscar(evento.target.value)}
@@ -53,7 +59,7 @@ export function BuscadorLupa({
           onClick={() => alBuscar('')}
           aria-label="Borrar la búsqueda"
           title="Borrar la búsqueda"
-          className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-tinta-suave transition-colors hover:bg-superficie-2 hover:text-tinta"
+          className="absolute right-0.5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-tinta-suave transition-colors hover:bg-superficie-2 hover:text-tinta"
         >
           <Aspa />
         </button>
@@ -71,7 +77,7 @@ function Lupa() {
       strokeWidth="2.1"
       strokeLinecap="round"
       aria-hidden="true"
-      className="size-4"
+      className="size-3.5"
     >
       <circle cx="10.5" cy="10.5" r="6.5" />
       <path d="m15.4 15.4 4.6 4.6" />
@@ -88,7 +94,7 @@ function Aspa() {
       strokeWidth="2.2"
       strokeLinecap="round"
       aria-hidden="true"
-      className="size-4"
+      className="size-3.5"
     >
       <path d="M6 6l12 12M18 6L6 18" />
     </svg>
