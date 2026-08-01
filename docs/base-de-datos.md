@@ -165,13 +165,19 @@ PostgreSQL le devuelve vacío.
 
 ## Por qué el cuerpo de la receta va en JSONB
 
-Ingredientes, materiales, pasos y trucos no son cuatro tablas: son cuatro
-columnas `jsonb` dentro de `receta`.
+Ingredientes, materiales, pasos, trucos y las notas de voz no son cinco
+tablas: son cinco columnas `jsonb` dentro de `receta`.
 
-El criterio es **cómo cambian los datos**. Esas cuatro listas se escriben
-y se guardan siempre juntas, en la misma pantalla y por la misma persona.
-Normalizarlas costaría cuatro joins en cada lectura y una transacción en
+El criterio es **cómo cambian los datos**. Esas listas se escriben y se
+guardan siempre juntas, en la misma pantalla y por la misma persona.
+Normalizarlas costaría varios joins en cada lectura y una transacción en
 cada guardado, a cambio de nada.
+
+Los archivos no van dentro: en el JSON solo está **la ruta** de cada foto
+y cada audio dentro del almacén. La columna `audios` guarda además a qué
+apartado pertenece cada nota —ingredientes, elaboración, trucos, por qué
+es especial, de quién viene— para poder ponerla debajo de lo que
+explica.
 
 Las variantes sí son tabla propia, y por el mismo criterio: **las escribe
 otra persona, en otro momento**, sobre una receta que ya existe.

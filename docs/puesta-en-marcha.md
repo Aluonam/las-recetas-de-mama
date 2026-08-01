@@ -65,6 +65,7 @@ uno detrás de otro:
 8. `supabase/migraciones/010-escribir-a-quien-administra.sql`
 9. `supabase/migraciones/011-usuario-jefe.sql`
 10. `supabase/migraciones/012-solo-el-jefe-cambia-el-codigo.sql`
+11. `supabase/migraciones/014-audios-por-apartado.sql`
 
 > **No ejecutes el 002 ni el 003.** Son del modelo anterior. El 003,
 > pasado después del 004, desharía la separación entre familias.

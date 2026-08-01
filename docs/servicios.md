@@ -81,6 +81,17 @@ estadísticas de un tercero.
 Es para uso personal. Si esto llegara a generar dinero, habría que pasar
 al de pago.
 
+### El micrófono solo funciona aquí
+
+Grabar audio y dictar necesitan **contexto seguro**: `https://` o
+`localhost`. Nada más.
+
+Eso quiere decir que **abrir la web en la tablet por la dirección de red
+del ordenador —`http://192.168.1.x:5173`— no vale**: el navegador
+bloquea el micrófono sin preguntar y sin avisar, y parece que la
+aplicación está rota. Para probar el audio en la tablet hay que entrar
+por la dirección de Vercel.
+
 ---
 
 ## Supabase
