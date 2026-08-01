@@ -298,12 +298,20 @@
 
   /* Base común. Tailwind 4 no deja hacer @apply de otra clase de
      componente, así que la base se comparte por lista de selectores. */
+  /**
+   * `select-none` en todos los botones.
+   *
+   * Mantener pulsado un botón es lo más normal del mundo —con el dedo,
+   * al dudar, o al pulsar el de grabar—, y el navegador lo entendía como
+   * que se quería seleccionar su texto y lo pintaba de azul. Un botón no
+   * es un párrafo: no hay nada que copiar de él.
+   */
   .boton,
   .boton-principal,
   .boton-secundario,
   .boton-peligro {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2
-           rounded-lg px-5 py-2.5 font-semibold transition-colors
+    @apply inline-flex cursor-pointer select-none items-center justify-center
+           gap-2 rounded-lg px-5 py-2.5 font-semibold transition-colors
            disabled:cursor-not-allowed disabled:opacity-50;
   }
 

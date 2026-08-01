@@ -57,8 +57,11 @@ export function BotonDictar({
             : `Dictar ${etiqueta} en voz alta`
         }
         aria-pressed={dictado.escuchando}
+        // `select-none`: al mantenerlo pulsado —que es lo que hace
+        // cualquiera con un botón de micrófono— el navegador entendía
+        // que se quería seleccionar el texto y lo pintaba de azul.
         className={
-          'flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors ' +
+          'flex select-none items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition-colors ' +
           (dictado.escuchando
             ? 'border-rosa-medio bg-rosa-medio text-papel'
             : 'border-borde bg-superficie text-tinta-suave hover:bg-superficie-2')

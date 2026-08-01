@@ -73,11 +73,14 @@ function mensaje(fallo: string): string {
   }
 
   if (fallo === 'no-speech') {
-    return 'No se ha oído nada. Acércate al micrófono y prueba otra vez.'
+    return 'No se ha oído nada. Habla un poco más alto y vuelve a pulsar.'
   }
 
   if (fallo === 'audio-capture') {
-    return 'No se encuentra ningún micrófono conectado.'
+    return (
+      'No se encuentra ningún micrófono. Comprueba que está conectado y ' +
+      'que no lo está usando otro programa.'
+    )
   }
 
   if (fallo === 'network') {
@@ -87,9 +90,12 @@ function mensaje(fallo: string): string {
     )
   }
 
+  // Se para a propósito, o se pulsa otra vez. No hay nada que contar.
   if (fallo === 'aborted') return ''
 
-  return `No se ha podido dictar (${fallo}). Prueba otra vez, o escríbelo a mano.`
+  // El nombre del fallo va delante: es feo, pero es lo único que
+  // permite averiguar qué pasa cuando pasa algo que no está previsto.
+  return `El navegador ha cortado el dictado (${fallo}). Vuelve a pulsar.`
 }
 
 export function useDictado(alDictar: (texto: string) => void) {
@@ -119,8 +125,18 @@ export function useDictado(alDictar: (texto: string) => void) {
     nuevo.continuous = true
     nuevo.interimResults = false
 
-    /** Para saber si acabó sin haber entendido nada. */
+    /**
+     * Lo que hay que saber cuando esto se apaga, para saber por qué.
+     *
+     * `huboFallo` es el importante: si el navegador ya ha dicho lo que
+     * pasaba, ese mensaje manda. Antes se guardaba y acto seguido lo
+     * machacaba el de «no se ha entendido nada», así que el motivo de
+     * verdad no llegaba a verse nunca.
+     */
     let algoDicho = false
+    let huboFallo = false
+    let arranco = false
+    const desde = Date.now()
 
     nuevo.onresult = (evento) => {
       let dicho = ''
@@ -134,6 +150,7 @@ export function useDictado(alDictar: (texto: string) => void) {
     }
 
     nuevo.onerror = (evento) => {
+      huboFallo = true
       setError(mensaje(evento.error))
     }
 
@@ -148,12 +165,25 @@ export function useDictado(alDictar: (texto: string) => void) {
     nuevo.onend = () => {
       setEscuchando(false)
       motor.current = null
-      if (!algoDicho) {
+
+      // Si el navegador ya ha dicho qué pasaba, manda su mensaje.
+      if (huboFallo || algoDicho) return
+
+      /**
+       * Apagarse al momento no es silencio, es que no ha llegado a
+       * escuchar. Casi siempre es el permiso del micrófono, que en
+       * algunos navegadores se deniega sin dar ningún aviso.
+       */
+      if (!arranco || Date.now() - desde < 700) {
         setError(
-          'No se ha entendido nada. Habla más cerca del micrófono, o ' +
-            'escríbelo a mano.',
+          'El navegador ha cortado el dictado nada más empezar. Suele ser ' +
+            'el permiso del micrófono: búscalo en el candado de la barra de ' +
+            'direcciones y déjalo puesto para esta página.',
         )
+        return
       }
+
+      setError('No se ha oído nada. Habla un poco más alto y vuelve a pulsar.')
     }
 
     /**
@@ -164,7 +194,10 @@ export function useDictado(alDictar: (texto: string) => void) {
      * que puede tardar o no llegar nunca. Encenderlo antes ponía
      * «Escuchando…» sobre un micrófono que estaba apagado.
      */
-    nuevo.onstart = () => setEscuchando(true)
+    nuevo.onstart = () => {
+      arranco = true
+      setEscuchando(true)
+    }
 
     motor.current = nuevo
 
