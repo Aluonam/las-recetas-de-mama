@@ -52,7 +52,7 @@ export function HojaGirando({
     <div
       aria-hidden="true"
       className={
-        'hoja-girando hidden md:block ' +
+        'hoja-girando solo-con-dos ' +
         (sentido === 'adelante' ? 'gira-adelante' : 'gira-atras')
       }
     >

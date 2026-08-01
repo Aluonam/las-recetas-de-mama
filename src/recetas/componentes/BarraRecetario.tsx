@@ -1,0 +1,196 @@
+import { BuscadorLupa } from './BuscadorLupa'
+import type { Agrupacion } from '../indice/agrupar'
+import type { Vista } from '../indice/usePreferenciaVista'
+
+/**
+ * Los mandos del recetario, en una sola fila.
+ *
+ * Antes ocupaban tres: las solapas, las píldoras de ocasión y el botón
+ * de pantalla completa. Tres renglones de mandos delante de las recetas
+ * es mucho pedir para elegir entre dos maneras de mirar.
+ *
+ * Ahora:
+ *
+ *   [ Buscar ]  [ Ocasión ▾ ]  [ ▦ ☰ ]  [ 📖 ]
+ *
+ * El libro deja de ser una tercera manera de mirar y pasa a ser un
+ * botón: no es una vista más, es abrir el recetario entero y ponerse a
+ * hojear, y eso ocurre a pantalla completa. Así lo que queda a elegir
+ * son dos cosas —tarjetas o lista—, que es lo que cabe en un
+ * interruptor.
+ *
+ * El desplegable cambia según lo que se esté mirando: en tarjetas filtra
+ * por ocasión, en lista ordena. Nunca hay dos, y la fila mide siempre lo
+ * mismo.
+ */
+export function BarraRecetario({
+  busqueda,
+  alBuscar,
+  vista,
+  alCambiarVista,
+  ocasiones,
+  ocasion,
+  alFiltrar,
+  agrupacion,
+  alAgrupar,
+  alAbrirLibro,
+}: {
+  busqueda: string
+  alBuscar: (texto: string) => void
+  vista: Vista
+  alCambiarVista: (vista: Vista) => void
+  ocasiones: string[]
+  ocasion: string | null
+  alFiltrar: (ocasion: string | null) => void
+  agrupacion: Agrupacion
+  alAgrupar: (agrupacion: Agrupacion) => void
+  alAbrirLibro: () => void
+}) {
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-2">
+      <BuscadorLupa busqueda={busqueda} alBuscar={alBuscar} />
+
+      {vista === 'fichas'
+        ? ocasiones.length > 0 && (
+            <select
+              className="campo h-9 w-40 text-sm"
+              aria-label="Filtrar por ocasión"
+              value={ocasion ?? ''}
+              onChange={(evento) => alFiltrar(evento.target.value || null)}
+            >
+              <option value="">Todas las ocasiones</option>
+              {ocasiones.map((una) => (
+                <option key={una} value={una}>
+                  {una}
+                </option>
+              ))}
+            </select>
+          )
+        : (
+            <select
+              className="campo h-9 w-40 text-sm"
+              aria-label="Ordenar la lista por"
+              value={agrupacion}
+              onChange={(evento) =>
+                alAgrupar(evento.target.value as Agrupacion)
+              }
+            >
+              <option value="plato">Por plato</option>
+              <option value="quien">Por quién la hacía</option>
+              <option value="ocasion">Por ocasión</option>
+            </select>
+          )}
+
+      <div className="flex-1" />
+
+      {/* Tarjetas o lista, en un interruptor de dos: son dos maneras de
+          mirar lo mismo, no dos sitios distintos. */}
+      <div
+        role="group"
+        aria-label="Cómo ver las recetas"
+        className="flex overflow-hidden rounded-lg border border-verde-texto"
+      >
+        <Modo
+          activo={vista === 'fichas'}
+          etiqueta="Ver en tarjetas"
+          onClick={() => alCambiarVista('fichas')}
+        >
+          <Rejilla />
+        </Modo>
+        <Modo
+          activo={vista === 'indice'}
+          etiqueta="Ver en lista"
+          onClick={() => alCambiarVista('indice')}
+        >
+          <Renglones />
+        </Modo>
+      </div>
+
+      <button
+        type="button"
+        onClick={alAbrirLibro}
+        aria-label="Abrir el libro"
+        title="Abrir el libro"
+        className="boton-principal h-9 px-3"
+      >
+        <Libro />
+      </button>
+    </div>
+  )
+}
+
+function Modo({
+  activo,
+  etiqueta,
+  onClick,
+  children,
+}: {
+  activo: boolean
+  etiqueta: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={activo}
+      aria-label={etiqueta}
+      title={etiqueta}
+      className={
+        'flex h-9 w-10 items-center justify-center transition-colors ' +
+        (activo
+          ? 'bg-verde-texto text-papel'
+          : 'bg-superficie text-verde-texto hover:bg-superficie-2')
+      }
+    >
+      {children}
+    </button>
+  )
+}
+
+function Rejilla() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-4">
+      <rect x="3" y="3" width="8" height="8" rx="1.5" />
+      <rect x="13" y="3" width="8" height="8" rx="1.5" />
+      <rect x="3" y="13" width="8" height="8" rx="1.5" />
+      <rect x="13" y="13" width="8" height="8" rx="1.5" />
+    </svg>
+  )
+}
+
+function Renglones() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      aria-hidden="true"
+      className="size-4"
+    >
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  )
+}
+
+/** Un libro abierto, visto de frente. */
+function Libro() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="size-5"
+    >
+      <path d="M12 6.5C10.4 5 8.3 4.3 4.5 4.3v13c3.8 0 5.9.7 7.5 2.2 1.6-1.5 3.7-2.2 7.5-2.2v-13c-3.8 0-5.9.7-7.5 2.2Z" />
+      <path d="M12 6.5v13" />
+    </svg>
+  )
+}

@@ -4,14 +4,11 @@ import { listarRecetas } from '../api'
 import type { RecetaResumen } from '../tipos'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { TarjetaReceta } from '../componentes/TarjetaReceta'
-import { FiltroOcasiones } from '../componentes/FiltroOcasiones'
-import { BuscadorLupa } from '../componentes/BuscadorLupa'
+import { BarraRecetario } from '../componentes/BarraRecetario'
 import { PanelIndice } from '../indice/PanelIndice'
-import { PanelLibro } from '../libro/PanelLibro'
 import { LibroPantallaCompleta } from '../libro/LibroPantallaCompleta'
 import { useFamilia } from '../../familias/contexto'
 import { AvisoInstalar } from '../../pwa/AvisoInstalar'
-import { SelectorVista } from '../indice/SelectorVista'
 import { usePreferenciaVista } from '../indice/usePreferenciaVista'
 
 /** Portada: todas las recetas, con buscador y filtro por ocasión. */
@@ -25,10 +22,13 @@ export function PaginaRecetario() {
 
   /**
    * El libro se abre a pantalla completa, que es como se mira un libro:
-   * él solo, sin web alrededor. Con la X se vuelve a la página de
-   * siempre, y desde ahí se puede entrar otra vez.
+   * él solo, sin web alrededor. Con la X se vuelve a la lista.
+   *
+   * No se recuerda de una vez para otra: entrar en el recetario es venir
+   * a ver qué hay, y abrir el libro es un gesto que se hace cuando se
+   * quiere hojear.
    */
-  const [pantallaCompleta, setPantallaCompleta] = useState(vista === 'libro')
+  const [libroAbierto, setLibroAbierto] = useState(false)
 
   /**
    * Se vuelven a pedir al cambiar de recetario.
@@ -46,22 +46,16 @@ export function PaginaRecetario() {
   }, [familia])
 
   /**
-   * Al salir de Fichas se limpia el filtro de celebración.
+   * Al pasar a la lista se limpia el filtro de ocasión.
    *
-   * Las píldoras de ocasión solo se ven ahí, así que dejarlas puestas
-   * escondería recetas en el libro o en el índice sin nada en pantalla
-   * que explicara por qué faltan. La búsqueda no se toca: esa sí se ve
-   * siempre, con su caja y su cruz, así que nunca esconde nada a
-   * escondidas.
+   * Su desplegable solo está en tarjetas, así que dejarlo puesto
+   * escondería recetas sin nada en pantalla que explicara por qué
+   * faltan. La búsqueda no se toca: esa se ve siempre, con su caja y su
+   * cruz, así que nunca esconde nada a escondidas.
    */
-  const cambiarVista = (parche: Parameters<typeof cambiar>[0]) => {
-    if (!parche.vista) return cambiar(parche)
-
-    if (parche.vista !== 'fichas') setOcasion(null)
-    // Elegir «Libro» es pedir el libro, así que se abre como se mira.
-    setPantallaCompleta(parche.vista === 'libro')
-    cambiar(parche)
-  }
+  useEffect(() => {
+    if (vista !== 'fichas') setOcasion(null)
+  }, [vista])
 
   /** Solo las ocasiones que alguien ha usado de verdad. */
   const ocasiones = useMemo(() => {
@@ -109,51 +103,23 @@ export function PaginaRecetario() {
 
       <AvisoInstalar />
 
-      <div className="mb-6 flex flex-col gap-3">
-        {/* `items-end`: la lupa se apoya en la misma raya en la que se
-            apoyan las solapas, que es lo que las alinea. */}
-        <div className="flex flex-wrap items-end gap-3">
-          {/* Fijo, como las solapas. Sale en las tres vistas, el libro
-              incluido: buscar antes de abrirlo a pantalla completa es
-              justo la manera de llegar a la receta que quieres sin
-              hojear el abecedario entero. */}
-          <BuscadorLupa busqueda={busqueda} alBuscar={setBusqueda} />
-
-          <SelectorVista
-            vista={vista}
-            agrupacion={agrupacion}
-            alCambiar={cambiarVista}
-          />
-        </div>
-
-        {/* Los filtros de celebración viven dentro de Fichas: es la vista
-            para rebuscar. «Todas» enseña el recetario entero sin recortes. */}
-        {vista === 'fichas' && (
-          <FiltroOcasiones
-            ocasiones={ocasiones}
-            seleccionada={ocasion}
-            alSeleccionar={setOcasion}
-          />
-        )}
-      </div>
+      <BarraRecetario
+        busqueda={busqueda}
+        alBuscar={setBusqueda}
+        vista={vista}
+        alCambiarVista={(nueva) => cambiar({ vista: nueva })}
+        ocasiones={ocasiones}
+        ocasion={ocasion}
+        alFiltrar={setOcasion}
+        agrupacion={agrupacion}
+        alAgrupar={(nueva) => cambiar({ agrupacion: nueva })}
+        alAbrirLibro={() => setLibroAbierto(true)}
+      />
 
       {visibles.length === 0 ? (
         <p className="py-12 text-center text-tinta-suave">
           Ninguna receta encaja con esa búsqueda.
         </p>
-      ) : vista === 'libro' ? (
-        <div>
-          <div className="mb-4 text-center">
-            <button
-              type="button"
-              onClick={() => setPantallaCompleta(true)}
-              className="boton-secundario"
-            >
-              Ver a pantalla completa
-            </button>
-          </div>
-          <PanelLibro recetas={visibles} todas={recetas} />
-        </div>
       ) : vista === 'indice' ? (
         <PanelIndice recetas={visibles} modo={agrupacion} />
       ) : (
@@ -167,11 +133,11 @@ export function PaginaRecetario() {
       )}
 
       {/* Va al final y por encima de todo: tapa la página entera. */}
-      {vista === 'libro' && pantallaCompleta && visibles.length > 0 && (
+      {libroAbierto && visibles.length > 0 && (
         <LibroPantallaCompleta
           recetas={visibles}
           todas={recetas}
-          alCerrar={() => setPantallaCompleta(false)}
+          alCerrar={() => setLibroAbierto(false)}
         />
       )}
     </div>

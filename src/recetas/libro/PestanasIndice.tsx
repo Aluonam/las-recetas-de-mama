@@ -55,7 +55,7 @@ export function PestanasIndice({ recetas, abierta, alElegir }: Props) {
   return (
     <nav
       aria-label="Índice del recetario"
-      className="pestanas hidden md:flex"
+      className="pestanas solo-con-dos-flex"
     >
       {letras.map(({ letra, indice }) => {
         const esta = letra === letraAbierta

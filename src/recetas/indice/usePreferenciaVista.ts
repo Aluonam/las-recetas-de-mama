@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import type { Agrupacion } from './agrupar'
 
-export type Vista = 'fichas' | 'indice' | 'libro'
+/**
+ * Dos maneras de mirar el recetario, no tres.
+ *
+ * El libro se salió de aquí: no es una vista más sino un botón, porque
+ * abrirlo es ponerse a hojear a pantalla completa y no elegir cómo se
+ * enseña la lista. Lo que queda a elegir son tarjetas o lista, que es lo
+ * que cabe en un interruptor de dos.
+ */
+export type Vista = 'fichas' | 'indice'
 
 const CLAVE = 'vista-recetario'
 
@@ -15,15 +23,14 @@ const POR_DEFECTO: Preferencia = { vista: 'fichas', agrupacion: 'plato' }
 /**
  * Vistas que ya no existen, y por cuál se cambian.
  *
- * «Todas» y «Fichas» pintaban exactamente la misma rejilla: la única
- * diferencia era que en Fichas salían los filtros de celebración. Eran
- * dos botones para lo mismo, así que se quedan en uno.
+ * «Todas» y «Fichas» pintaban exactamente la misma rejilla, y «Libro»
+ * dejó de ser una vista para ser un botón. Las tres acaban en Fichas.
  *
  * Hace falta traducirlo al leer porque la preferencia está guardada en
- * el navegador de cada uno: sin esto, quien tuviera «Todas» elegida se
- * encontraría el recetario en blanco.
+ * el navegador de cada uno: sin esto, quien tuviera cualquiera de las
+ * dos elegida se encontraría el recetario en blanco.
  */
-const RENOMBRADAS: Record<string, Vista> = { todos: 'fichas' }
+const RENOMBRADAS: Record<string, Vista> = { todos: 'fichas', libro: 'fichas' }
 
 /**
  * Recuerda cómo prefieres ver el recetario.

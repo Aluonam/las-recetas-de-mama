@@ -480,6 +480,59 @@
    propia animación.
    --------------------------------------------------------------- */
 /**
+ * UNA PÁGINA O DOS, SEGÚN LA FORMA DE LA PANTALLA
+ *
+ * Antes lo decidía el ancho a secas, y por eso una tablet de pie —que es
+ * ancha de sobra en píxeles pero estrecha y alta de forma— abría el
+ * libro en dos páginas apretadas y altísimas. Un libro abierto es
+ * apaisado: si la pantalla no lo es, lo que toca es una sola página, que
+ * además así se lee del tamaño de la hoja entera.
+ *
+ * Hacen falta las dos condiciones. Sitio, porque dos páginas en 700
+ * píxeles no son dos páginas sino dos columnas; y forma apaisada, porque
+ * es la del libro.
+ *
+ * Todo lo que depende de si hay una página o dos cuelga de aquí, y no de
+ * clases sueltas repartidas por el componente: eran dos criterios que
+ * había que acordarse de mantener iguales, y en cuanto se separaban
+ * salía media hoja izquierda flotando en una tablet de pie.
+ */
+.doble-pagina {
+  grid-template-columns: 1fr;
+}
+
+/* Por defecto, libro de una hoja: es el caso más estrecho y el que no
+   puede salir mal. Lo de dos se enciende solo si hay sitio y forma. */
+.solo-con-dos,
+.solo-con-dos-flex {
+  display: none;
+}
+
+@media (width >= 64rem) and (orientation: landscape) {
+  .doble-pagina {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .solo-con-dos {
+    display: block;
+  }
+
+  .solo-con-dos-flex {
+    display: flex;
+  }
+
+  /* Con una sola hoja el alto lo pone la receta; con dos, el libro
+     tiene que medir siempre lo mismo o pegaría un salto al pasar. */
+  .doble-pagina {
+    height: 36rem;
+  }
+
+  .solo-con-una {
+    display: none;
+  }
+}
+
+/**
  * La doble página, y de dónde se mira.
  *
  * La perspectiva tiene que estar en el padre directo de la hoja que
@@ -898,22 +951,28 @@
 }
 
 /**
- * El alto del libro no depende de la receta.
+ * Con una sola hoja, la receta se desplaza dentro del libro.
  *
- * Una receta de tres líneas y otra de treinta tienen que ocupar lo
- * mismo, o el libro pega un salto cada vez que pasas hoja y la hoja que
- * gira se queda a media altura. Lo que sobra se desplaza dentro de la
- * página; lo que falta se queda en blanco, como en el papel.
- *
- * `height` y no `min-height`: un mínimo lo respeta la receta corta pero
- * lo revienta la larga, que era justo el salto que se quería evitar. Un
- * libro encuadernado no crece de grosor por la página que abras.
+ * Ahí la hoja lleva las dos mitades una debajo de otra —foto e
+ * ingredientes, y luego la elaboración—, así que a pantalla completa no
+ * cabe casi nunca. Sin esto se quedaba cortada por abajo, porque el
+ * bloque de papel recorta lo que se sale.
  */
-@media (width >= 48rem) {
-  .doble-pagina {
-    height: 36rem;
+@media (width < 64rem), (orientation: portrait) {
+  .libro-lleno .doble-pagina {
+    overflow-y: auto;
   }
 }
+
+/**
+ * Nota sobre el alto fijo de arriba: es `height` y no `min-height`.
+ *
+ * Un mínimo lo respeta la receta corta pero lo revienta la larga, que
+ * era justo el salto que se quería evitar: un libro encuadernado no
+ * crece de grosor por la página que abras. Lo que sobra se desplaza
+ * dentro de la página, y lo que falta se queda en blanco, como en el
+ * papel.
+ */
 
 /* ---------------------------------------------------------------
    EN PAPEL

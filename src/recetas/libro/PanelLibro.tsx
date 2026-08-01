@@ -33,9 +33,11 @@ const ESPERA_DOBLE_CLIC = 260
  * El índice no ocupa ninguna hoja: va troquelado en el canto, que es
  * donde vive en un recetario de casa.
  *
- * En pantallas pequeñas solo cabe una página, así que se queda la
- * elaboración escondida detrás del desplazamiento y desaparecen las
- * pestañas: para buscar ya está la vista de Índice.
+ * Que haya una página o dos no se decide aquí: lo dice `.doble-pagina`
+ * en el CSS, mirando el sitio y la forma de la pantalla. Aquí solo se
+ * marca qué trozos son de un caso y cuáles del otro —`solo-con-dos`,
+ * `solo-con-una`—, para que una tablet de pie no acabe con media hoja
+ * izquierda flotando por haber dos criterios que no se hablan.
  */
 export function PanelLibro({
   recetas,
@@ -166,7 +168,7 @@ export function PanelLibro({
             <div
               onDoubleClick={alPulsarDosVeces}
               className={
-                'doble-pagina relative grid md:grid-cols-2' +
+                'doble-pagina relative grid' +
                 (lleno ? ' h-full' : '')
               }
             >
@@ -175,7 +177,7 @@ export function PanelLibro({
               <div
                 onClick={alPulsarHoja('atras')}
                 className={
-                  'hidden md:block md:h-full ' +
+                  'solo-con-dos h-full ' +
                   (indice > 0 ? 'cursor-pointer' : 'cursor-default')
                 }
               >
@@ -186,18 +188,18 @@ export function PanelLibro({
                 />
               </div>
 
-              {/* En móvil solo hay una página y es esta, así que lleva
-                  las dos mitades una debajo de otra. */}
+              {/* Con una sola hoja es esta, así que lleva las dos
+                  mitades una debajo de otra. */}
               <div
                 onClick={alPulsarHoja('adelante')}
                 className={
-                  'md:h-full ' +
+                  'h-full ' +
                   (indice < enOrden.length - 1
                     ? 'cursor-pointer'
                     : 'cursor-default')
                 }
               >
-                <div className="md:hidden">
+                <div className="solo-con-una">
                   <PaginaIzquierda
                     receta={receta}
                     resumen={resumen}
@@ -270,7 +272,7 @@ export function PanelLibro({
               {girando && (
                 <div
                   aria-hidden="true"
-                  className="sombra-lomo hidden md:block"
+                  className="sombra-lomo solo-con-dos"
                 />
               )}
 

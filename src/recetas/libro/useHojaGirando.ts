@@ -25,10 +25,13 @@ export interface Pagina {
  * hoja.
  */
 /**
- * A partir de aquí caben las dos páginas y hay hoja que girar. Es el
- * corte `md` de Tailwind, el mismo que decide el libro abierto.
+ * Cuándo hay dos páginas y, por tanto, hoja que girar.
+ *
+ * Tiene que decir exactamente lo mismo que `.doble-pagina` en el CSS: si
+ * los dos se separan, o se congela una página que nadie va a tapar, o se
+ * gira una hoja sobre un libro que solo tiene una.
  */
-const HAY_DOS_PAGINAS = '(width >= 48rem)'
+const HAY_DOS_PAGINAS = '(width >= 64rem) and (orientation: landscape)'
 
 export function useHojaGirando(actual: Pagina | null) {
   const [congelada, setCongelada] = useState<Pagina | null>(null)
