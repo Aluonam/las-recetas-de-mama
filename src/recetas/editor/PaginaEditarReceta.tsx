@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Aviso, Cargando } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
+import { useAvisoAlSalir } from './useAvisoAlSalir'
 import { AsistenteReceta } from './AsistenteReceta'
 import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
@@ -32,8 +34,21 @@ export function PaginaEditarReceta() {
 
 function Edicion({ id }: { id: string }) {
   const navegar = useNavigate()
-  const { receta, cambiar, guardar, cargando, guardando, error } =
+  const { receta, cambiar, guardar, cargando, guardando, error, hayCambios } =
     useFormularioReceta(id)
+
+  const [guardado, setGuardado] = useState(false)
+
+  /**
+   * Aquí no hay borrador.
+   *
+   * La receta ya existe y está a salvo en el recetario; lo que se puede
+   * perder son los cambios de este rato. Guardar un borrador encima
+   * plantearía una pregunta fea al volver —cuál vale, lo guardado o lo
+   * que dejaste a medias— para arreglar un caso mucho menos grave que
+   * perder una receta entera sin escribir.
+   */
+  useAvisoAlSalir(hayCambios && !guardado)
 
   if (cargando) return <Cargando que="Abriendo la receta" />
   if (!receta) return <Aviso error={error ?? new Error('No se pudo cargar.')} />
@@ -41,7 +56,21 @@ function Edicion({ id }: { id: string }) {
   const enviar = async (evento: React.FormEvent) => {
     evento.preventDefault()
     const guardadaId = await guardar()
-    if (guardadaId) navegar(`/receta/${guardadaId}`)
+    if (!guardadaId) return
+
+    setGuardado(true)
+    navegar(`/receta/${guardadaId}`)
+  }
+
+  const salir = () => {
+    if (hayCambios) {
+      const seguro = window.confirm(
+        'Has cambiado cosas y no están guardadas.\n\n' +
+          'Si sales ahora, la receta se queda como estaba. ¿Salir?',
+      )
+      if (!seguro) return
+    }
+    navegar(-1)
   }
 
   return (
@@ -91,11 +120,7 @@ function Edicion({ id }: { id: string }) {
         >
           {guardando ? 'Guardando…' : 'Guardar receta'}
         </button>
-        <button
-          type="button"
-          className="boton-secundario"
-          onClick={() => navegar(-1)}
-        >
+        <button type="button" className="boton-secundario" onClick={salir}>
           Cancelar
         </button>
       </div>

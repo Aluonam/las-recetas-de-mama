@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { actualizarReceta, crearReceta, obtenerReceta } from '../api'
 import { aEditable, recetaVacia } from '../tipos'
 import type { RecetaEditable } from '../tipos'
@@ -39,15 +39,36 @@ export function useFormularioReceta(id?: string) {
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
+  /**
+   * Cómo estaba la receta al abrirla, para saber si se ha tocado algo.
+   *
+   * Se guarda en texto y se compara en texto: es una receta entera con
+   * sus listas dentro, y comparar campo a campo sería escribir a mano
+   * lo que `JSON.stringify` ya hace, con el riesgo de olvidarse de uno.
+   */
+  const comoEstaba = useRef(id ? null : JSON.stringify(recetaVacia()))
+
   useEffect(() => {
     if (!id) return
 
     setCargando(true)
     obtenerReceta(id)
-      .then((receta) => setReceta(aEditable(receta)))
+      .then((receta) => {
+        const editable = aEditable(receta)
+        comoEstaba.current = JSON.stringify(editable)
+        setReceta(editable)
+      })
       .catch(setError)
       .finally(() => setCargando(false))
   }, [id])
+
+  const hayCambios = useMemo(
+    () =>
+      receta != null &&
+      comoEstaba.current != null &&
+      JSON.stringify(receta) !== comoEstaba.current,
+    [receta],
+  )
 
   /** Cambia uno o varios campos de la receta. */
   const cambiar = useCallback((parche: Partial<RecetaEditable>) => {
@@ -74,5 +95,14 @@ export function useFormularioReceta(id?: string) {
     }
   }, [id, receta])
 
-  return { receta, cambiar, guardar, cargando, guardando, error, setError }
+  return {
+    receta,
+    cambiar,
+    guardar,
+    cargando,
+    guardando,
+    error,
+    setError,
+    hayCambios,
+  }
 }

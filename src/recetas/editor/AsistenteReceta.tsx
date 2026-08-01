@@ -1,8 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { RecetaEditable } from '../tipos'
 import { Aviso } from '../../ui/Estado'
 import { useFormularioReceta } from './useFormularioReceta'
+import { useAvisoAlSalir } from './useAvisoAlSalir'
+import {
+  borrarBorrador,
+  guardarBorrador,
+  leerBorrador,
+  tieneAlgo,
+} from './borrador'
 import { SeccionPlato, SeccionEspecial, SeccionVoz } from './secciones'
 import { CamposProcedencia } from './CamposProcedencia'
 import { EditorIngredientes } from './EditorIngredientes'
@@ -119,6 +126,30 @@ export function AsistenteReceta() {
   const { receta, cambiar, guardar, guardando, error } = useFormularioReceta()
   const [donde, setDonde] = useState(0)
 
+  /**
+   * Lo que quedó a medias la última vez, esperando respuesta.
+   *
+   * Se lee una sola vez, al abrir. Mientras esté aquí no se guarda nada
+   * encima: si el asistente empezara a escribir su borrador en blanco
+   * antes de que nadie conteste, se cargaría justo lo que viene a
+   * rescatar.
+   */
+  const [pendiente, setPendiente] = useState(() => leerBorrador())
+
+  const hayAlgo = receta != null && tieneAlgo(receta)
+  const [terminado, setTerminado] = useState(false)
+
+  /** Se guarda solo, un poco después de dejar de escribir. */
+  useEffect(() => {
+    if (!receta || pendiente || terminado || !tieneAlgo(receta)) return
+
+    const reloj = window.setTimeout(() => guardarBorrador(receta), 600)
+    return () => window.clearTimeout(reloj)
+  }, [receta, pendiente, terminado])
+
+  // La última red, para cuando no hay dónde guardar el borrador.
+  useAvisoAlSalir(hayAlgo && !terminado)
+
   if (!receta) return null
 
   const paso = PASOS[donde]
@@ -128,7 +159,29 @@ export function AsistenteReceta() {
 
   const terminar = async () => {
     const id = await guardar()
-    if (id) navegar(`/receta/${id}`)
+    if (!id) return
+
+    // Ya está a salvo en el recetario: el borrador sobra.
+    setTerminado(true)
+    borrarBorrador()
+    navegar(`/receta/${id}`)
+  }
+
+  /**
+   * Al salir con algo escrito se avisa, pero no se borra nada: queda de
+   * borrador y al volver se ofrece. «Cancelar» no debería significar
+   * «tira lo que llevas» cuando se puede significar «déjalo para luego».
+   */
+  const salir = () => {
+    if (hayAlgo) {
+      const seguro = window.confirm(
+        'Vas a dejar la receta a medias.\n\n' +
+          'Se guarda como borrador en este aparato, así que podrás seguir ' +
+          'con ella cuando vuelvas. ¿Salir?',
+      )
+      if (!seguro) return
+    }
+    navegar(-1)
   }
 
   const ir = (destino: number) =>
@@ -148,6 +201,20 @@ export function AsistenteReceta() {
 
       <h1 className="mb-2 text-3xl sm:text-4xl">Escribir una receta</h1>
 
+      {pendiente && (
+        <Rescate
+          borrador={pendiente}
+          alSeguir={() => {
+            cambiar(pendiente)
+            setPendiente(null)
+          }}
+          alDejarlo={() => {
+            borrarBorrador()
+            setPendiente(null)
+          }}
+        />
+      )}
+
       <Guia donde={donde} hayNombre={hayNombre} alIr={ir} />
 
       <div className="mt-6">{paso.pintar({ receta, cambiar })}</div>
@@ -165,7 +232,7 @@ export function AsistenteReceta() {
           <button
             type="button"
             className="boton-secundario"
-            onClick={() => (primero ? navegar(-1) : ir(donde - 1))}
+            onClick={() => (primero ? salir() : ir(donde - 1))}
           >
             {primero ? 'Cancelar' : '‹ Atrás'}
           </button>
@@ -223,6 +290,52 @@ export function AsistenteReceta() {
         )}
       </div>
     </form>
+  )
+}
+
+/**
+ * «Tenías una receta a medias.»
+ *
+ * Sale antes que nada y con las dos salidas a la vista, porque quien
+ * abre esto viene a escribir: si la única opción visible fuera seguir
+ * con lo de antes, quien quiere empezar otra se quedaría atascado.
+ *
+ * Se dice el nombre si lo tiene. «Tenías una receta a medias» no le
+ * dice nada a nadie; «tenías a medias las croquetas de la abuela» se
+ * reconoce al momento.
+ */
+function Rescate({
+  borrador,
+  alSeguir,
+  alDejarlo,
+}: {
+  borrador: RecetaEditable
+  alSeguir: () => void
+  alDejarlo: () => void
+}) {
+  const nombre = borrador.titulo.trim()
+
+  return (
+    <div className="mb-6 rounded-lg border-2 border-rosa-medio bg-superficie p-4">
+      <p className="mb-3">
+        {nombre ? (
+          <>
+            Tenías a medias <strong>«{nombre}»</strong>. ¿Sigues con ella?
+          </>
+        ) : (
+          <>Tenías una receta empezada, todavía sin nombre. ¿Sigues con ella?</>
+        )}
+      </p>
+
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="boton-principal" onClick={alSeguir}>
+          Sí, seguir con ella
+        </button>
+        <button type="button" className="boton-secundario" onClick={alDejarlo}>
+          No, empezar una nueva
+        </button>
+      </div>
+    </div>
   )
 }
 
