@@ -132,6 +132,7 @@ Podrás notificar cualquier error o sugerencia al administrador del recetario.
 Descarga una copia de seguridad de todas vuestras recetas.
 
 **ENJOY IT**
+<img width="1278" height="1021" alt="image" src="https://github.com/user-attachments/assets/5e8a34ef-f9b2-4264-96d4-4034baa3974f" />
 
 
 ---
