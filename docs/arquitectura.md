@@ -236,12 +236,4 @@ Tres contextos reales de uso, no tres breakpoints inventados:
 El modo cocina sube el texto a `1.35rem` y mantiene la pantalla encendida
 con Wake Lock, volviendo a pedirlo al regresar a la pestaña.
 
-## 13. Pendiente
 
-- **Tests.** `formato.ts`, `agrupar.ts` y `editor/listaEnTexto.ts` son
-  puros y son por donde empezar (Vitest).
-- **Quién editó y cuándo.** Cualquiera con el código puede editar y
-  machacar una receta, sin historial ni forma de recuperarla.
-- **Borrar un recetario** desde la aplicación, y salirse de uno.
-- **Exportar a PDF.** Las funciones de `formato.ts` se reutilizan tal
-  cual, y los estilos de impresión ya hacen la mitad del trabajo.
