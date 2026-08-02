@@ -45,51 +45,32 @@ Un recetario ajeno no existe para quien no es miembro.
 Solo existe confirmación para el usuario administrador.
 
 **Dos formas de mirarlo y una de leerlo:** tarjetas con filtro por
-ocasión —de una a cuatro por fila, como en una tienda de ropa— o lista
-agrupada por plato, por quién la hacía o por ocasión. Y el **libro**, que
-se abre a pantalla completa: cada receta en su pliego, el índice
+ocasión —de una a cuatro por fila—  agrupadas por plato, por quién la hacía o por ocasión. 
+Y el **libro**, que se abre a pantalla completa: cada receta en su pliego, el índice
 troquelado en el canto y las hojas girando sobre la costura.
-<img width="1512" height="879" alt="image" src="https://github.com/user-attachments/assets/417c081d-a152-4e83-a6eb-cf5695b01f94" />
-<img width="1256" height="878" alt="image" src="https://github.com/user-attachments/assets/2ef8cf1b-76c6-46c1-bce4-fbfb21adb438" />
+<img width="1143" height="655" alt="image" src="https://github.com/user-attachments/assets/0f7fa94a-72e0-4207-924c-ebbee78592e4" />
 
-**Con su voz.** La receta entera contada de viva voz tanmto en notas sueltas 
+**Con su voz.** La receta entera contada de viva voz tanto en notas sueltas 
 en cada apartado como en una grabación completa. Así mismo, puedes escribir dictando.
+<img width="1236" height="839" alt="image" src="https://github.com/user-attachments/assets/373553d8-53a9-4546-bd62-fca486324c2e" />
+<img width="1248" height="637" alt="image" src="https://github.com/user-attachments/assets/d933a3a2-a2e8-43e0-a1a8-8b88241c9dfb" />
 
-**Modo libro:** 
+**Modo libro:** `Lee, pasa las páginas y busca por índice.
 
 **Se instala** en el móvil o la tablet como una aplicación más, y las
 recetas ya vistas funcionan sin conexión. Es una PWA.
+<img width="1241" height="429" alt="image" src="https://github.com/user-attachments/assets/d22b9e9a-89dd-4d1a-b1b7-915fdf7ccb21" />
+<img width="102" height="101" alt="image" src="https://github.com/user-attachments/assets/b0e62ba6-4e9a-4793-a8df-bc1c0158b7b2" />
 
 **Copia de seguridad** puedes descargar una copia de las recetas en PDF.
+<img width="1241" height="270" alt="image" src="https://github.com/user-attachments/assets/7cd9b81b-5b0b-41a9-b74d-f2167504436d" />
 
 ---
 
 ## Puesta en marcha
 
-Abre la web, inicia sesión. Aparecerá un mensaje para dejarlo en tu escritorio
-como una PWA.
+Abre la web, inicia sesión. Aparecerá un mensaje para dejarlo en tu escritorio como una PWA.
 
-**[docs/puesta-en-marcha.md](docs/puesta-en-marcha.md)**
-
-Para levantarlo solo en tu ordenador:
-
-```bash
-npm install
-npm run dev
-```
-
-Sin claves de Supabase arranca en **modo demostración**: guarda en el
-navegador y trae tres recetas de ejemplo. Para conectarlo de verdad, copia
-`.env.example` a `.env.local` y rellena las dos claves.
-
-| Comando | Qué hace |
-| ------- | -------- |
-| `npm run dev` | Servidor de desarrollo |
-| `npm run build` | Comprueba tipos y compila |
-| `npm run lint` | Analiza el código |
-| `node scripts/prueba-permisos.mjs` | Comprueba los permisos contra la base real |
-
----
 
 ## Cómo está organizado
 
