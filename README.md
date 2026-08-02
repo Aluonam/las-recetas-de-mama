@@ -1,16 +1,21 @@
 # Las Recetas de Mamá
 
 El recetario de la familia. No es una app de cocina: es un **archivo
-familiar**. Las recetas se pueden encontrar en cualquier web; lo que se
-pierde es quién las hacía, cómo las contaba y por qué esa y no otra.
+familiar**. Las recetas de tu familia contadas por tu abuela.
 
-**En marcha:** [las-recetas-de-mama.vercel.app](https://las-recetas-de-mama.vercel.app)
+**¿Quieres iniciar sesión?**
+Introduce tu correo electrónico y el código de prueba: ABC-792286
+[las-recetas-de-mama.vercel.app](https://las-recetas-de-mama.vercel.app)
+<img width="1267" height="873" alt="image" src="https://github.com/user-attachments/assets/c1638441-f2e9-4f47-a9a3-8b2b9ad6ac8c" />
+
+<img width="1525" height="898" alt="image" src="https://github.com/user-attachments/assets/55f70d1e-f0e9-44d8-9f0c-e32f664ed0c2" />
+
 
 | | Servicio | Para qué |
 | --- | -------- | -------- |
-| 🌐 | [Vercel](https://vercel.com) | Publica la web y cuenta las visitas |
-| 🗄️ | [Supabase](https://supabase.com) | Recetas, fotos, audios y accesos |
-| ⏰ | [cron-job.org](https://cron-job.org) | Que Supabase no se duerma |
+| 🌐 | [Vercel](https://vercel.com) | Publica la web y Analytics |
+| 🗄️ | [Supabase](https://supabase.com) | SQL DB que almacena: Recetas, fotos, audios y accesos |
+| ⏰ | [cron-job.org](https://cron-job.org) | Evita la desactivación de la base de datos |
 
 Todos con plan gratuito. Detalle de cada uno, con sus ajustes y qué hacer
 si falla, en **[docs/servicios.md](docs/servicios.md)**.
@@ -34,36 +39,35 @@ si falla, en **[docs/servicios.md](docs/servicios.md)**.
 
 ## Cómo se usa
 
-**Cada familia tiene su recetario**, con un código que se comparte por
-WhatsApp. Quien lo escribe entra: sin cuentas, sin contraseñas, sin
-esperar ningún correo. Un recetario ajeno no existe para quien no es
-miembro — no se ve ni su nombre.
+**Cada familia tiene su recetario**, con un código compartido. 
+Quien lo escribe entra y se registra su acceso. 
+Un recetario ajeno no existe para quien no es miembro.
+Solo existe confirmación para el usuario administrador.
 
 **Dos formas de mirarlo y una de leerlo:** tarjetas con filtro por
 ocasión —de una a cuatro por fila, como en una tienda de ropa— o lista
 agrupada por plato, por quién la hacía o por ocasión. Y el **libro**, que
 se abre a pantalla completa: cada receta en su pliego, el índice
 troquelado en el canto y las hojas girando sobre la costura.
+<img width="1512" height="879" alt="image" src="https://github.com/user-attachments/assets/417c081d-a152-4e83-a6eb-cf5695b01f94" />
+<img width="1256" height="878" alt="image" src="https://github.com/user-attachments/assets/2ef8cf1b-76c6-46c1-bce4-fbfb21adb438" />
 
-**Con su voz.** La receta entera contada de viva voz, notas sueltas
-pegadas a cada apartado —«las manzanas tienen que quedar rectas por la
-base»— y una grabación por paso. Y dictado, para quien prefiere hablar a
-escribir.
+**Con su voz.** La receta entera contada de viva voz tanmto en notas sueltas 
+en cada apartado como en una grabación completa. Así mismo, puedes escribir dictando.
 
-**Modo cocina:** texto grande, ingredientes fijos arriba, pasos que se
-tachan al tocarlos y la pantalla que no se apaga.
+**Modo libro:** 
 
 **Se instala** en el móvil o la tablet como una aplicación más, y las
-recetas ya vistas funcionan sin conexión.
+recetas ya vistas funcionan sin conexión. Es una PWA.
 
-**Copia de seguridad** en un ZIP que se abre sin esta aplicación.
+**Copia de seguridad** puedes descargar una copia de las recetas en PDF.
 
 ---
 
 ## Puesta en marcha
 
-Para montarlo de cero —base de datos, publicación e instalación en la
-tablet— sigue la guía completa:
+Abre la web, inicia sesión. Aparecerá un mensaje para dejarlo en tu escritorio
+como una PWA.
 
 **[docs/puesta-en-marcha.md](docs/puesta-en-marcha.md)**
 
@@ -132,28 +136,21 @@ botones que no funcionarían, pero eso es cortesía: esconder un botón no
 impide nada a quien sepa escribir una petición a mano. Por eso existe
 `scripts/prueba-permisos.mjs`, que lo comprueba contra la base de verdad.
 
-**KISS.** El cuerpo de la receta va en columnas JSONB, no en cuatro
-tablas: siempre se edita entero, así que partirlo solo añadiría joins.
-
+**KISS:**
 **Las pantallas no conocen la base de datos.** Hablan con el `api.ts` de
 su funcionalidad. Eso permitió meter un modo demostración completo sin
 tocar ninguna vista.
 
-**Accesibilidad, no adorno.** Quien aporta el contenido tiene 70 u 80
-años: base de 18px, contraste AA en claro y oscuro, foco siempre visible,
-objetivos táctiles de 44px y entrada sin contraseñas.
-
 **Seguridad proporcional.** Se protege que un recetario no se mezcle con
-otro y que las fotos no queden en direcciones permanentes. No hay límite
-de intentos ni doble factor: cada capa se paga en complicación, y la
-complicación se paga en que la abuela no sepa entrar. Está razonado en
-[`docs/base-de-datos.md`](docs/base-de-datos.md#seguridad).
+otro y que las fotos no queden en direcciones permanentes. 
+La autenticación de doble factor es innecesaria y pierde accesibilidad.
+
+**Ajustes** Desde ajustes puedes añadir otro recetario familiar. 
+Podrás cambiar de uno a otro sin iniciar sesión de nuevo. Así como, identificarte como administrador 
+Podrás notificar cualquier error o sugerencia al administrador del recetario.
+Descarga una copia de seguridad de todas vuestras recetas.
+
+**ENJOY IT**
+
 
 ---
-
-## Lo que viene
-
-- **Exportar a PDF**, para el recetario familiar impreso.
-- **Limitar los intentos** al probar códigos, si esto dejara de ser
-  familiar.
-- **Copias automáticas**, que hoy dependen de pulsar un botón.
